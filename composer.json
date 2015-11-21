@@ -1,0 +1,14 @@
+{
+    "require": {
+        "archi-strasbourg/archi-wiki": "dev-dev",
+        "symfony/console": "~2.7.5"
+    },
+    "require-dev": {
+        "symfony/var-dumper": "~2.7.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "AW2MW\\": "classes/"
+        }
+    }
+}
