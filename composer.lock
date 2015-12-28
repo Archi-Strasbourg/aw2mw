@@ -13,19 +13,19 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Archi-Strasbourg/archi-wiki.git",
-                "reference": "75be04f454bbb54ab98b2dd42642f55f33978828"
+                "reference": "b007813049aa5c8321d8c68f9cf4737127af5e63"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Archi-Strasbourg/archi-wiki/zipball/75be04f454bbb54ab98b2dd42642f55f33978828",
-                "reference": "75be04f454bbb54ab98b2dd42642f55f33978828",
+                "url": "https://api.github.com/repos/Archi-Strasbourg/archi-wiki/zipball/b007813049aa5c8321d8c68f9cf4737127af5e63",
+                "reference": "b007813049aa5c8321d8c68f9cf4737127af5e63",
                 "shasum": ""
             },
             "require": {
                 "eventviva/php-image-resize": "~1.5"
             },
             "require-dev": {
-                "symfony/var-dumper": "~2.7.5"
+                "symfony/var-dumper": "~3.0.1"
             },
             "type": "library",
             "autoload": {
@@ -41,7 +41,7 @@
                 "GPL-3.0"
             ],
             "description": "Source code for http://archi-strasbourg.org/",
-            "time": "2015-11-21 12:41:29"
+            "time": "2015-12-28 18:36:30"
         },
         {
             "name": "eventviva/php-image-resize",
