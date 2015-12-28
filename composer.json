@@ -1,4 +1,7 @@
 {
+    "name": "archi-strasbourg/aw2mw",
+    "description": "Export ArchiWiki data to MediaWiki",
+    "license": "GPL-3.0",
     "require": {
         "archi-strasbourg/archi-wiki": "dev-dev",
         "symfony/console": "~2.7.5"
