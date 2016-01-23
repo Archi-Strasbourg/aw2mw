@@ -1,10 +1,12 @@
 <?php
 namespace AW2MW;
+
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+
 class ExportAllCommand extends Command
 {
     /**
@@ -25,6 +27,6 @@ class ExportAllCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        
+
     }
 }

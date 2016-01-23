@@ -1,5 +1,6 @@
 <?php
 namespace AW2MW;
+
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -81,7 +82,7 @@ class ExportAddressCommand extends Command
 					WHERE hE.idEvenement = '.mysql_real_escape_string($id).'
 			ORDER BY hE.idHistoriqueEvenement DESC';
 
-			$res = $e->connexionBdd->requete($sql);
+            $res = $e->connexionBdd->requete($sql);
 
             $event = mysql_fetch_assoc($res);
 
@@ -93,7 +94,9 @@ class ExportAddressCommand extends Command
             $content .= '=='.$title.'=='.PHP_EOL;
             exec(
                 'echo '.
-                escapeshellarg($bbCode->convertToDisplay(array('text'=>$event['description']))). ' | html2wiki --dialect MediaWiki',
+                escapeshellarg(
+                    $bbCode->convertToDisplay(array('text'=>$event['description']))
+                ). ' | html2wiki --dialect MediaWiki',
                 $html
             );
             $html = implode(PHP_EOL, $html);
@@ -114,13 +117,16 @@ class ExportAddressCommand extends Command
             PASSWORD_BCRYPT,
             array('salt'=>$config->salt)
         );
-        $api->login( new Api\ApiUser('Test1', $password));
+        $api->login(new Api\ApiUser('Test1', $password));
         $services = new Api\MediawikiFactory($api);
         $page = $services->newPageGetter()->getFromTitle($address['nom']);
         $revision = new DataModel\Revision(
             new DataModel\Content($content),
             new DataModel\PageIdentifier(new DataModel\Title($address['nom']))
         );
-        $services->newRevisionSaver()->save($revision, new DataModel\EditInfo('Importé depuis Archi-Wiki', false, true));
+        $services->newRevisionSaver()->save(
+            $revision,
+            new DataModel\EditInfo('Importé depuis Archi-Wiki', false, true)
+        );
     }
 }
