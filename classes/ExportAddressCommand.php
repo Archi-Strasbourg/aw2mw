@@ -42,8 +42,17 @@ class ExportAddressCommand extends Command
         $bbCode = new \bbCodeObject();
 
         $address = $a->getArrayAdresseFromIdAdresse($input->getArgument('id'));
+        if (!$address) {
+            $output->writeln('<error>Adresse introuvable</error>');
+            return;
+        }
+        $pageName = $a->getIntituleAdresseFrom(
+            $input->getArgument('id'),
+            'idAdresse',
+            array('noHTML'=>true, 'noQuartier'=>true, 'noSousQuartier'=>true)
+        );
 
-        $output->writeln('<info>Exporting '.$address['nom'].'…</info>');
+        $output->writeln('<info>Exporting '.$pageName.'…</info>');
 
         $groupInfo = mysql_fetch_assoc($a->getIdEvenementsFromAdresse($input->getArgument('id')));
 
@@ -119,10 +128,10 @@ class ExportAddressCommand extends Command
         );
         $api->login(new Api\ApiUser('Test1', $password));
         $services = new Api\MediawikiFactory($api);
-        $page = $services->newPageGetter()->getFromTitle($address['nom']);
+        $page = $services->newPageGetter()->getFromTitle($pageName);
         $revision = new DataModel\Revision(
             new DataModel\Content($content),
-            new DataModel\PageIdentifier(new DataModel\Title($address['nom']))
+            new DataModel\PageIdentifier(new DataModel\Title($pageName))
         );
         $services->newRevisionSaver()->save(
             $revision,
