@@ -15,5 +15,8 @@
 		"psr-4": {
 			"AW2MW\\": "classes/"
 		}
+	},
+	"scripts": {
+		"export:address": "php aw2mw.php export:address --ansi"
 	}
 }
