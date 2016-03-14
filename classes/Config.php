@@ -11,6 +11,7 @@ class Config
     public $apiUrl = '';
     public $userSecret = '';
     public $salt = '';
+    public $admin = array();
     /**
      * Config constructor
      */
