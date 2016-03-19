@@ -163,6 +163,8 @@ class ExportAddressCommand extends Command
             new DataModel\EditInfo('Sections importées depuis Archi-Wiki', true, true)
         );
 
+        $sections = array();
+
         foreach ($events as $section => $id) {
             $req = "SELECT idHistoriqueEvenement
                     FROM historiqueEvenement
@@ -247,19 +249,33 @@ class ExportAddressCommand extends Command
                         )
                     )
                 );
+                $sections[$section] = $content;
             }
         }
 
-        //Replace <u/> with ===
-        $content = $page->getRevisions()->getLatest()->getContent()->getData();
-        $content = preg_replace('/<u>([\w\s]+)<\/u>(\s*:)?\s*/i', '===$1==='.PHP_EOL, $content);
+        //Login with bot
         $this->login('aw2mw bot');
+
+        //Replace <u/> with ===
+        $content = implode('', $sections);
+        $content = preg_replace('/<u>(.+)<\/u>(\s*:)?\s*/i', '===$1==='.PHP_EOL, $content);
         $revisionSaver->save(
             new DataModel\Revision(
                 new DataModel\Content($content),
                 $pageIdentifier
             ),
             new DataModel\EditInfo('Conversion des titres de section', true, true)
+        );
+
+        //Convert sources
+        $content = preg_replace('/\s*\(source\s*:(.+)\)/i', '<ref>$1</ref>'.PHP_EOL, $content);
+        $content .= PHP_EOL.'==Sources=='.PHP_EOL.'<references />';
+        $revisionSaver->save(
+            new DataModel\Revision(
+                new DataModel\Content($content),
+                $pageIdentifier
+            ),
+            new DataModel\EditInfo('Conversion des sources', true, true)
         );
     }
 }
