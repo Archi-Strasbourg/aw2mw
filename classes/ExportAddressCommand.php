@@ -148,6 +148,10 @@ class ExportAddressCommand extends Command
             $content .= '=='.$title.'=='.PHP_EOL;
         }
 
+        //Add References section
+        $references = PHP_EOL.'==Références=='.PHP_EOL.'<references />';
+        $content .= $references;
+
 
         //Login as bot
         $this->login('aw2mw bot');
@@ -251,6 +255,9 @@ class ExportAddressCommand extends Command
                 //Trim each line
                 $html = implode(PHP_EOL, array_map('trim', explode(PHP_EOL, $html)));
 
+                //Convert sources
+                $html = preg_replace('/\s*\(source\s*:(.+)\)/i', '<ref>$1</ref>'.PHP_EOL, $html);
+
                 $content .= trim($html).PHP_EOL;
                 $this->api->postRequest(
                     new Api\SimpleRequest(
@@ -271,6 +278,8 @@ class ExportAddressCommand extends Command
             }
         }
 
+        $sections[] = $references;
+
         //Login with bot
         $this->login('aw2mw bot');
 
@@ -283,17 +292,6 @@ class ExportAddressCommand extends Command
                 $pageIdentifier
             ),
             new DataModel\EditInfo('Conversion des titres de section', true, true)
-        );
-
-        //Convert sources
-        $content = preg_replace('/\s*\(source\s*:(.+)\)/i', '<ref>$1</ref>'.PHP_EOL, $content);
-        $content .= PHP_EOL.'==Sources=='.PHP_EOL.'<references />';
-        $revisionSaver->save(
-            new DataModel\Revision(
-                new DataModel\Content($content),
-                $pageIdentifier
-            ),
-            new DataModel\EditInfo('Conversion des sources', true, true)
         );
     }
 }
