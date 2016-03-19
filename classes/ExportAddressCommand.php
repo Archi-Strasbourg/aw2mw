@@ -233,7 +233,7 @@ class ExportAddressCommand extends Command
                 //Trim each line
                 $html = implode(PHP_EOL, array_map('trim', explode(PHP_EOL, $html)));
 
-                $content .= $html.PHP_EOL.PHP_EOL;
+                $content .= trim($html).PHP_EOL;
                 $this->api->postRequest(
                     new Api\SimpleRequest(
                         'edit',
