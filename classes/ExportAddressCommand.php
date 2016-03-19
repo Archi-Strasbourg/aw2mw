@@ -28,6 +28,26 @@ class ExportAddressCommand extends Command
                 'Address ID'
             );
     }
+
+    private function login($username)
+    {
+        $password = password_hash(
+            $username.$this->config->userSecret,
+            PASSWORD_BCRYPT,
+            array('salt'=>$this->config->salt)
+        );
+        try {
+            $this->api->login(new Api\ApiUser($username, $password));
+        } catch (Api\UsageException $error) {
+            //No email for now
+            $this->services->newUserCreator()->create(
+                $username,
+                $password
+            );
+            $this->api->login(new Api\ApiUser($username, $password));
+        }
+    }
+
     /**
      * Execute command
      *
@@ -39,13 +59,13 @@ class ExportAddressCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         //Instantiate objects
-        $config = Config::getInstance();
+        $this->config = Config::getInstance();
         $a = new \archiAdresse();
         $e = new \archiEvenement();
         $u = new \archiUtilisateur();
         $bbCode = new \bbCodeObject();
-        $api = new Api\MediawikiApi($config->apiUrl);
-        $services = new Api\MediawikiFactory($api);
+        $this->api = new Api\MediawikiApi($this->config->apiUrl);
+        $this->services = new Api\MediawikiFactory($this->api);
 
         $address = $a->getArrayAdresseFromIdAdresse($input->getArgument('id'));
         if (!$address) {
@@ -69,12 +89,12 @@ class ExportAddressCommand extends Command
         $output->writeln('<info>Exporting "'.$pageName.'"…</info>');
 
         //Login as admin
-        $api->login(new Api\ApiUser($config->admin['login'], $config->admin['password']));
+        $this->api->login(new Api\ApiUser($this->config->admin['login'], $this->config->admin['password']));
 
         //Delete article if it already exists
-        $page = $services->newPageGetter()->getFromTitle($pageName);
+        $page = $this->services->newPageGetter()->getFromTitle($pageName);
         if ($page->getPageIdentifier()->getId() > 0) {
-            $services->newPageDeleter()->delete($page);
+            $this->services->newPageDeleter()->delete($page);
         }
 
         $groupInfo = mysql_fetch_assoc($a->getIdEvenementsFromAdresse($input->getArgument('id')));
@@ -130,26 +150,15 @@ class ExportAddressCommand extends Command
 
 
         //Login as bot
-        $password = password_hash(
-            'aw2mw bot'.$config->userSecret,
-            PASSWORD_BCRYPT,
-            array('salt'=>$config->salt)
-        );
-        try {
-            $api->login(new Api\ApiUser('aw2mw bot', $password));
-        } catch (Api\UsageException $error) {
-            $services->newUserCreator()->create(
-                'aw2mw bot',
-                $password
-            );
-            $api->login(new Api\ApiUser('aw2mw bot', $password));
-        }
+        $this->login('aw2mw bot');
 
+        $pageIdentifier = new DataModel\PageIdentifier(new DataModel\Title($pageName));
         $revision = new DataModel\Revision(
             new DataModel\Content($content),
-            new DataModel\PageIdentifier(new DataModel\Title($pageName))
+            $pageIdentifier
         );
-        $services->newRevisionSaver()->save(
+        $revisionSaver = $this->services->newRevisionSaver();
+        $revisionSaver->save(
             $revision,
             new DataModel\EditInfo('Sections importées depuis Archi-Wiki', true, true)
         );
@@ -196,22 +205,7 @@ class ExportAddressCommand extends Command
                 $user = $u->getArrayInfosFromUtilisateur($event['idUtilisateur']);
 
                 //Login as user
-                $username = $user['prenom'].' '.$user['nom'];
-                $password = password_hash(
-                    $username.$config->userSecret,
-                    PASSWORD_BCRYPT,
-                    array('salt'=>$config->salt)
-                );
-                try {
-                    $api->login(new Api\ApiUser($username, $password));
-                } catch (Api\UsageException $error) {
-                    //No email for now
-                    $services->newUserCreator()->create(
-                        $username,
-                        $password
-                    );
-                    $api->login(new Api\ApiUser($username, $password));
-                }
+                $this->login($user['prenom'].' '.$user['nom']);
 
 
                 $content = '';
@@ -238,7 +232,7 @@ class ExportAddressCommand extends Command
                 $html = implode(PHP_EOL, array_map('trim', explode(PHP_EOL, $html)));
 
                 $content .= $html.PHP_EOL.PHP_EOL;
-                $api->postRequest(
+                $this->api->postRequest(
                     new Api\SimpleRequest(
                         'edit',
                         array(
@@ -249,12 +243,23 @@ class ExportAddressCommand extends Command
                             'bot'=>true,
                             'summary'=>'Révision du '.$event['dateCreationEvenement'].' importée depuis Archi-Wiki',
                             'timestamp'=>0,
-                            'token'=>$api->getToken()
+                            'token'=>$this->api->getToken()
                         )
                     )
                 );
             }
         }
 
+        //Replace <u/> with ===
+        $content = $page->getRevisions()->getLatest()->getContent()->getData();
+        $content = preg_replace('/<u>([\w\s]+)<\/u>(\s*:)?\s*/i', '===$1==='.PHP_EOL, $content);
+        $this->login('aw2mw bot');
+        $revisionSaver->save(
+            new DataModel\Revision(
+                new DataModel\Content($content),
+                $pageIdentifier
+            ),
+            new DataModel\EditInfo('Conversion des titres de section', true, true)
+        );
     }
 }
