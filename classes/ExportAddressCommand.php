@@ -106,34 +106,34 @@ class ExportAddressCommand extends Command
         //Create page structure
         foreach ($events as $id) {
             $sql = 'SELECT  hE.idEvenement,
-    				hE.titre, hE.idSource,
-    				hE.idTypeStructure,
-    				hE.idTypeEvenement,
-    				hE.description,
-    				hE.dateDebut,
-    				hE.dateFin,
-    				hE.dateDebut,
-    				hE.dateFin,
-    				tE.nom AS nomTypeEvenement,
-    				tS.nom AS nomTypeStructure,
-    				s.nom AS nomSource,
-    				u.nom AS nomUtilisateur,
-    				u.prenom as prenomUtilisateur,
-    				tE.groupe,
-    				hE.ISMH ,
-    				hE.MH,
-    				date_format(hE.dateCreationEvenement,"'._("%e/%m/%Y à %kh%i").'") as dateCreationEvenement,
-    				hE.isDateDebutEnviron as isDateDebutEnviron,
-    				u.idUtilisateur as idUtilisateur,
-    				hE.numeroArchive as numeroArchive
+                    hE.titre, hE.idSource,
+                    hE.idTypeStructure,
+                    hE.idTypeEvenement,
+                    hE.description,
+                    hE.dateDebut,
+                    hE.dateFin,
+                    hE.dateDebut,
+                    hE.dateFin,
+                    tE.nom AS nomTypeEvenement,
+                    tS.nom AS nomTypeStructure,
+                    s.nom AS nomSource,
+                    u.nom AS nomUtilisateur,
+                    u.prenom as prenomUtilisateur,
+                    tE.groupe,
+                    hE.ISMH ,
+                    hE.MH,
+                    date_format(hE.dateCreationEvenement,"'._("%e/%m/%Y à %kh%i").'") as dateCreationEvenement,
+                    hE.isDateDebutEnviron as isDateDebutEnviron,
+                    u.idUtilisateur as idUtilisateur,
+                    hE.numeroArchive as numeroArchive
 
-    				FROM historiqueEvenement hE
-    				LEFT JOIN source s      ON s.idSource = hE.idSource
-    				LEFT JOIN typeStructure tS  ON tS.idTypeStructure = hE.idTypeStructure
-    				LEFT JOIN typeEvenement tE  ON tE.idTypeEvenement = hE.idTypeEvenement
-    				LEFT JOIN utilisateur u     ON u.idUtilisateur = hE.idUtilisateur
-    				WHERE hE.idEvenement = '.mysql_real_escape_string($id).'
-    		ORDER BY hE.idHistoriqueEvenement DESC';
+                    FROM historiqueEvenement hE
+                    LEFT JOIN source s      ON s.idSource = hE.idSource
+                    LEFT JOIN typeStructure tS  ON tS.idTypeStructure = hE.idTypeStructure
+                    LEFT JOIN typeEvenement tE  ON tE.idTypeEvenement = hE.idTypeEvenement
+                    LEFT JOIN utilisateur u     ON u.idUtilisateur = hE.idUtilisateur
+                    WHERE hE.idEvenement = '.mysql_real_escape_string($id).'
+            ORDER BY hE.idHistoriqueEvenement DESC';
 
             $res = $e->connexionBdd->requete($sql);
 
@@ -173,34 +173,34 @@ class ExportAddressCommand extends Command
 
             while ($fetch = mysql_fetch_assoc($res)) {
                 $sql = 'SELECT  hE.idEvenement,
-    					hE.titre, hE.idSource,
-    					hE.idTypeStructure,
-    					hE.idTypeEvenement,
-    					hE.description,
-    					hE.dateDebut,
-    					hE.dateFin,
-    					hE.dateDebut,
-    					hE.dateFin,
-    					tE.nom AS nomTypeEvenement,
-    					tS.nom AS nomTypeStructure,
-    					s.nom AS nomSource,
-    					u.nom AS nomUtilisateur,
-    					u.prenom as prenomUtilisateur,
-    					tE.groupe,
-    					hE.ISMH ,
-    					hE.MH,
-    					date_format(hE.dateCreationEvenement,"'._("%e/%m/%Y à %kh%i").'") as dateCreationEvenement,
-    					hE.isDateDebutEnviron as isDateDebutEnviron,
-    					u.idUtilisateur as idUtilisateur,
-    					hE.numeroArchive as numeroArchive
+                        hE.titre, hE.idSource,
+                        hE.idTypeStructure,
+                        hE.idTypeEvenement,
+                        hE.description,
+                        hE.dateDebut,
+                        hE.dateFin,
+                        hE.dateDebut,
+                        hE.dateFin,
+                        tE.nom AS nomTypeEvenement,
+                        tS.nom AS nomTypeStructure,
+                        s.nom AS nomSource,
+                        u.nom AS nomUtilisateur,
+                        u.prenom as prenomUtilisateur,
+                        tE.groupe,
+                        hE.ISMH ,
+                        hE.MH,
+                        date_format(hE.dateCreationEvenement,"'._("%e/%m/%Y à %kh%i").'") as dateCreationEvenement,
+                        hE.isDateDebutEnviron as isDateDebutEnviron,
+                        u.idUtilisateur as idUtilisateur,
+                        hE.numeroArchive as numeroArchive
 
-    					FROM historiqueEvenement hE
-    					LEFT JOIN source s      ON s.idSource = hE.idSource
-    					LEFT JOIN typeStructure tS  ON tS.idTypeStructure = hE.idTypeStructure
-    					LEFT JOIN typeEvenement tE  ON tE.idTypeEvenement = hE.idTypeEvenement
-    					LEFT JOIN utilisateur u     ON u.idUtilisateur = hE.idUtilisateur
-    					WHERE hE.idHistoriqueEvenement = '.mysql_real_escape_string($fetch['idHistoriqueEvenement']).'
-    			ORDER BY hE.idHistoriqueEvenement DESC';
+                        FROM historiqueEvenement hE
+                        LEFT JOIN source s      ON s.idSource = hE.idSource
+                        LEFT JOIN typeStructure tS  ON tS.idTypeStructure = hE.idTypeStructure
+                        LEFT JOIN typeEvenement tE  ON tE.idTypeEvenement = hE.idTypeEvenement
+                        LEFT JOIN utilisateur u     ON u.idUtilisateur = hE.idUtilisateur
+                        WHERE hE.idHistoriqueEvenement = '.mysql_real_escape_string($fetch['idHistoriqueEvenement']).'
+                ORDER BY hE.idHistoriqueEvenement DESC';
 
                 $event = mysql_fetch_assoc($e->connexionBdd->requete($sql));
 
@@ -214,9 +214,27 @@ class ExportAddressCommand extends Command
                 if (!empty($event['titre'])) {
                     $title = $event['titre'];
                 } else {
-                    $title = substr($event['dateDebut'], 0, 4);
+                    $title = '';
+                    if ($event['isDateDebutEnviron']=='1') {
+                        $title .= "environ ";
+                    }
+                    if (substr($event['dateDebut'], 5)=="00-00") {
+                        $datetime=substr($event['dateDebut'], 0, 4);
+                    } else {
+                        $datetime = $event['dateDebut'];
+                    }
+                    if ($event['dateDebut']!='0000-00-00') {
+                        $title .= $e->date->toFrenchAffichage($datetime);
+                    }
+                    if ($event['dateFin']!='0000-00-00') {
+                        if (strlen($e->date->toFrench($event['dateFin']))<=4) {
+                            $title .= ' à '.$e->date->toFrenchAffichage($event['dateFin']);
+                        } else {
+                            $title .= ' au '.$e->date->toFrenchAffichage($event['dateFin']);
+                        }
+                    }
                 }
-                $title = stripslashes($title);
+                $title = ucfirst(stripslashes($title));
                 $content .= '=='.$title.'=='.PHP_EOL;
                 exec(
                     'echo '.
