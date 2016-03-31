@@ -6,6 +6,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Process\Process;
 use Mediawiki\Api;
 use Mediawiki\DataModel;
 use AW2MW\Config;
@@ -240,14 +241,14 @@ class ExportAddressCommand extends Command
                 }
                 $title = ucfirst(stripslashes($title));
                 $content .= '=='.$title.'=='.PHP_EOL;
-                exec(
+                $process = new Process(
                     'echo '.
                     escapeshellarg(
                         $bbCode->convertToDisplay(array('text'=>$event['description']))
-                    ). ' | html2wiki --dialect MediaWiki',
-                    $html
+                    ). ' | html2wiki --dialect MediaWiki'
                 );
-                $html = implode(PHP_EOL, $html);
+                $process->run();
+                $html =$process->getOutput();
 
                 //Don't use <br>
                 $html = str_replace('<br />', PHP_EOL, $html);
