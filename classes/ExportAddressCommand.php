@@ -11,7 +11,7 @@ use Mediawiki\Api;
 use Mediawiki\DataModel;
 use AW2MW\Config;
 
-class ExportAddressCommand extends Command
+class ExportAddressCommand extends ExportCommand
 {
     /**
      * Configure command
@@ -30,25 +30,6 @@ class ExportAddressCommand extends Command
             );
     }
 
-    private function login($username)
-    {
-        $password = password_hash(
-            $username.$this->config->userSecret,
-            PASSWORD_BCRYPT,
-            array('salt'=>$this->config->salt)
-        );
-        try {
-            $this->api->login(new Api\ApiUser($username, $password));
-        } catch (Api\UsageException $error) {
-            //No email for now
-            $this->services->newUserCreator()->create(
-                $username,
-                $password
-            );
-            $this->api->login(new Api\ApiUser($username, $password));
-        }
-    }
-
     /**
      * Execute command
      *
@@ -59,25 +40,17 @@ class ExportAddressCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        //Instantiate objects
-        $this->config = Config::getInstance();
-        $a = new \archiAdresse();
-        $e = new \archiEvenement();
-        $u = new \archiUtilisateur();
-        $s = new \ArchiSource();
-        $bbCode = new \bbCodeObject();
-        $this->api = new Api\MediawikiApi($this->config->apiUrl);
-        $this->services = new Api\MediawikiFactory($this->api);
+        parent::setup();
 
-        $address = $a->getArrayAdresseFromIdAdresse($input->getArgument('id'));
+        $address = $this->a->getArrayAdresseFromIdAdresse($input->getArgument('id'));
         if (!$address) {
             $output->writeln('<error>Adresse introuvable</error>');
             return;
         }
-        $city = $a->getInfosVille($address['idVille']);
+        $city = $this->a->getInfosVille($address['idVille']);
 
         $pageName = 'Adresse:'.strip_tags(
-            $a->getIntituleAdresseFrom(
+            $this->a->getIntituleAdresseFrom(
                 $input->getArgument('id'),
                 'idAdresse',
                 array(
@@ -90,16 +63,11 @@ class ExportAddressCommand extends Command
 
         $output->writeln('<info>Exporting "'.$pageName.'"…</info>');
 
-        //Login as admin
-        $this->api->login(new Api\ApiUser($this->config->admin['login'], $this->config->admin['password']));
+        $this->loginAsAdmin();
 
-        //Delete article if it already exists
-        $page = $this->services->newPageGetter()->getFromTitle($pageName);
-        if ($page->getPageIdentifier()->getId() > 0) {
-            $this->services->newPageDeleter()->delete($page);
-        }
+        $this->deletePage($pageName);
 
-        $groupInfo = mysql_fetch_assoc($a->getIdEvenementsFromAdresse($input->getArgument('id')));
+        $groupInfo = mysql_fetch_assoc($this->a->getIdEvenementsFromAdresse($input->getArgument('id')));
 
         $events = array();
         $requete ="
@@ -112,7 +80,7 @@ class ExportAddressCommand extends Command
             WHERE evt.idEvenement = ee.idEvenementAssocie
             ORDER BY pe.position ASC
             ";
-        $result = $e->connexionBdd->requete($requete);
+        $result = $this->e->connexionBdd->requete($requete);
         $arrayIdEvenement = array();
         while ($res = mysql_fetch_assoc($result)) {
             $events[] = $res['idEvenement'];
@@ -152,7 +120,7 @@ class ExportAddressCommand extends Command
                     WHERE hE.idEvenement = '.mysql_real_escape_string($id).'
             ORDER BY hE.idHistoriqueEvenement DESC';
 
-            $res = $e->connexionBdd->requete($sql);
+            $res = $this->e->connexionBdd->requete($sql);
 
             $event = mysql_fetch_assoc($res);
 
@@ -173,16 +141,7 @@ class ExportAddressCommand extends Command
         //Login as bot
         $this->login('aw2mw bot');
 
-        $pageIdentifier = new DataModel\PageIdentifier(new DataModel\Title($pageName));
-        $revision = new DataModel\Revision(
-            new DataModel\Content($content),
-            $pageIdentifier
-        );
-        $revisionSaver = $this->services->newRevisionSaver();
-        $revisionSaver->save(
-            $revision,
-            new DataModel\EditInfo('Sections importées depuis Archi-Wiki', true, true)
-        );
+        $this->savePage($pageName, $content, 'Sections importées depuis Archi-Wiki');
 
         $sections = array();
 
@@ -190,7 +149,7 @@ class ExportAddressCommand extends Command
             $req = "SELECT idHistoriqueEvenement
                     FROM historiqueEvenement
                     WHERE idEvenement=".$id." order by dateCreationEvenement ASC";
-            $res = $e->connexionBdd->requete($req);
+            $res = $this->e->connexionBdd->requete($req);
 
             while ($fetch = mysql_fetch_assoc($res)) {
                 $sql = 'SELECT  hE.idEvenement,
@@ -223,9 +182,9 @@ class ExportAddressCommand extends Command
                         WHERE hE.idHistoriqueEvenement = '.mysql_real_escape_string($fetch['idHistoriqueEvenement']).'
                 ORDER BY hE.idHistoriqueEvenement DESC';
 
-                $event = mysql_fetch_assoc($e->connexionBdd->requete($sql));
+                $event = mysql_fetch_assoc($this->e->connexionBdd->requete($sql));
 
-                $user = $u->getArrayInfosFromUtilisateur($event['idUtilisateur']);
+                $user = $this->u->getArrayInfosFromUtilisateur($event['idUtilisateur']);
 
                 //Login as user
                 $this->login($user['prenom'].' '.$user['nom']);
@@ -256,28 +215,15 @@ class ExportAddressCommand extends Command
                     }
                 }
                 if ($event['idSource'] > 0) {
-                    $sourceName = $s->getSourceLibelle($event['idSource']);
+                    $sourceName = $this->s->getSourceLibelle($event['idSource']);
                     $title .= '<ref>[[Source:'.$sourceName.'|'.$sourceName.']]</ref>';
                 }
                 $title = ucfirst(stripslashes($title));
                 $content .= '=='.$title.'=='.PHP_EOL;
-                $process = new Process(
-                    'echo '.
-                    escapeshellarg(
-                        $bbCode->convertToDisplay(array('text'=>$event['description']))
-                    ). ' | html2wiki --dialect MediaWiki'
+
+                $html = $this->convertHtml(
+                    $this->bbCode->convertToDisplay(array('text'=>$event['description']))
                 );
-                $process->run();
-                $html =$process->getOutput();
-
-                //Don't use <br>
-                $html = str_replace('<br />', PHP_EOL, $html);
-
-                //Trim each line
-                $html = implode(PHP_EOL, array_map('trim', explode(PHP_EOL, $html)));
-
-                //Convert sources
-                $html = preg_replace('/\s*\(?source\s*:([^)]+)\)?/i', '<ref>$1</ref>'.PHP_EOL, $html);
 
                 $content .= trim($html).PHP_EOL;
                 $this->api->postRequest(
@@ -304,15 +250,12 @@ class ExportAddressCommand extends Command
         //Login with bot
         $this->login('aw2mw bot');
 
-        //Replace <u/> with ===
         $content = implode('', $sections);
-        $content = preg_replace('/<u>(.+)<\/u>(\s*:)?\s*/i', '===$1==='.PHP_EOL, $content);
-        $revisionSaver->save(
-            new DataModel\Revision(
-                new DataModel\Content($content),
-                $pageIdentifier
-            ),
-            new DataModel\EditInfo('Conversion des titres de section', true, true)
-        );
+
+        //Replace <u/> with ===
+        $content = $this->replaceSubtitles($content);
+
+        $this->savePage($pageName, $content, 'Conversion des titres de section');
+
     }
 }
