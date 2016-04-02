@@ -204,13 +204,13 @@ class ExportAddressCommand extends ExportCommand
                         $datetime = $event['dateDebut'];
                     }
                     if ($event['dateDebut']!='0000-00-00') {
-                        $title .= $e->date->toFrenchAffichage($datetime);
+                        $title .= $this->e->date->toFrenchAffichage($datetime);
                     }
                     if ($event['dateFin']!='0000-00-00') {
-                        if (strlen($e->date->toFrench($event['dateFin']))<=4) {
-                            $title .= ' à '.$e->date->toFrenchAffichage($event['dateFin']);
+                        if (strlen($this->e->date->toFrench($event['dateFin']))<=4) {
+                            $title .= ' à '.$this->e->date->toFrenchAffichage($event['dateFin']);
                         } else {
-                            $title .= ' au '.$e->date->toFrenchAffichage($event['dateFin']);
+                            $title .= ' au '.$this->e->date->toFrenchAffichage($event['dateFin']);
                         }
                     }
                 }
