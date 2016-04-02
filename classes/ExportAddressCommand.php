@@ -221,7 +221,8 @@ class ExportAddressCommand extends ExportCommand
                 }
                 if (!empty($event['numeroArchive'])) {
                     $sourceName = $this->s->getSourceLibelle(24);
-                    $title .= '<ref>[[Source:'.$sourceName.'|'.$sourceName.']] - Cote '.$event['numeroArchive'].'</ref>';
+                    $title .= '<ref>[[Source:'.$sourceName.'|'.$sourceName.']] - Cote '.
+                        $event['numeroArchive'].'</ref>';
                 }
 
                 $title = ucfirst(stripslashes($title));
@@ -230,6 +231,48 @@ class ExportAddressCommand extends ExportCommand
                 $html = $this->convertHtml(
                     $this->bbCode->convertToDisplay(array('text'=>$event['description']))
                 );
+
+                $reqImages = "
+                    SELECT hi1.idImage,  hi1.idHistoriqueImage,  hi1.nom,
+                        hi1.description,  hi1.dateUpload,  hi1.dateCliche
+                    FROM _evenementImage ei
+                    LEFT JOIN historiqueImage hi1 ON hi1.idImage = ei.idImage
+                    LEFT JOIN historiqueImage hi2 ON hi2.idImage = hi1.idImage
+                    WHERE ei.idEvenement = '".mysql_real_escape_string($id)."'
+                    GROUP BY hi1.idImage ,  hi1.idHistoriqueImage
+                    HAVING hi1.idHistoriqueImage = max(hi2.idHistoriqueImage)
+                    ORDER BY ei.position, hi1.idHistoriqueImage
+                    ";
+
+                $resImages = $this->i->connexionBdd->requete($reqImages);
+                $images = array();
+                while ($fetchImages = mysql_fetch_assoc($resImages)) {
+                    $images[] = $fetchImages;
+                }
+
+                //@todo attribute images
+                $this->login('aw2mw bot');
+                if (!empty($images)) {
+                    $html .= '<gallery>'.PHP_EOL;
+                    foreach ($images as $image) {
+                        $filename = $image['idImage'].'-import.jpg';
+                        $imagePage = $this->services->newPageGetter()->getFromTitle('File:'.$filename);
+                        if ($imagePage->getPageIdentifier()->getId() == 0) {
+                            $oldPath = 'http://www.archi-wiki.org/photos--'.$image['dateUpload'].
+                                '-'.$image['idHistoriqueImage'].'-originaux.jpg';
+                            $output->writeln('<info>Exporting "'.$oldPath.'"…</info>');
+                            $this->fileUploader->upload($filename, $oldPath);
+                        }
+                        $this->savePage(
+                            'File:'.$filename,
+                            $image['description'],
+                            "Description de l'image importée depuis Archi-Wiki"
+                        );
+                        $html .= 'File:'.$filename.'|'.$image['description'].PHP_EOL;
+                    }
+                    $html .= '</gallery>'.PHP_EOL;
+                }
+                $this->login($user['prenom'].' '.$user['nom']);
 
                 $content .= trim($html).PHP_EOL;
                 $this->api->postRequest(

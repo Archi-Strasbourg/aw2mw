@@ -60,11 +60,13 @@ abstract class ExportCommand extends Command
         $this->a = new \archiAdresse();
         $this->e = new \archiEvenement();
         $this->u = new \archiUtilisateur();
+        $this->i = new \archiImage();
         $this->s = new \ArchiSource();
         $this->bbCode = new \bbCodeObject();
         $this->api = new Api\MediawikiApi($this->config->apiUrl);
         $this->services = new Api\MediawikiFactory($this->api);
         $this->revisionSaver = $this->services->newRevisionSaver();
+        $this->fileUploader = $this->services->newFileUploader();
     }
 
     protected function loginAsAdmin()
