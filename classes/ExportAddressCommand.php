@@ -214,10 +214,16 @@ class ExportAddressCommand extends ExportCommand
                         }
                     }
                 }
+
                 if ($event['idSource'] > 0) {
                     $sourceName = $this->s->getSourceLibelle($event['idSource']);
                     $title .= '<ref>[[Source:'.$sourceName.'|'.$sourceName.']]</ref>';
                 }
+                if (!empty($event['numeroArchive'])) {
+                    $sourceName = $this->s->getSourceLibelle(24);
+                    $title .= '<ref>[[Source:'.$sourceName.'|'.$sourceName.']] - Cote '.$event['numeroArchive'].'</ref>';
+                }
+
                 $title = ucfirst(stripslashes($title));
                 $content .= '=='.$title.'=='.PHP_EOL;
 
