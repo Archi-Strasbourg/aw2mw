@@ -64,6 +64,7 @@ class ExportAddressCommand extends Command
         $a = new \archiAdresse();
         $e = new \archiEvenement();
         $u = new \archiUtilisateur();
+        $s = new \ArchiSource();
         $bbCode = new \bbCodeObject();
         $this->api = new Api\MediawikiApi($this->config->apiUrl);
         $this->services = new Api\MediawikiFactory($this->api);
@@ -75,7 +76,7 @@ class ExportAddressCommand extends Command
         }
         $city = $a->getInfosVille($address['idVille']);
 
-        $pageName = strip_tags(
+        $pageName = 'Adresse:'.strip_tags(
             $a->getIntituleAdresseFrom(
                 $input->getArgument('id'),
                 'idAdresse',
@@ -254,6 +255,10 @@ class ExportAddressCommand extends Command
                         }
                     }
                 }
+                if ($event['idSource'] > 0) {
+                    $sourceName = $s->getSourceLibelle($event['idSource']);
+                    $title .= '<ref>[[Source:'.$sourceName.'|'.$sourceName.']]</ref>';
+                }
                 $title = ucfirst(stripslashes($title));
                 $content .= '=='.$title.'=='.PHP_EOL;
                 $process = new Process(
@@ -272,7 +277,7 @@ class ExportAddressCommand extends Command
                 $html = implode(PHP_EOL, array_map('trim', explode(PHP_EOL, $html)));
 
                 //Convert sources
-                $html = preg_replace('/\s*\(source\s*:(.+)\)/i', '<ref>$1</ref>'.PHP_EOL, $html);
+                $html = preg_replace('/\s*\(?source\s*:([^)]+)\)?/i', '<ref>$1</ref>'.PHP_EOL, $html);
 
                 $content .= trim($html).PHP_EOL;
                 $this->api->postRequest(
