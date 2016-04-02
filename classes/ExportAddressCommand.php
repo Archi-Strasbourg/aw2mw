@@ -100,7 +100,22 @@ class ExportAddressCommand extends Command
 
         $groupInfo = mysql_fetch_assoc($a->getIdEvenementsFromAdresse($input->getArgument('id')));
 
-        $events = $e->getArrayIdEvenement($groupInfo['idEvenementGroupeAdresse']);
+        $events = array();
+        $requete ="
+            SELECT evt.idEvenement, pe.idEvenement, pe.position
+            FROM evenements evt
+            LEFT JOIN _evenementEvenement ee on ee.idEvenement = ".
+                mysql_real_escape_string($groupInfo['idEvenementGroupeAdresse']).
+            "
+            LEFT JOIN positionsEvenements pe on pe.idEvenement = ee.idEvenementAssocie
+            WHERE evt.idEvenement = ee.idEvenementAssocie
+            ORDER BY pe.position ASC
+            ";
+        $result = $e->connexionBdd->requete($requete);
+        $arrayIdEvenement = array();
+        while ($res = mysql_fetch_assoc($result)) {
+            $events[] = $res['idEvenement'];
+        }
 
         $content = '';
 
