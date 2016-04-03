@@ -55,7 +55,7 @@ class ExportImageCommand extends ExportCommand
         $reqImages = "
             SELECT hi1.idImage,  hi1.idHistoriqueImage,  hi1.nom, hi1.auteur,
                 hi1.description,  hi1.dateUpload,  hi1.dateCliche, hi1.idUtilisateur,
-                hi1.licence
+                hi1.licence, hi1.tags
             FROM _evenementImage ei
             LEFT JOIN historiqueImage hi1 ON hi1.idImage = ei.idImage
             LEFT JOIN historiqueImage hi2 ON hi2.idImage = hi1.idImage
@@ -102,6 +102,9 @@ class ExportImageCommand extends ExportCommand
         if ($image['dateCliche'] == '0000-00-00') {
             $image['dateCliche'] = '';
         }
+        if (substr($image['dateCliche'], 5) == '00-00') {
+            $image['dateCliche'] = substr($image['dateCliche'], 0, 4);
+        }
         $licence = $this->i->getLicence($image['idImage']);
         $this->login('aw2mw bot');
         $this->savePage(
@@ -111,6 +114,7 @@ class ExportImageCommand extends ExportCommand
             |date='.$image['dateCliche'].'
             |auteur='.$image['auteur'].'
             |licence = {{Modèle:'.$licence['name'].'}}
+            |tags = '.$image['tags'].'
             }}',
             "Description de l'image importée depuis Archi-Wiki"
         );
