@@ -5,6 +5,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\Process;
 use Mediawiki\Api;
@@ -49,7 +50,7 @@ class ExportAddressCommand extends ExportCommand
         }
         $city = $this->a->getInfosVille($address['idVille']);
 
-        $pageName = 'Adresse:'.strip_tags(
+        $basePageName = strip_tags(
             $this->a->getIntituleAdresseFrom(
                 $input->getArgument('id'),
                 'idAdresse',
@@ -60,6 +61,8 @@ class ExportAddressCommand extends ExportCommand
                 )
             )
         ).'_('.$address['nomVille'].')';
+
+        $pageName = 'Adresse:'.$basePageName;
 
         $output->writeln('<info>Exporting "'.$pageName.'"…</info>');
 
@@ -232,47 +235,6 @@ class ExportAddressCommand extends ExportCommand
                     $this->bbCode->convertToDisplay(array('text'=>$event['description']))
                 );
 
-                $reqImages = "
-                    SELECT hi1.idImage,  hi1.idHistoriqueImage,  hi1.nom,
-                        hi1.description,  hi1.dateUpload,  hi1.dateCliche
-                    FROM _evenementImage ei
-                    LEFT JOIN historiqueImage hi1 ON hi1.idImage = ei.idImage
-                    LEFT JOIN historiqueImage hi2 ON hi2.idImage = hi1.idImage
-                    WHERE ei.idEvenement = '".mysql_real_escape_string($id)."'
-                    GROUP BY hi1.idImage ,  hi1.idHistoriqueImage
-                    HAVING hi1.idHistoriqueImage = max(hi2.idHistoriqueImage)
-                    ORDER BY ei.position, hi1.idHistoriqueImage
-                    ";
-
-                $resImages = $this->i->connexionBdd->requete($reqImages);
-                $images = array();
-                while ($fetchImages = mysql_fetch_assoc($resImages)) {
-                    $images[] = $fetchImages;
-                }
-
-                //@todo attribute images
-                $this->login('aw2mw bot');
-                if (!empty($images)) {
-                    $html .= '<gallery>'.PHP_EOL;
-                    foreach ($images as $image) {
-                        $filename = $image['idImage'].'-import.jpg';
-                        $imagePage = $this->services->newPageGetter()->getFromTitle('File:'.$filename);
-                        if ($imagePage->getPageIdentifier()->getId() == 0) {
-                            $oldPath = 'http://www.archi-wiki.org/photos--'.$image['dateUpload'].
-                                '-'.$image['idHistoriqueImage'].'-originaux.jpg';
-                            $output->writeln('<info>Exporting "'.$oldPath.'"…</info>');
-                            $this->fileUploader->upload($filename, $oldPath);
-                        }
-                        $this->savePage(
-                            'File:'.$filename,
-                            $image['description'],
-                            "Description de l'image importée depuis Archi-Wiki"
-                        );
-                        $html .= 'File:'.$filename.'|'.$image['description'].PHP_EOL;
-                    }
-                    $html .= '</gallery>'.PHP_EOL;
-                }
-                $this->login($user['prenom'].' '.$user['nom']);
 
                 $content .= trim($html).PHP_EOL;
                 $this->api->postRequest(
@@ -292,6 +254,51 @@ class ExportAddressCommand extends ExportCommand
                 );
                 $sections[$section] = $content;
             }
+            $reqImages = "
+                SELECT hi1.idImage, hi1.description
+                FROM _evenementImage ei
+                LEFT JOIN historiqueImage hi1 ON hi1.idImage = ei.idImage
+                LEFT JOIN historiqueImage hi2 ON hi2.idImage = hi1.idImage
+                WHERE ei.idEvenement = '".mysql_real_escape_string($id)."'
+                GROUP BY hi1.idImage ,  hi1.idHistoriqueImage
+                HAVING hi1.idHistoriqueImage = max(hi2.idHistoriqueImage)
+                ORDER BY ei.position, hi1.idHistoriqueImage
+                ";
+
+            $resImages = $this->i->connexionBdd->requete($reqImages);
+            $images = array();
+            while ($fetchImages = mysql_fetch_assoc($resImages)) {
+                $images[] = $fetchImages;
+            }
+
+            if (!empty($images)) {
+                $sections[$section] .= '<gallery>'.PHP_EOL;
+                foreach ($images as $image) {
+                    $command = $this->getApplication()->find('export:image');
+                    $command->run(
+                        new ArrayInput(array('id'=>$image['idImage'])),
+                        $output
+                    );
+                    $filename = $image['idImage'].'-import.jpg';
+                    $sections[$section] .= 'File:'.$filename.'|'.$image['description'].PHP_EOL;
+                }
+                $sections[$section] .= '</gallery>'.PHP_EOL;
+            }
+            $this->api->postRequest(
+                new Api\SimpleRequest(
+                    'edit',
+                    array(
+                        'title'=>$pageName,
+                        'md5'=>md5($sections[$section]),
+                        'text'=>$sections[$section],
+                        'section'=>$section + 1,
+                        'bot'=>true,
+                        'summary'=>'Images importées depuis Archi-Wiki',
+                        'timestamp'=>0,
+                        'token'=>$this->api->getToken()
+                    )
+                )
+            );
         }
 
         $sections[] = $references;
