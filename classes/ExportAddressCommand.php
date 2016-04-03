@@ -196,7 +196,7 @@ class ExportAddressCommand extends ExportCommand
                 $content = '';
                 if (!empty($event['titre'])) {
                     $title = $event['titre'];
-                } else {
+                } else if ($event['dateDebut']!='0000-00-00') {
                     $title = '';
                     if ($event['isDateDebutEnviron']=='1') {
                         $title .= "environ ";
@@ -216,6 +216,8 @@ class ExportAddressCommand extends ExportCommand
                             $title .= ' au '.$this->e->date->toFrenchAffichage($event['dateFin']);
                         }
                     }
+                } else {
+                    $title = $event['nomTypeEvenement'];
                 }
 
                 if ($event['idSource'] > 0) {
