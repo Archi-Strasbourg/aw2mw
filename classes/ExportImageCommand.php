@@ -68,7 +68,8 @@ class ExportImageCommand extends ExportCommand
         $resImages = $this->i->connexionBdd->requete($reqImages);
         $image = mysql_fetch_assoc($resImages);
 
-        $this->login('aw2mw bot');
+        $user = $this->u->getArrayInfosFromUtilisateur($image['idUtilisateur']);
+        $this->login($user['prenom'].' '.$user['nom']);
 
         $filename = $image['idImage'].'-import.jpg';
         $imagePage = $this->services->newPageGetter()->getFromTitle('File:'.$filename);
@@ -95,7 +96,6 @@ class ExportImageCommand extends ExportCommand
             );
         }
         if (empty($image['auteur'])) {
-            $user = $this->u->getArrayInfosFromUtilisateur($image['idUtilisateur']);
             $image['auteur'] = '[[Utilisateur:'.$user['prenom'].' '.$user['nom'].'|'.
                 $user['prenom'].' '.$user['nom'].']]';
         }
@@ -103,6 +103,7 @@ class ExportImageCommand extends ExportCommand
             $image['dateCliche'] = '';
         }
         $licence = $this->i->getLicence($image['idImage']);
+        $this->login('aw2mw bot');
         $this->savePage(
             'File:'.$filename,
             '{{Information
