@@ -73,6 +73,7 @@ class ExportAddressCommand extends ExportCommand
         $groupInfo = mysql_fetch_assoc($this->a->getIdEvenementsFromAdresse($input->getArgument('id')));
 
         $events = array();
+        $sections = array();
         $requete ="
             SELECT evt.idEvenement, pe.idEvenement, pe.position
             FROM evenements evt
@@ -197,6 +198,7 @@ class ExportAddressCommand extends ExportCommand
         }
 
         $intro .= '}}';
+        $sections[0] = $intro.PHP_EOL;
 
         $this->api->postRequest(
             new Api\SimpleRequest(
@@ -212,8 +214,6 @@ class ExportAddressCommand extends ExportCommand
                 )
             )
         );
-
-        $sections = array();
 
         foreach ($events as $section => $id) {
             $req = "SELECT idHistoriqueEvenement
@@ -314,7 +314,7 @@ class ExportAddressCommand extends ExportCommand
                         )
                     )
                 );
-                $sections[$section] = $content;
+                $sections[$section + 1] = $content;
             }
             $reqImages = "
                 SELECT hi1.idImage, hi1.description
@@ -334,7 +334,7 @@ class ExportAddressCommand extends ExportCommand
             }
 
             if (!empty($images)) {
-                $sections[$section] .= '<gallery>'.PHP_EOL;
+                $sections[$section + 1] .= '<gallery>'.PHP_EOL;
                 foreach ($images as $image) {
                     $command = $this->getApplication()->find('export:image');
                     $command->run(
@@ -342,17 +342,17 @@ class ExportAddressCommand extends ExportCommand
                         $output
                     );
                     $filename = $image['idImage'].'-import.jpg';
-                    $sections[$section] .= 'File:'.$filename.'|'.$image['description'].PHP_EOL;
+                    $sections[$section + 1] .= 'File:'.$filename.'|'.$image['description'].PHP_EOL;
                 }
-                $sections[$section] .= '</gallery>'.PHP_EOL;
+                $sections[$section + 1] .= '</gallery>'.PHP_EOL;
             }
             $this->api->postRequest(
                 new Api\SimpleRequest(
                     'edit',
                     array(
                         'title'=>$pageName,
-                        'md5'=>md5($sections[$section]),
-                        'text'=>$sections[$section],
+                        'md5'=>md5($sections[$section + 1]),
+                        'text'=>$sections[$section + 1],
                         'section'=>$section + 1,
                         'bot'=>true,
                         'summary'=>'Images importées depuis Archi-Wiki',
