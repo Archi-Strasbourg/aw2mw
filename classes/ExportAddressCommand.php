@@ -194,28 +194,29 @@ class ExportAddressCommand extends ExportCommand
 
 
                 $content = '';
+                $date = '';
+                if ($event['isDateDebutEnviron']=='1') {
+                    $date .= "environ ";
+                }
+                if (substr($event['dateDebut'], 5)=="00-00") {
+                    $datetime=substr($event['dateDebut'], 0, 4);
+                } else {
+                    $datetime = $event['dateDebut'];
+                }
+                if ($event['dateDebut']!='0000-00-00') {
+                    $date .= $this->e->date->toFrenchAffichage($datetime);
+                }
+                if ($event['dateFin']!='0000-00-00') {
+                    if (strlen($this->e->date->toFrench($event['dateFin']))<=4) {
+                        $date .= ' à '.$this->e->date->toFrenchAffichage($event['dateFin']);
+                    } else {
+                        $date .= ' au '.$this->e->date->toFrenchAffichage($event['dateFin']);
+                    }
+                }
                 if (!empty($event['titre'])) {
                     $title = $event['titre'];
-                } else if ($event['dateDebut']!='0000-00-00') {
-                    $title = '';
-                    if ($event['isDateDebutEnviron']=='1') {
-                        $title .= "environ ";
-                    }
-                    if (substr($event['dateDebut'], 5)=="00-00") {
-                        $datetime=substr($event['dateDebut'], 0, 4);
-                    } else {
-                        $datetime = $event['dateDebut'];
-                    }
-                    if ($event['dateDebut']!='0000-00-00') {
-                        $title .= $this->e->date->toFrenchAffichage($datetime);
-                    }
-                    if ($event['dateFin']!='0000-00-00') {
-                        if (strlen($this->e->date->toFrench($event['dateFin']))<=4) {
-                            $title .= ' à '.$this->e->date->toFrenchAffichage($event['dateFin']);
-                        } else {
-                            $title .= ' au '.$this->e->date->toFrenchAffichage($event['dateFin']);
-                        }
-                    }
+                } elseif ($event['dateDebut']!='0000-00-00') {
+                    $title = $date;
                 } else {
                     $title = $event['nomTypeEvenement'];
                 }
@@ -232,6 +233,13 @@ class ExportAddressCommand extends ExportCommand
 
                 $title = ucfirst(stripslashes($title));
                 $content .= '=='.$title.'=='.PHP_EOL;
+
+                if (count($date) == 4) {
+                    $content .= '|année = '.$date;
+                } else {
+                    $content .= '|date = '.$date;
+                }
+                $content .= '}}';
 
                 $html = $this->convertHtml(
                     $this->bbCode->convertToDisplay(array('text'=>$event['description']))
