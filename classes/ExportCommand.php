@@ -53,6 +53,30 @@ abstract class ExportCommand extends Command
         );
     }
 
+    protected function convertDate($startDate, $endDate, $approximately)
+    {
+        $date = '';
+        if ($approximately=='1') {
+            $date .= "environ ";
+        }
+        if (substr($startDate, 5)=="00-00") {
+            $datetime=substr($startDate, 0, 4);
+        } else {
+            $datetime = $startDate;
+        }
+        if ($startDate!='0000-00-00') {
+            $date .= $this->e->date->toFrenchAffichage($datetime);
+        }
+        if ($endDate!='0000-00-00') {
+            if (strlen($this->e->date->toFrench($endDate))<=4) {
+                $date .= ' à '.$this->e->date->toFrenchAffichage($endDate);
+            } else {
+                $date .= ' au '.$this->e->date->toFrenchAffichage($endDate);
+            }
+        }
+        return $date;
+    }
+
     protected function setup()
     {
         //Instantiate objects

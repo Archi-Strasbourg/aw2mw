@@ -90,6 +90,7 @@ class ExportAddressCommand extends ExportCommand
         }
 
         $content = '';
+        $infobox = array();
 
         //Create page structure
         foreach ($events as $id) {
@@ -134,6 +135,37 @@ class ExportAddressCommand extends ExportCommand
             }
             $title = stripslashes($title);
             $content .= '=='.$title.'=='.PHP_EOL;
+
+            $rep = $this->e->connexionBdd->requete('
+                    SELECT  p.idPersonne, m.nom as metier, p.nom, p.prenom
+                    FROM _evenementPersonne _eP
+                    LEFT JOIN personne p ON p.idPersonne = _eP.idPersonne
+                    LEFT JOIN metier m ON m.idMetier = p.idMetier
+                    WHERE _eP.idEvenement='.mysql_real_escape_string($id).'
+                    ORDER BY p.nom DESC');
+            $people = array();
+            while ($res = mysql_fetch_object($rep)) {
+                $people[] = $res;
+            }
+
+            $info = array(
+                'type'=>'',
+                'structure'=>'',
+                'date'=>'',
+                'people'=> array(
+                    'architecte'=>''
+                )
+            );
+
+            $info['type'] = $event['nomTypeEvenement'];
+            $info['structure'] = $event['nomTypeStructure'];
+            $info['date'] = $this->convertDate($event['dateDebut'], $event['dateFin'], $event['isDateDebutEnviron']);
+
+            foreach ($people as $person) {
+                $info['people'][$person->metier] = $person->prenom.' '.$person->nom;
+            }
+
+            $infobox[] = $info;
         }
 
         //Add References section
@@ -145,6 +177,41 @@ class ExportAddressCommand extends ExportCommand
         $this->login('aw2mw bot');
 
         $this->savePage($pageName, $content, 'Sections importées depuis Archi-Wiki');
+
+        $intro = '{{Infobox adresse'.PHP_EOL;
+
+        foreach ($infobox as $i => $info) {
+            foreach ($info['people'] as $job => $name) {
+                $intro .= '|'.$job.($i + 1).' = '.$name.PHP_EOL;
+            }
+            if (strlen($info['date']) == 4) {
+                $intro .= '|année'.($i + 1).' = '.$info['date'].PHP_EOL;
+            } else {
+                $intro .= '|date'.($i + 1).' = '.$info['date'].PHP_EOL;
+            }
+            if ($i > 0 && $info['structure'] == $infobox[$i-1]['structure']) {
+                $info['structure'] = '';
+            }
+            $intro .= '|structure'.($i + 1).' = '.$info['structure'].PHP_EOL;
+            $intro .= '|type'.($i + 1).' = '.strtolower($info['type']).PHP_EOL;
+        }
+
+        $intro .= '}}';
+
+        $this->api->postRequest(
+            new Api\SimpleRequest(
+                'edit',
+                array(
+                    'title'=>$pageName,
+                    'md5'=>md5($intro),
+                    'text'=>$intro,
+                    'section'=>0,
+                    'bot'=>true,
+                    'summary'=>'Informations importées depuis Archi-Wiki',
+                    'token'=>$this->api->getToken()
+                )
+            )
+        );
 
         $sections = array();
 
@@ -194,25 +261,8 @@ class ExportAddressCommand extends ExportCommand
 
 
                 $content = '';
-                $date = '';
-                if ($event['isDateDebutEnviron']=='1') {
-                    $date .= "environ ";
-                }
-                if (substr($event['dateDebut'], 5)=="00-00") {
-                    $datetime=substr($event['dateDebut'], 0, 4);
-                } else {
-                    $datetime = $event['dateDebut'];
-                }
-                if ($event['dateDebut']!='0000-00-00') {
-                    $date .= $this->e->date->toFrenchAffichage($datetime);
-                }
-                if ($event['dateFin']!='0000-00-00') {
-                    if (strlen($this->e->date->toFrench($event['dateFin']))<=4) {
-                        $date .= ' à '.$this->e->date->toFrenchAffichage($event['dateFin']);
-                    } else {
-                        $date .= ' au '.$this->e->date->toFrenchAffichage($event['dateFin']);
-                    }
-                }
+                $date = $this->convertDate($event['dateDebut'], $event['dateFin'], $event['isDateDebutEnviron']);
+
                 if (!empty($event['titre'])) {
                     $title = $event['titre'];
                 } elseif ($event['dateDebut']!='0000-00-00') {
@@ -234,11 +284,14 @@ class ExportAddressCommand extends ExportCommand
                 $title = ucfirst(stripslashes($title));
                 $content .= '=='.$title.'=='.PHP_EOL;
 
-                if (count($date) == 4) {
-                    $content .= '|année = '.$date;
+                $content .= '{{Infobox événement'.PHP_EOL;
+                if (strlen($date) == 4) {
+                    $content .= '|année = '.$date.PHP_EOL;
                 } else {
-                    $content .= '|date = '.$date;
+                    $content .= '|date = '.$date.PHP_EOL;
                 }
+                $content .= '|type = '.strtolower($event['nomTypeEvenement']).PHP_EOL;
+                $content .= '|structure = '.strtolower($event['nomTypeStructure']).PHP_EOL;
                 $content .= '}}';
 
                 $html = $this->convertHtml(
@@ -257,7 +310,6 @@ class ExportAddressCommand extends ExportCommand
                             'section'=>$section + 1,
                             'bot'=>true,
                             'summary'=>'Révision du '.$event['dateCreationEvenement'].' importée depuis Archi-Wiki',
-                            'timestamp'=>0,
                             'token'=>$this->api->getToken()
                         )
                     )
@@ -304,7 +356,6 @@ class ExportAddressCommand extends ExportCommand
                         'section'=>$section + 1,
                         'bot'=>true,
                         'summary'=>'Images importées depuis Archi-Wiki',
-                        'timestamp'=>0,
                         'token'=>$this->api->getToken()
                     )
                 )
