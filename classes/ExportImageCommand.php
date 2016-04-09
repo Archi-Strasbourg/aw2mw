@@ -50,7 +50,7 @@ class ExportImageCommand extends ExportCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        parent::setup();
+        parent::setup($output);
 
         $reqImages = "
             SELECT hi1.idImage,  hi1.idHistoriqueImage,  hi1.nom, hi1.auteur,

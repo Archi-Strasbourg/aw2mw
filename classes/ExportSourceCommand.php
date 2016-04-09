@@ -45,7 +45,7 @@ class ExportSourceCommand extends ExportCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        parent::setup();
+        parent::setup($output);
 
         $id = $input->getArgument('id');
         $pageName = 'Source:'.$this->s->getSourceLibelle($id);

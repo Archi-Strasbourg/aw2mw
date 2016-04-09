@@ -31,67 +31,19 @@ class ExportAddressCommand extends ExportCommand
             );
     }
 
-    /**
-     * Execute command
-     *
-     * @param InputInterface  $input  Input
-     * @param OutputInterface $output Output
-     *
-     * @return void
-     */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    private function exportEvents($events, $pageName, $address = null)
     {
-        parent::setup();
+        $content = '';
+        $infobox = array();
+        $sections = array();
 
-        $address = $this->a->getArrayAdresseFromIdAdresse($input->getArgument('id'));
-        if (!$address) {
-            $output->writeln('<error>Adresse introuvable</error>');
-            return;
-        }
-        $city = $this->a->getInfosVille($address['idVille']);
+        $this->output->writeln('<info>Exporting "'.$pageName.'"…</info>');
 
-        $basePageName = strip_tags(
-            $this->a->getIntituleAdresseFrom(
-                $input->getArgument('id'),
-                'idAdresse',
-                array(
-                    'noHTML'=>true, 'noQuartier'=>true, 'noSousQuartier'=>true, 'noVille'=>true,
-                    'displayFirstTitreAdresse'=>true,
-                    'setSeparatorAfterTitle'=>'_'
-                )
-            )
-        ).'_('.$address['nomVille'].')';
-
-        $pageName = 'Adresse:'.$basePageName;
-
-        $output->writeln('<info>Exporting "'.$pageName.'"…</info>');
+        $isNews = $this->services->newPageGetter()->getFromTitle($pageName)->getTitle()->getNs() == 4001;
 
         $this->loginAsAdmin();
 
         $this->deletePage($pageName);
-
-        $groupInfo = mysql_fetch_assoc($this->a->getIdEvenementsFromAdresse($input->getArgument('id')));
-
-        $events = array();
-        $sections = array();
-        $requete ="
-            SELECT evt.idEvenement, pe.idEvenement, pe.position
-            FROM evenements evt
-            LEFT JOIN _evenementEvenement ee on ee.idEvenement = ".
-                mysql_real_escape_string($groupInfo['idEvenementGroupeAdresse']).
-            "
-            LEFT JOIN positionsEvenements pe on pe.idEvenement = ee.idEvenementAssocie
-            WHERE evt.idEvenement = ee.idEvenementAssocie
-            ORDER BY pe.position ASC
-            ";
-        $result = $this->e->connexionBdd->requete($requete);
-        $arrayIdEvenement = array();
-        while ($res = mysql_fetch_assoc($result)) {
-            $events[] = $res['idEvenement'];
-        }
-
-        $content = '';
-        $infobox = array();
 
         //Create page structure
         foreach ($events as $id) {
@@ -110,7 +62,7 @@ class ExportAddressCommand extends ExportCommand
                     u.nom AS nomUtilisateur,
                     u.prenom as prenomUtilisateur,
                     tE.groupe,
-                    hE.ISMH ,
+                    hE.ISMH,
                     hE.MH,
                     date_format(hE.dateCreationEvenement,"'._("%e/%m/%Y à %kh%i").'") as dateCreationEvenement,
                     hE.isDateDebutEnviron as isDateDebutEnviron,
@@ -169,9 +121,11 @@ class ExportAddressCommand extends ExportCommand
             $infobox[] = $info;
         }
 
-        //Add References section
-        $references = PHP_EOL.'==Références=='.PHP_EOL.'<references />';
-        $content .= $references;
+        if (!$isNews) {
+            //Add References section
+            $references = PHP_EOL.'==Références=='.PHP_EOL.'<references />';
+            $content .= $references;
+        }
 
 
         //Login as bot
@@ -179,41 +133,46 @@ class ExportAddressCommand extends ExportCommand
 
         $this->savePage($pageName, $content, 'Sections importées depuis Archi-Wiki');
 
-        $intro = '{{Infobox adresse'.PHP_EOL;
+        if (!$isNews) {
+            $intro = '{{Infobox adresse'.PHP_EOL;
 
-        foreach ($infobox as $i => $info) {
-            foreach ($info['people'] as $job => $name) {
-                $intro .= '|'.$job.($i + 1).' = '.$name.PHP_EOL;
+            foreach ($infobox as $i => $info) {
+                foreach ($info['people'] as $job => $name) {
+                    $intro .= '|'.$job.($i + 1).' = '.$name.PHP_EOL;
+                }
+                if (strlen($info['date']) == 4) {
+                    $intro .= '|année'.($i + 1).' = '.$info['date'].PHP_EOL;
+                } else {
+                    $intro .= '|date'.($i + 1).' = '.$info['date'].PHP_EOL;
+                }
+                if ($i > 0 && $info['structure'] == $infobox[$i-1]['structure']) {
+                    $info['structure'] = '';
+                }
+                $intro .= '|structure'.($i + 1).' = '.$info['structure'].PHP_EOL;
+                $intro .= '|type'.($i + 1).' = '.strtolower($info['type']).PHP_EOL;
+                $intro .= '|adresse = '.$address['numero'].' '.$address['prefixeRue']. ' '.$address['nomRue'].PHP_EOL;
+                $intro .= '|ville = '.$address['nomVille'].PHP_EOL;
+                $intro .= '|pays = '.$address['nomPays'].PHP_EOL;
             }
-            if (strlen($info['date']) == 4) {
-                $intro .= '|année'.($i + 1).' = '.$info['date'].PHP_EOL;
-            } else {
-                $intro .= '|date'.($i + 1).' = '.$info['date'].PHP_EOL;
-            }
-            if ($i > 0 && $info['structure'] == $infobox[$i-1]['structure']) {
-                $info['structure'] = '';
-            }
-            $intro .= '|structure'.($i + 1).' = '.$info['structure'].PHP_EOL;
-            $intro .= '|type'.($i + 1).' = '.strtolower($info['type']).PHP_EOL;
-        }
 
-        $intro .= '}}';
-        $sections[0] = $intro.PHP_EOL;
+            $intro .= '}}';
+            $sections[0] = $intro.PHP_EOL;
 
-        $this->api->postRequest(
-            new Api\SimpleRequest(
-                'edit',
-                array(
-                    'title'=>$pageName,
-                    'md5'=>md5($intro),
-                    'text'=>$intro,
-                    'section'=>0,
-                    'bot'=>true,
-                    'summary'=>'Informations importées depuis Archi-Wiki',
-                    'token'=>$this->api->getToken()
+            $this->api->postRequest(
+                new Api\SimpleRequest(
+                    'edit',
+                    array(
+                        'title'=>$pageName,
+                        'md5'=>md5($intro),
+                        'text'=>$intro,
+                        'section'=>0,
+                        'bot'=>true,
+                        'summary'=>'Informations importées depuis Archi-Wiki',
+                        'token'=>$this->api->getToken()
+                    )
                 )
-            )
-        );
+            );
+        }
 
         foreach ($events as $section => $id) {
             $req = "SELECT idHistoriqueEvenement
@@ -284,15 +243,21 @@ class ExportAddressCommand extends ExportCommand
                 $title = ucfirst(stripslashes($title));
                 $content .= '=='.$title.'=='.PHP_EOL;
 
-                $content .= '{{Infobox événement'.PHP_EOL;
-                if (strlen($date) == 4) {
-                    $content .= '|année = '.$date.PHP_EOL;
+                if ($isNews) {
+                    $content .= '{{Infobox actualité'.PHP_EOL.
+                    '|date = '.$date.PHP_EOL.
+                    '}}'.PHP_EOL;
                 } else {
-                    $content .= '|date = '.$date.PHP_EOL;
+                    $content .= '{{Infobox événement'.PHP_EOL;
+                    if (strlen($date) == 4) {
+                        $content .= '|année = '.$date.PHP_EOL;
+                    } else {
+                        $content .= '|date = '.$date.PHP_EOL;
+                    }
+                    $content .= '|type = '.strtolower($event['nomTypeEvenement']).PHP_EOL;
+                    $content .= '|structure = '.strtolower($event['nomTypeStructure']).PHP_EOL;
+                    $content .= '}}'.PHP_EOL;
                 }
-                $content .= '|type = '.strtolower($event['nomTypeEvenement']).PHP_EOL;
-                $content .= '|structure = '.strtolower($event['nomTypeStructure']).PHP_EOL;
-                $content .= '}}';
 
                 $html = $this->convertHtml(
                     $this->bbCode->convertToDisplay(array('text'=>$event['description']))
@@ -339,7 +304,7 @@ class ExportAddressCommand extends ExportCommand
                     $command = $this->getApplication()->find('export:image');
                     $command->run(
                         new ArrayInput(array('id'=>$image['idImage'])),
-                        $output
+                        $this->output
                     );
                     $filename = $image['idImage'].'-import.jpg';
                     $sections[$section + 1] .= 'File:'.$filename.'|'.$image['description'].PHP_EOL;
@@ -362,7 +327,9 @@ class ExportAddressCommand extends ExportCommand
             );
         }
 
-        $sections[] = $references;
+        if (!$isNews) {
+            $sections[] = $references;
+        }
 
         //Login with bot
         $this->login('aw2mw bot');
@@ -373,6 +340,81 @@ class ExportAddressCommand extends ExportCommand
         $content = $this->replaceSubtitles($content);
 
         $this->savePage($pageName, $content, 'Conversion des titres de section');
+    }
 
+    /**
+     * Execute command
+     *
+     * @param InputInterface  $input  Input
+     * @param OutputInterface $output Output
+     *
+     * @return void
+     */
+    protected function execute(InputInterface $input, OutputInterface $output)
+    {
+        parent::setup($output);
+
+        $address = $this->a->getArrayAdresseFromIdAdresse($input->getArgument('id'));
+        if (!$address) {
+            $this->output->writeln('<error>Adresse introuvable</error>');
+            return;
+        }
+        $city = $this->a->getInfosVille($address['idVille']);
+
+        $basePageName = strip_tags(
+            $this->a->getIntituleAdresseFrom(
+                $input->getArgument('id'),
+                'idAdresse',
+                array(
+                    'noHTML'=>true, 'noQuartier'=>true, 'noSousQuartier'=>true, 'noVille'=>true,
+                    'displayFirstTitreAdresse'=>true,
+                    'setSeparatorAfterTitle'=>'_'
+                )
+            )
+        ).'_('.$address['nomVille'].')';
+
+        $pageName = 'Adresse:'.$basePageName;
+
+        $groupInfo = mysql_fetch_assoc($this->a->getIdEvenementsFromAdresse($input->getArgument('id')));
+
+        $events = array();
+
+        $requete ="
+            SELECT evt.idEvenement, pe.idEvenement, pe.position
+            FROM evenements evt
+            LEFT JOIN _evenementEvenement ee on ee.idEvenement = ".
+                mysql_real_escape_string($groupInfo['idEvenementGroupeAdresse']).
+            "
+            LEFT JOIN positionsEvenements pe on pe.idEvenement = ee.idEvenementAssocie
+            WHERE evt.idEvenement = ee.idEvenementAssocie
+            ORDER BY pe.position ASC
+            ";
+        $result = $this->e->connexionBdd->requete($requete);
+        $arrayIdEvenement = array();
+        while ($res = mysql_fetch_assoc($result)) {
+            $allEvents[] = $res['idEvenement'];
+        }
+
+        foreach ($allEvents as $id) {
+            $rep = $this->e->connexionBdd->requete('
+                    SELECT  p.idPersonne
+                    FROM _evenementPersonne _eP
+                    LEFT JOIN personne p ON p.idPersonne = _eP.idPersonne
+                    LEFT JOIN metier m ON m.idMetier = p.idMetier
+                    WHERE _eP.idEvenement='.mysql_real_escape_string($id).'
+                    ORDER BY p.nom DESC');
+            $people = array();
+            while ($res = mysql_fetch_object($rep)) {
+                $people[] = $res;
+            }
+            if (!empty($people)) {
+                $events[] = $id;
+            } else {
+                $newsEvents[] = $id;
+            }
+        }
+
+        $this->exportEvents($events, $pageName, $address);
+        $this->exportEvents($newsEvents, 'Actualités_adresse:'.$basePageName);
     }
 }
