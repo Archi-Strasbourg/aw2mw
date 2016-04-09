@@ -31,6 +31,22 @@ class ExportAddressCommand extends ExportCommand
             );
     }
 
+    private function createGallery($images)
+    {
+        $return = '<gallery>'.PHP_EOL;
+        foreach ($images as $image) {
+            $command = $this->getApplication()->find('export:image');
+            $command->run(
+                new ArrayInput(array('id'=>$image['idImage'])),
+                $this->output
+            );
+            $filename = $image['idImage'].'-import.jpg';
+            $return .= 'File:'.$filename.'|'.$image['description'].PHP_EOL;
+        }
+        $return .= '</gallery>'.PHP_EOL;
+        return $return;
+    }
+
     private function exportEvents($events, $pageName, $address = null)
     {
         $content = '';
@@ -122,6 +138,29 @@ class ExportAddressCommand extends ExportCommand
         }
 
         if (!$isNews) {
+            $reqPhotos = "
+                SELECT hi1.idHistoriqueImage, hi1.idImage as idImage,
+                hi1.dateUpload, ai.idAdresse, hi1.description,
+                ae.idEvenement as idEvenementGroupeAdresseCourant
+                FROM historiqueImage hi2,  historiqueImage hi1
+                LEFT JOIN _adresseImage ai ON ai.idImage = hi1.idImage
+                LEFT JOIN _adresseEvenement ae ON ae.idAdresse = ai.idAdresse
+                WHERE hi2.idImage = hi1.idImage
+                AND ai.idAdresse = ".mysql_real_escape_string($address['idAdresse'])."
+                AND ai.prisDepuis='1'
+                GROUP BY hi1.idImage,  hi1.idHistoriqueImage
+                HAVING hi1.idHistoriqueImage = max(hi2.idHistoriqueImage)
+            ";
+
+            $resPhotos = $this->i->connexionBdd->requete($reqPhotos);
+
+            $images = array();
+            while ($fetchPhotos = mysql_fetch_assoc($resPhotos)) {
+                $images[] = $fetchPhotos;
+            }
+            $otherImages = PHP_EOL.'==Vues prises depuis cette adresse=='.PHP_EOL.$this->createGallery($images);
+            $content .= $otherImages;
+
             //Add References section
             $references = PHP_EOL.'==Références=='.PHP_EOL.'<references />';
             $content .= $references;
@@ -303,17 +342,7 @@ class ExportAddressCommand extends ExportCommand
             }
 
             if (!empty($images)) {
-                $sections[$section + 1] .= '<gallery>'.PHP_EOL;
-                foreach ($images as $image) {
-                    $command = $this->getApplication()->find('export:image');
-                    $command->run(
-                        new ArrayInput(array('id'=>$image['idImage'])),
-                        $this->output
-                    );
-                    $filename = $image['idImage'].'-import.jpg';
-                    $sections[$section + 1] .= 'File:'.$filename.'|'.$image['description'].PHP_EOL;
-                }
-                $sections[$section + 1] .= '</gallery>'.PHP_EOL;
+                $sections[$section + 1] .= $this->createGallery($images);
             }
             $this->api->postRequest(
                 new Api\SimpleRequest(
@@ -332,6 +361,7 @@ class ExportAddressCommand extends ExportCommand
         }
 
         if (!$isNews) {
+            $sections[] = $otherImages;
             $sections[] = $references;
             $sections[] = $comments;
         }
