@@ -125,6 +125,10 @@ class ExportAddressCommand extends ExportCommand
             //Add References section
             $references = PHP_EOL.'==Références=='.PHP_EOL.'<references />';
             $content .= $references;
+
+            //Add Comments section
+            $comments = PHP_EOL.'==Commentaires=='.PHP_EOL.'<comments />';
+            $content .= $comments;
         }
 
 
@@ -329,6 +333,7 @@ class ExportAddressCommand extends ExportCommand
 
         if (!$isNews) {
             $sections[] = $references;
+            $sections[] = $comments;
         }
 
         //Login with bot
