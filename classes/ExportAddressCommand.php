@@ -176,11 +176,11 @@ class ExportAddressCommand extends ExportCommand
             $content .= $otherImages;
 
             //Add References section
-            $references = PHP_EOL.'==Références=='.PHP_EOL.'<references />';
+            $references = PHP_EOL.'==Références=='.PHP_EOL.'<references />'.PHP_EOL;
             $content .= $references;
 
             //Add Comments section
-            $comments = PHP_EOL.'==Commentaires=='.PHP_EOL.'<comments />';
+            $comments = PHP_EOL.'==Commentaires=='.PHP_EOL.'<comments />'.PHP_EOL;
             $content .= $comments;
         }
 
@@ -212,8 +212,8 @@ class ExportAddressCommand extends ExportCommand
                 $intro .= '|pays = '.$address['nomPays'].PHP_EOL;
             }
 
-            $intro .= '}}';
-            $sections[0] = $intro.PHP_EOL;
+            $intro .= '}}'.PHP_EOL.PHP_EOL;
+            $sections[0] = $intro;
 
             $this->api->postRequest(
                 new Api\SimpleRequest(
@@ -321,7 +321,7 @@ class ExportAddressCommand extends ExportCommand
                 );
 
 
-                $content .= trim($html).PHP_EOL;
+                $content .= trim($html).PHP_EOL.PHP_EOL;
                 $this->api->postRequest(
                     new Api\SimpleRequest(
                         'edit',
