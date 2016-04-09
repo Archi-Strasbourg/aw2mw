@@ -154,11 +154,25 @@ class ExportAddressCommand extends ExportCommand
 
             $resPhotos = $this->i->connexionBdd->requete($reqPhotos);
 
-            $images = array();
+            $otherImages = array();
             while ($fetchPhotos = mysql_fetch_assoc($resPhotos)) {
-                $images[] = $fetchPhotos;
+                $reqPriseDepuis = "SELECT ai.idAdresse,  ai.idEvenementGroupeAdresse
+                                    FROM _adresseImage ai
+                                    WHERE ai.idImage = ".$fetchPhotos['idImage']."
+                                    AND ai.vueSur='1'
+                ";
+                $resPriseDepuis = $this->a->connexionBdd->requete($reqPriseDepuis);
+                $fetchPhotos['description'] = 'Vue sur';
+                $otherAddresses = array();
+                while ($otherAddress = mysql_fetch_assoc($resPriseDepuis)) {
+                    $otherAddress = $this->a->getArrayAdresseFromIdAdresse($otherAddress['idAdresse']);
+                    $otherAddress['nom'] = trim($otherAddress['nom']);
+                    $otherAddresses[] = ' [[Adresse:'.$otherAddress['nom'].'|'.$otherAddress['nom'].']]';
+                }
+                $fetchPhotos['description'] .= implode(', ', $otherAddresses);
+                $otherImages[] = $fetchPhotos;
             }
-            $otherImages = PHP_EOL.'==Vues prises depuis cette adresse=='.PHP_EOL.$this->createGallery($images);
+            $otherImages = PHP_EOL.'==Vues prises depuis cette adresse=='.PHP_EOL.$this->createGallery($otherImages);
             $content .= $otherImages;
 
             //Add References section
