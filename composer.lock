@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "60e3af461d638bc9a279b13156431b42",
-    "content-hash": "ac2803c483b98f006896ad92a283ce3b",
+    "hash": "a3f03fc089d6bfe84c4372cddbc3d0e8",
+    "content-hash": "0f897b006281ac34fe1a3da212480db6",
     "packages": [
         {
             "name": "addwiki/mediawiki-api",
@@ -463,16 +463,16 @@
         },
         {
             "name": "ptachoire/process-builder-chain",
-            "version": "1.1.0",
+            "version": "1.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/krichprollsch/process-builder-chain.git",
-                "reference": "100878e4edaf3b995df279ce4e774ccc8620d355"
+                "reference": "465055dbcc3b5ef792a768df935571551de4781a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/krichprollsch/process-builder-chain/zipball/100878e4edaf3b995df279ce4e774ccc8620d355",
-                "reference": "100878e4edaf3b995df279ce4e774ccc8620d355",
+                "url": "https://api.github.com/repos/krichprollsch/process-builder-chain/zipball/465055dbcc3b5ef792a768df935571551de4781a",
+                "reference": "465055dbcc3b5ef792a768df935571551de4781a",
                 "shasum": ""
             },
             "require": {
@@ -495,7 +495,7 @@
                 }
             ],
             "description": "Add ability to chain symfony processes",
-            "time": "2015-12-08 12:58:12"
+            "time": "2016-04-10 08:33:20"
         },
         {
             "name": "react/promise",
