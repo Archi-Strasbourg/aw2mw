@@ -52,6 +52,8 @@ class ExportImageCommand extends ExportCommand
     {
         parent::setup($output);
 
+        $id = $input->getArgument('id');
+
         $reqImages = "
             SELECT hi1.idImage,  hi1.idHistoriqueImage,  hi1.nom, hi1.auteur,
                 hi1.description,  hi1.dateUpload,  hi1.dateCliche, hi1.idUtilisateur,
@@ -59,7 +61,7 @@ class ExportImageCommand extends ExportCommand
             FROM _evenementImage ei
             LEFT JOIN historiqueImage hi1 ON hi1.idImage = ei.idImage
             LEFT JOIN historiqueImage hi2 ON hi2.idImage = hi1.idImage
-            WHERE hi1.idImage = '".mysql_real_escape_string($input->getArgument('id'))."'
+            WHERE hi1.idImage = '".mysql_real_escape_string($id)."'
             GROUP BY hi1.idImage ,  hi1.idHistoriqueImage
             HAVING hi1.idHistoriqueImage = max(hi2.idHistoriqueImage)
             ORDER BY ei.position, hi1.idHistoriqueImage
@@ -68,8 +70,18 @@ class ExportImageCommand extends ExportCommand
         $resImages = $this->i->connexionBdd->requete($reqImages);
         $image = mysql_fetch_assoc($resImages);
 
-        $user = $this->u->getArrayInfosFromUtilisateur($image['idUtilisateur']);
-        $this->login($user['prenom'].' '.$user['nom']);
+        $idAuteur = mysql_fetch_assoc(
+            $this->i->connexionBdd->requete(
+                "SELECT idUtilisateur FROM historiqueImage WHERE idImage = '".mysql_real_escape_string($id)."'"
+            )
+        );
+        $user = $this->u->getArrayInfosFromUtilisateur($idAuteur['idUtilisateur']);
+
+        if ($user) {
+            $this->login($user['prenom'].' '.$user['nom']);
+        } else {
+            $this->login('aw2mw bot');
+        }
 
         $filename = $image['idImage'].'-import.jpg';
         $imagePage = $this->services->newPageGetter()->getFromTitle('File:'.$filename);
