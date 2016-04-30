@@ -136,7 +136,7 @@ class ExportImageCommand extends ExportCommand
         $this->login('aw2mw bot');
         $this->savePage(
             'File:'.$filename,
-            '{{Information
+            '{{Infobox image
             |description='.$image['description'].'
             |date='.$image['dateCliche'].'
             |auteur='.$image['auteur'].'
