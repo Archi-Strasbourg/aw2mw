@@ -70,17 +70,24 @@ class ExportImageCommand extends ExportCommand
         $resImages = $this->i->connexionBdd->requete($reqImages);
         $image = mysql_fetch_assoc($resImages);
 
-        $idAuteur = mysql_fetch_assoc(
+        $origImage = mysql_fetch_assoc(
             $this->i->connexionBdd->requete(
-                "SELECT idUtilisateur FROM historiqueImage WHERE idImage = '".mysql_real_escape_string($id)."'"
+                "SELECT idUtilisateur, dateUpload
+                FROM historiqueImage
+                WHERE idImage = '".mysql_real_escape_string($id)."'"
             )
         );
-        $user = $this->u->getArrayInfosFromUtilisateur($idAuteur['idUtilisateur']);
+        $user = $this->u->getArrayInfosFromUtilisateur($origImage['idUtilisateur']);
 
         if ($user) {
             $this->login($user['prenom'].' '.$user['nom']);
         } else {
-            $this->login('aw2mw bot');
+            $after2008 = new \DateTime($origImage['dateUpload']) > new \DateTime('2008-04-01');
+            if ($after2008) {
+                $this->login('aw2mw bot');
+            } else {
+                $this->login('Fabien Romary');
+            }
         }
 
         $filename = $image['idImage'].'-import.jpg';
@@ -108,8 +115,16 @@ class ExportImageCommand extends ExportCommand
             );
         }
         if (empty($image['auteur'])) {
-            $image['auteur'] = '[[Utilisateur:'.$user['prenom'].' '.$user['nom'].'|'.
-                $user['prenom'].' '.$user['nom'].']]';
+            if ($user) {
+                $image['auteur'] = '[[Utilisateur:'.$user['prenom'].' '.$user['nom'].'|'.
+                    $user['prenom'].' '.$user['nom'].']]';
+            } else {
+                if ($after2008) {
+                    $image['auteur'] = '';
+                } else {
+                    $image['auteur'] = '[[Utilisateur:Fabien Romary|Fabien Romary]]';
+                }
+            }
         }
         if ($image['dateCliche'] == '0000-00-00') {
             $image['dateCliche'] = '';
