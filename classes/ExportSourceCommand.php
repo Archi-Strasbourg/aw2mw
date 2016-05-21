@@ -20,6 +20,7 @@ class ExportSourceCommand extends ExportCommand
      */
     protected function configure()
     {
+        parent::configure();
         $this
             ->setName('export:source')
             ->setDescription('Export one specific source')
@@ -45,7 +46,7 @@ class ExportSourceCommand extends ExportCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        parent::setup($output);
+        parent::setup($input, $output);
 
         $id = $input->getArgument('id');
         $pageName = 'Source:'.$this->s->getSourceLibelle($id);

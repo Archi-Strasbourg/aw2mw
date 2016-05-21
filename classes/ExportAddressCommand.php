@@ -21,6 +21,7 @@ class ExportAddressCommand extends ExportCommand
      */
     protected function configure()
     {
+        parent::configure();
         $this
             ->setName('export:address')
             ->setDescription('Export one specific address')
@@ -401,7 +402,7 @@ class ExportAddressCommand extends ExportCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        parent::setup($output);
+        parent::setup($input, $output);
 
         $address = $this->a->getArrayAdresseFromIdAdresse($input->getArgument('id'));
         if (!$address) {

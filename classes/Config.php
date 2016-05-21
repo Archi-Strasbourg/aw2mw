@@ -15,9 +15,13 @@ class Config
     /**
      * Config constructor
      */
-    private function __construct()
+    private function __construct($prod = false)
     {
-        $yamlfile = __DIR__.'/../config.yml';
+        if ($prod) {
+            $yamlfile = __DIR__.'/../config_prod.yml';
+        } else {
+            $yamlfile = __DIR__.'/../config.yml';
+        }
         $yaml = Yaml::parse(file_get_contents($yamlfile));
         foreach ($yaml as $param => $value) {
             if (isset($this->$param)) {
@@ -29,10 +33,10 @@ class Config
      * Get singleton instance
      * @return Config
      */
-    public static function getInstance()
+    public static function getInstance($prod = false)
     {
         if (is_null(self::$instance)) {
-            self::$instance = new Config();
+            self::$instance = new Config($prod);
         }
         return self::$instance;
     }

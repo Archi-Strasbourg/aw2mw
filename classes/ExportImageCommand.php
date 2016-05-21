@@ -20,6 +20,7 @@ class ExportImageCommand extends ExportCommand
      */
     protected function configure()
     {
+        parent::configure();
         $this
             ->setName('export:image')
             ->setDescription('Export one specific image')
@@ -50,7 +51,7 @@ class ExportImageCommand extends ExportCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        parent::setup($output);
+        parent::setup($input, $output);
 
         $id = $input->getArgument('id');
 

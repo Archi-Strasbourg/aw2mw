@@ -16,6 +16,21 @@ use Chain\Chain;
 abstract class ExportCommand extends Command
 {
 
+    /**
+     * Configure command
+     *
+     * @return void
+     */
+    protected function configure()
+    {
+        $this->addOption(
+            'prod',
+            null,
+            InputOption::VALUE_NONE,
+            'Use production server'
+        );
+    }
+
     protected function login($username)
     {
         $password = password_hash(
@@ -79,10 +94,10 @@ abstract class ExportCommand extends Command
         return $date;
     }
 
-    protected function setup($output)
+    protected function setup(InputInterface $input, OutputInterface $output)
     {
         //Instantiate objects
-        $this->config = Config::getInstance();
+        $this->config = Config::getInstance($input->getOption('force'));
         $this->a = new \archiAdresse();
         $this->e = new \archiEvenement();
         $this->u = new \archiUtilisateur();

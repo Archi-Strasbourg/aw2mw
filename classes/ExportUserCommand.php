@@ -20,6 +20,7 @@ class ExportUserCommand extends ExportCommand
      */
     protected function configure()
     {
+        parent::configure();
         $this
             ->setName('export:user')
             ->setDescription('Export one specific user')
@@ -45,7 +46,7 @@ class ExportUserCommand extends ExportCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        parent::setup($output);
+        parent::setup($input, $output);
 
         $id = $input->getArgument('id');
         $user = $this->u->getArrayInfosFromUtilisateur($id);

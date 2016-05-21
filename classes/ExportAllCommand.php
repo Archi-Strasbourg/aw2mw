@@ -15,6 +15,7 @@ class ExportAllCommand extends Command
      */
     protected function configure()
     {
+        parent::configure();
         $this
             ->setName('export:all')
             ->setDescription('Export all data');
