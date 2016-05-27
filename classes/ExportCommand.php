@@ -97,12 +97,7 @@ abstract class ExportCommand extends Command
     protected function setup(InputInterface $input, OutputInterface $output)
     {
         //Instantiate objects
-        if ($input->hasOption('force')) {
-            $force = $input->getOption('force');
-        } else {
-            $force = false;
-        }
-        $this->config = Config::getInstance($force);
+        $this->config = Config::getInstance($input->getOption('prod'));
         $this->a = new \archiAdresse();
         $this->e = new \archiEvenement();
         $this->u = new \archiUtilisateur();
