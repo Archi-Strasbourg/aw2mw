@@ -48,7 +48,7 @@ class ExportAddressCommand extends ExportCommand
         return $return;
     }
 
-    private function exportEvents($events, $pageName, $address = null)
+    private function exportEvents($events, $pageName, $address)
     {
         $content = '';
         $infobox = array();
@@ -471,6 +471,6 @@ class ExportAddressCommand extends ExportCommand
         }
 
         $this->exportEvents($events, $pageName, $address);
-        $this->exportEvents($newsEvents, 'Actualités_adresse:'.$basePageName);
+        $this->exportEvents($newsEvents, 'Actualités_adresse:'.$basePageName, $address);
     }
 }
