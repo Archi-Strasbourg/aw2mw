@@ -287,8 +287,6 @@ class ExportAddressCommand extends ExportCommand
 
                 if (!empty($event['titre'])) {
                     $title = $event['titre'];
-                } elseif ($event['dateDebut']!='0000-00-00') {
-                    $title = $date;
                 } else {
                     $title = $event['nomTypeEvenement'];
                 }
