@@ -209,7 +209,8 @@ class ExportAddressCommand extends ExportCommand
                 $intro .= '|structure'.($i + 1).' = '.$info['structure'].PHP_EOL;
                 $intro .= '|type'.($i + 1).' = '.strtolower($info['type']).PHP_EOL;
                 $intro .= '|numéro = '.$address['numero'].PHP_EOL;
-                $intro .= '|rue = '.$address['prefixeRue']. ' '.$address['nomRue'].PHP_EOL;
+                $intro .= '|rue = '.$address['nomRue'].PHP_EOL;
+                $intro .= '|complément_rue = '.$address['prefixeRue'].PHP_EOL;
                 $intro .= '|ville = '.$address['nomVille'].PHP_EOL;
                 $intro .= '|pays = '.$address['nomPays'].PHP_EOL;
             }
