@@ -64,6 +64,19 @@ class ExportPersonCommand extends ExportCommand
 
         $content = '';
 
+        $relatedPeople = $person->getRelatedPeople($id);
+        if (!empty($relatedPeople)) {
+            $content .= ';Personnes liées :'.PHP_EOL;
+        }
+        foreach ($relatedPeople as $relatedId) {
+            $relatedPerson = new \ArchiPersonne($relatedId);
+            $content .= '* [[Personne:'.$relatedPerson->prenom.' '.$relatedPerson->nom.'|'.
+                $relatedPerson->prenom.' '.$relatedPerson->nom.']]'.PHP_EOL;
+        }
+
+        $sections = array();
+        $sections[0] = $content;
+
         //Create page structure
         foreach ($events as $event) {
             $sql = 'SELECT  hE.idEvenement,
