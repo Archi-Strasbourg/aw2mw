@@ -143,7 +143,7 @@ abstract class ExportCommand extends Command
         $html = implode(PHP_EOL, array_map('trim', explode(PHP_EOL, $html)));
 
         //Convert sources
-        $html = preg_replace('/\s*\(?source\s*:([^)]+)\)?/i', '<ref>$1</ref>'.PHP_EOL, $html);
+        $html = preg_replace('/\s*\(?source\s*:([^)]+)\)?/i', '<ref>$1</ref>', $html);
 
         return $html;
     }
