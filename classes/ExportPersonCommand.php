@@ -154,9 +154,9 @@ class ExportPersonCommand extends ExportCommand
                         WHERE hE.idHistoriqueEvenement = '.mysql_real_escape_string($fetch['idHistoriqueEvenement']).'
                 ORDER BY hE.idHistoriqueEvenement DESC';
 
-                $event = mysql_fetch_assoc($this->e->connexionBdd->requete($sql));
+                $eventInfo = mysql_fetch_assoc($this->e->connexionBdd->requete($sql));
 
-                $user = $this->u->getArrayInfosFromUtilisateur($event['idUtilisateur']);
+                $user = $this->u->getArrayInfosFromUtilisateur($eventInfo['idUtilisateur']);
 
                 //Login as user
                 if (!empty($user['nom'])) {
@@ -167,21 +167,25 @@ class ExportPersonCommand extends ExportCommand
 
 
                 $content = '';
-                $date = $this->convertDate($event['dateDebut'], $event['dateFin'], $event['isDateDebutEnviron']);
+                $date = $this->convertDate(
+                    $eventInfo['dateDebut'],
+                    $eventInfo['dateFin'],
+                    $eventInfo['isDateDebutEnviron']
+                );
 
-                if (!empty($event['titre'])) {
-                    $title = $event['titre'];
-                } elseif (!empty($event['nomTypeEvenement'])) {
-                    $title = $event['nomTypeEvenement'];
+                if (!empty($eventInfo['titre'])) {
+                    $title = $eventInfo['titre'];
+                } elseif (!empty($eventInfo['nomTypeEvenement'])) {
+                    $title = $eventInfo['nomTypeEvenement'];
                 } else {
                     $title = 'Biographie';
                 }
 
-                if ($event['idSource'] > 0) {
+                if ($eventInfo['idSource'] > 0) {
                     $sourceName = $this->s->getSourceLibelle($event['idSource']);
                     $title .= '<ref>[[Source:'.$sourceName.'|'.$sourceName.']]</ref>';
                 }
-                if (!empty($event['numeroArchive'])) {
+                if (!empty($eventInfo['numeroArchive'])) {
                     $sourceName = $this->s->getSourceLibelle(24);
                     $title .= '<ref>[[Source:'.$sourceName.'|'.$sourceName.']] - Cote '.
                         $event['numeroArchive'].'</ref>';
@@ -191,7 +195,7 @@ class ExportPersonCommand extends ExportCommand
                 $content .= '=='.$title.'=='.PHP_EOL;
 
                 $html = $this->convertHtml(
-                    $this->bbCode->convertToDisplay(array('text'=>$event['description']))
+                    $this->bbCode->convertToDisplay(array('text'=>$eventInfo['description']))
                 );
 
 
@@ -205,13 +209,100 @@ class ExportPersonCommand extends ExportCommand
                             'text'=>$content,
                             'section'=>$section + 1,
                             'bot'=>true,
-                            'summary'=>'Révision du '.$event['dateCreationEvenement'].' importée depuis Archi-Wiki',
+                            'summary'=>'Révision du '.$eventInfo['dateCreationEvenement'].
+                                ' importée depuis Archi-Wiki',
                             'token'=>$this->api->getToken()
                         )
                     )
                 );
                 $sections[$section + 1] = $content;
             }
+
+            $linkedEvents=$person->getEvenementsLies($id, $eventInfo['dateDebut'], 3000);
+            if (!empty($linkedEvents)) {
+                $html = '=== Adresses liées ==='.PHP_EOL;
+            }
+            foreach ($linkedEvents as $linkedEvent) {
+                $req = "
+                    SELECT titre, dateDebut, idTypeEvenement
+                    FROM historiqueEvenement
+                    WHERE idEvenement = '".$linkedEvent."'
+                    ORDER BY idHistoriqueEvenement DESC
+                ";
+
+                $resEvent = $config->connexionBdd->requete($req);
+                $linkedEventInfo=mysql_fetch_object($resEvent);
+
+                $linkedEventAddress=$this->a->getIntituleAdresseFrom(
+                    $linkedEvent,
+                    "idEvenement",
+                    array(
+                        'noHTML'=>true, 'noQuartier'=>true, 'noSousQuartier'=>true, 'noVille'=>true,
+                        'displayFirstTitreAdresse'=>true,
+                        'setSeparatorAfterTitle'=>'_'
+                    )
+                );
+
+                if (!empty($linkedEventAddress)) {
+                    $req = "
+                            SELECT  idAdresse
+                            FROM _adresseEvenement
+                            WHERE idEvenement = ".
+                            $this->e->getIdEvenementGroupeAdresseFromIdEvenement($linkedEvent);
+                    $resAddress = $config->connexionBdd->requete($req);
+                    $fetchAddress = mysql_fetch_object($resAddress);
+                    if (isset($fetchAddress->idAdresse)) {
+                        $linkedEventIdAddress=$fetchAddress->idAdresse;
+                        $address = $this->a->getArrayAdresseFromIdAdresse($input->getArgument('id'));
+                        $city = $address['nomVille'];
+                    }
+                }
+
+                $linkedEventImg=$this->a->getUrlImageFromEvenement($linkedEvent, "mini");
+                if ($linkedEventImg["url"]==$config->getUrlImage("", "transparent.gif")) {
+                    $linkedEventImg=$this->a->getUrlImageFromAdresse($linkedEventIdAddress, "mini");
+                }
+                $linkedEventUrl=$config->creerUrl(
+                    "",
+                    "adresseDetail",
+                    array("archiIdAdresse"=>$linkedEventIdAddress, "archiIdEvenementGroupeAdresse"=>$linkedEvent)
+                );
+                $html .= '{{Adresse liée
+                    |adresse='.$linkedEventAddress.' ('.$city.')'.PHP_EOL;
+                $reqImage = 'SELECT idImage FROM historiqueImage
+                    WHERE idHistoriqueImage = '.mysql_real_escape_string($linkedEventImg['idHistoriqueImage']).'
+                    ORDER BY idHistoriqueImage DESC LIMIT 1';
+                $resImage = $config->connexionBdd->requete($reqImage);
+                $imageInfo = mysql_fetch_object($resImage);
+                if (isset($imageInfo->idImage)) {
+                    $command = $this->getApplication()->find('export:image');
+                    $command->run(
+                        new ArrayInput(array('id'=>$imageInfo->idImage)),
+                        $this->output
+                    );
+                    $filename = $imageInfo->idImage.'-import.jpg';
+                    $html .= '|photo='.$filename.PHP_EOL;
+                }
+                if ($linkedEventInfo->dateDebut != "0000-00-00") {
+                    $html .= '|date='.$config->date->toFrench($linkedEventInfo->dateDebut).PHP_EOL;
+                }
+                $html .= '}}'.PHP_EOL;
+            }
+            $this->api->postRequest(
+                new Api\SimpleRequest(
+                    'edit',
+                    array(
+                        'title'=>$pageName,
+                        'md5'=>md5($html),
+                        'text'=>$html,
+                        'section'=>$section + 1,
+                        'bot'=>true,
+                        'summary'=>'Importation des adresses liées depuis Archi-Wiki',
+                        'token'=>$this->api->getToken()
+                    )
+                )
+            );
+            $sections[$section + 1] .= $html;
         }
 
         $sections[] = $references;
