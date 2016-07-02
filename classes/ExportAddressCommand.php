@@ -504,17 +504,7 @@ class ExportAddressCommand extends ExportCommand
         }
         $city = $this->a->getInfosVille($address['idVille']);
 
-        $basePageName = strip_tags(
-            $this->a->getIntituleAdresseFrom(
-                $input->getArgument('id'),
-                'idAdresse',
-                array(
-                    'noHTML'=>true, 'noQuartier'=>true, 'noSousQuartier'=>true, 'noVille'=>true,
-                    'displayFirstTitreAdresse'=>true,
-                    'setSeparatorAfterTitle'=>'#'
-                )
-            )
-        ).'_('.$address['nomVille'].')';
+        $basePageName = $this->getAddressName($input->getArgument('id'), $address['nomVille']);
 
         $pageName = 'Adresse:'.$basePageName;
 

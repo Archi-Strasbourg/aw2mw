@@ -147,4 +147,21 @@ abstract class ExportCommand extends Command
 
         return $html;
     }
+
+    protected function getAddressName($id, $city)
+    {
+        $return = strip_tags(
+            $this->a->getIntituleAdresseFrom(
+                $id,
+                'idAdresse',
+                array(
+                    'noHTML'=>true, 'noQuartier'=>true, 'noSousQuartier'=>true, 'noVille'=>true,
+                    'displayFirstTitreAdresse'=>true,
+                    'setSeparatorAfterTitle'=>'#'
+                )
+            )
+        ).' ('.$city.')';
+        $return = explode('#', $return);
+        return $return[0];
+    }
 }
