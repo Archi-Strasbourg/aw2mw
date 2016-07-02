@@ -179,10 +179,6 @@ class ExportAddressCommand extends ExportCommand
             //Add References section
             $references = PHP_EOL.'==Références=='.PHP_EOL.'<references />'.PHP_EOL;
             $content .= $references;
-
-            //Add Categories section
-            $categories = '[[Catégorie:'.$address['prefixeRue']. ' '.$address['nomRue'].']]'.PHP_EOL;
-            $content .= $categories;
         }
 
 
@@ -378,7 +374,6 @@ class ExportAddressCommand extends ExportCommand
         if (!$isNews) {
             $sections[] = $otherImages;
             $sections[] = $references;
-            $sections[] = $categories;
         }
 
         //Login with bot
