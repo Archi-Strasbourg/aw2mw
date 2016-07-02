@@ -425,7 +425,7 @@ class ExportAddressCommand extends ExportCommand
         $events = array();
 
         $requete ="
-            SELECT evt.idEvenement, pe.idEvenement, pe.position
+            SELECT DISTINCT evt.idEvenement, pe.idEvenement, pe.position
             FROM evenements evt
             LEFT JOIN _evenementEvenement ee on ee.idEvenement = ".
                 mysql_real_escape_string($groupInfo['idEvenementGroupeAdresse']).
