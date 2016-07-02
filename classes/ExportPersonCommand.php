@@ -239,7 +239,7 @@ class ExportPersonCommand extends ExportCommand
             }
             foreach ($linkedEvents as $linkedEvent) {
                 $req = "
-                    SELECT titre, dateDebut, idTypeEvenement
+                    SELECT titre, dateDebut, dateFin, idTypeEvenement
                     FROM historiqueEvenement
                     WHERE idEvenement = '".$linkedEvent."'
                     ORDER BY idHistoriqueEvenement DESC
@@ -299,7 +299,12 @@ class ExportPersonCommand extends ExportCommand
                     $html .= '|photo='.$filename.PHP_EOL;
                 }
                 if ($linkedEventInfo->dateDebut != "0000-00-00") {
-                    $html .= '|date='.$config->date->toFrench($linkedEventInfo->dateDebut).PHP_EOL;
+                    if ($linkedEventInfo->dateFin != "0000-00-00") {
+                        $linkedDate = $linkedEventInfo->dateFin;
+                    } else {
+                        $linkedDate = $linkedEventInfo->dateDebut;
+                    }
+                    $html .= '|date='.$config->date->toFrench($linkedDate).PHP_EOL;
                 }
                 $html .= '}}'.PHP_EOL;
             }
