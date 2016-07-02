@@ -173,8 +173,8 @@ class ExportAddressCommand extends ExportCommand
                 $otherAddresses = array();
                 while ($otherAddress = mysql_fetch_assoc($resPriseDepuis)) {
                     $otherAddress = $this->a->getArrayAdresseFromIdAdresse($otherAddress['idAdresse']);
-                    $otherAddress['nom'] = trim($otherAddress['nom']);
-                    $otherAddresses[] = ' [[Adresse:'.$otherAddress['nom'].'|'.$otherAddress['nom'].']]';
+                    $otherAddressName = $this->getAddressName($otherAddress['idAdresse']);
+                    $otherAddresses[] = ' [[Adresse:'.$otherAddressName.'|'.$otherAddressName.']]';
                 }
                 $fetchPhotos['description'] .= implode(', ', $otherAddresses);
                 $otherImagesInfo[] = $fetchPhotos;
@@ -506,7 +506,7 @@ class ExportAddressCommand extends ExportCommand
         }
         $city = $this->a->getInfosVille($address['idVille']);
 
-        $basePageName = $this->getAddressName($input->getArgument('id'), $address['nomVille']);
+        $basePageName = $this->getAddressName($input->getArgument('id'));
 
         $pageName = 'Adresse:'.$basePageName;
 

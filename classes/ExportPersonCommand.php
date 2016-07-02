@@ -283,7 +283,7 @@ class ExportPersonCommand extends ExportCommand
                     array("archiIdAdresse"=>$linkedEventIdAddress, "archiIdEvenementGroupeAdresse"=>$linkedEvent)
                 );
                 $html .= '{{Adresse liée
-                    |adresse='.$this->getAddressName($linkedEventIdAddress, $city).PHP_EOL;
+                    |adresse='.$this->getAddressName($linkedEventIdAddress).PHP_EOL;
                 $reqImage = 'SELECT idImage FROM historiqueImage
                     WHERE idHistoriqueImage = '.mysql_real_escape_string($linkedEventImg['idHistoriqueImage']).'
                     ORDER BY idHistoriqueImage DESC LIMIT 1';

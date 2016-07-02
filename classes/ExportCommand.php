@@ -148,8 +148,9 @@ abstract class ExportCommand extends Command
         return $html;
     }
 
-    protected function getAddressName($id, $city)
+    protected function getAddressName($id)
     {
+        $addressInfo = $this->a->getArrayAdresseFromIdAdresse($id);
         $return = strip_tags(
             $this->a->getIntituleAdresseFrom(
                 $id,
@@ -160,7 +161,7 @@ abstract class ExportCommand extends Command
                     'setSeparatorAfterTitle'=>'#'
                 )
             )
-        ).' ('.$city.')';
+        ).' ('.$addressInfo['nomVille'].')';
         $return = explode('#', $return);
         return $return[0];
     }
