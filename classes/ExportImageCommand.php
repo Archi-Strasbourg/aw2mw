@@ -91,7 +91,7 @@ class ExportImageCommand extends ExportCommand
             }
         }
 
-        $filename = $image['idImage'].'-import.jpg';
+        $filename = $this->getImageName($image['idImage']);
         $imagePage = $this->services->newPageGetter()->getFromTitle('File:'.$filename);
         $output->writeln('<info>Exporting "File:'.$filename.'"…</info>');
         if ($imagePage->getPageIdentifier()->getId() == 0 || $input->getOption('force')) {

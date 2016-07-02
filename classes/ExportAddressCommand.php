@@ -41,7 +41,7 @@ class ExportAddressCommand extends ExportCommand
                 new ArrayInput(array('id'=>$image['idImage'])),
                 $this->output
             );
-            $filename = $image['idImage'].'-import.jpg';
+            $filename = $this->getImageName($image['idImage']);
             $description = strip_tags(
                 $this->convertHtml(
                     $this->bbCode->convertToDisplay(array('text'=>$image['description']))

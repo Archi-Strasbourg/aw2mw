@@ -295,7 +295,7 @@ class ExportPersonCommand extends ExportCommand
                         new ArrayInput(array('id'=>$imageInfo->idImage)),
                         $this->output
                     );
-                    $filename = $imageInfo->idImage.'-import.jpg';
+                    $filename = $this->getImageName($imageInfo->idImage);
                     $html .= '|photo='.$filename.PHP_EOL;
                 }
                 if ($linkedEventInfo->dateDebut != "0000-00-00") {

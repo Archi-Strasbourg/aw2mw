@@ -165,4 +165,13 @@ abstract class ExportCommand extends Command
         $return = explode('#', $return);
         return $return[0];
     }
+
+    protected function getImageName($id)
+    {
+        $addressInfo = $this->a->getArrayAdresseFromIdAdresse($this->i->getIdAdresseFromIdImage($id));
+        if ($addressInfo['numero'] == 0) {
+            $addressInfo['numero'] = '';
+        }
+        return trim($addressInfo['numero'].' '.$addressInfo['prefixeRue'].' '.$addressInfo['nomRue'].' '.$addressInfo['nomVille'].' '.$id.'.jpg');
+    }
 }
