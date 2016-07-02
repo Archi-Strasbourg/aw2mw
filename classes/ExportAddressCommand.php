@@ -511,7 +511,7 @@ class ExportAddressCommand extends ExportCommand
                 array(
                     'noHTML'=>true, 'noQuartier'=>true, 'noSousQuartier'=>true, 'noVille'=>true,
                     'displayFirstTitreAdresse'=>true,
-                    'setSeparatorAfterTitle'=>'_'
+                    'setSeparatorAfterTitle'=>'#'
                 )
             )
         ).'_('.$address['nomVille'].')';
