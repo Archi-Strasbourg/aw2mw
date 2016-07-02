@@ -303,9 +303,17 @@ class ExportAddressCommand extends ExportCommand
                 $intro .= '|structure'.($i + 1).' = '.$info['structure'].PHP_EOL;
                 $intro .= '|type'.($i + 1).' = '.strtolower($info['type']).PHP_EOL;
             }
-            $intro .= '|numéro = '.$address['numero'].PHP_EOL;
-            $intro .= '|rue = '.$address['nomRue'].PHP_EOL;
-            $intro .= '|complément_rue = '.$address['prefixeRue'].PHP_EOL;
+            $resAddressGroup = $this->a->getAdressesFromEvenementGroupeAdresses(
+                $this->a->getIdEvenementGroupeAdresseFromIdAdresse($address['idAdresse'])
+            );
+            while ($fetchAddressGroup= mysql_fetch_assoc($resAddressGroup)) {
+                $addresses[] = $fetchAddressGroup;
+            }
+            foreach ($addresses as $i => $subAddress) {
+                $intro .= '|numéro'.($i + 1).' = '.$subAddress['numero'].PHP_EOL;
+                $intro .= '|rue'.($i + 1).' = '.$subAddress['nomRue'].PHP_EOL;
+                $intro .= '|complément_rue'.($i + 1).' = '.$subAddress['prefixeRue'].PHP_EOL;
+            }
             $intro .= '|ville = '.$address['nomVille'].PHP_EOL;
             $intro .= '|pays = '.$address['nomPays'].PHP_EOL;
             if (isset($txtAdresses)) {
