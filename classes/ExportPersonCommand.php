@@ -64,16 +64,6 @@ class ExportPersonCommand extends ExportCommand
 
         $content = '';
 
-        $relatedPeople = $person->getRelatedPeople($id);
-        if (!empty($relatedPeople)) {
-            $content .= ';Personnes liées :'.PHP_EOL;
-        }
-        foreach ($relatedPeople as $relatedId) {
-            $relatedPerson = new \ArchiPersonne($relatedId);
-            $content .= '* [[Personne:'.$relatedPerson->prenom.' '.$relatedPerson->nom.'|'.
-                $relatedPerson->prenom.' '.$relatedPerson->nom.']]'.PHP_EOL;
-        }
-
         $sections = array();
         $sections[0] = $content;
 
@@ -123,6 +113,18 @@ class ExportPersonCommand extends ExportCommand
             $title = stripslashes($title);
             $content .= '=='.$title.'=='.PHP_EOL;
         }
+
+        $relatedPeople = $person->getRelatedPeople($id);
+        if (!empty($relatedPeople)) {
+            $relatedPeopleContent = '==Personnes liées=='.PHP_EOL;
+        }
+        foreach ($relatedPeople as $relatedId) {
+            $relatedPerson = new \ArchiPersonne($relatedId);
+            $relatedPeopleContent .= '* [[Personne:'.$relatedPerson->prenom.' '.$relatedPerson->nom.'|'.
+                $relatedPerson->prenom.' '.$relatedPerson->nom.']]'.PHP_EOL;
+        }
+
+        $content .= $relatedPeopleContent;
 
         $references = PHP_EOL.'==Références=='.PHP_EOL.'<references />'.PHP_EOL;
         $content .= $references;
@@ -318,6 +320,7 @@ class ExportPersonCommand extends ExportCommand
             $sections[$section + 1] .= $html;
         }
 
+        $sections[] = $relatedPeopleContent;
         $sections[] = $references;
 
         //Login with bot
