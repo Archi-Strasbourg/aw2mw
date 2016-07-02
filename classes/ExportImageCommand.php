@@ -135,10 +135,13 @@ class ExportImageCommand extends ExportCommand
         }
         $licence = $this->i->getLicence($image['idImage']);
         $this->login('aw2mw bot');
+        $description = $this->convertHtml(
+            $this->bbCode->convertToDisplay(array('text'=>$image['description']))
+        );
         $this->savePage(
             'File:'.$filename,
             '{{Infobox image
-            |description='.$image['description'].'
+            |description='.$description.'
             |date='.$image['dateCliche'].'
             |auteur='.$image['auteur'].'
             |licence = {{Modèle:'.$licence['name'].'}}
