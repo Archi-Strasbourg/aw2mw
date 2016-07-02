@@ -155,7 +155,8 @@ class ExportAddressCommand extends ExportCommand
 
             $resPhotos = $this->i->connexionBdd->requete($reqPhotos);
 
-            $otherImages = array();
+            $otherImagesInfo = array();
+            $otherImages = '';
             while ($fetchPhotos = mysql_fetch_assoc($resPhotos)) {
                 $reqPriseDepuis = "SELECT ai.idAdresse,  ai.idEvenementGroupeAdresse
                                     FROM _adresseImage ai
@@ -171,10 +172,13 @@ class ExportAddressCommand extends ExportCommand
                     $otherAddresses[] = ' [[Adresse:'.$otherAddress['nom'].'|'.$otherAddress['nom'].']]';
                 }
                 $fetchPhotos['description'] .= implode(', ', $otherAddresses);
-                $otherImages[] = $fetchPhotos;
+                $otherImagesInfo[] = $fetchPhotos;
             }
-            $otherImages = PHP_EOL.'==Vues prises depuis cette adresse=='.PHP_EOL.$this->createGallery($otherImages);
-            $content .= $otherImages;
+            if (!empty($otherImagesInfo)) {
+                $otherImages = PHP_EOL.'==Vues prises depuis cette adresse=='.PHP_EOL.
+                    $this->createGallery($otherImagesInfo);
+                $content .= $otherImages;
+            }
 
             //Add References section
             $references = PHP_EOL.'==Références=='.PHP_EOL.'<references />'.PHP_EOL;
