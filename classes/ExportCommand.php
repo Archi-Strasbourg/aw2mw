@@ -186,6 +186,9 @@ abstract class ExportCommand extends Command
         if ($addressInfo['numero'] == 0) {
             $addressInfo['numero'] = '';
         }
-        return trim($addressInfo['numero'].' '.$addressInfo['prefixeRue'].' '.$addressInfo['nomRue'].' '.$addressInfo['nomVille'].' '.$id.'.jpg');
+        return trim(
+            $addressInfo['numero'].' '.$addressInfo['prefixeRue'].' '.
+            $addressInfo['nomRue'].' '.$addressInfo['nomVille'].' '.$id.'.jpg'
+        );
     }
 }
