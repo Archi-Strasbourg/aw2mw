@@ -389,7 +389,7 @@ class ExportAddressCommand extends ExportCommand
                 if (!empty($event['titre'])) {
                     $title = $event['titre'];
                 } else {
-                    $title = $event['nomTypeEvenement'];
+                    $title = str_replace('(Nouveautés)', '', $event['nomTypeEvenement']);
                 }
 
                 if ($event['idSource'] > 0) {
@@ -558,6 +558,7 @@ class ExportAddressCommand extends ExportCommand
         }
 
         $this->exportEvents($events, $pageName, $address);
+        $newsEvents = array_reverse($newsEvents);
         $this->exportEvents($newsEvents, 'Actualités_adresse:'.$basePageName, $address);
     }
 }
