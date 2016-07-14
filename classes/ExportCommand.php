@@ -145,6 +145,20 @@ abstract class ExportCommand extends Command
         //Convert sources
         $html = preg_replace('/\s*\(?source\s*:([^)]+)\)?/i', '<ref>$1</ref>', $html);
 
+        //Replace old domain
+        $html = str_replace('archi-strasbourg.org', 'archi-wiki.org', $html);
+
+        //Convert URLs
+        preg_match_all(
+            '#\[http:\/\/www.archi-wiki.org\/adresse-(.+)-([0-9]+)\.html\?[a-zA-z0-9=&\#]+\s([\s\w°]+)\]#i',
+            $html,
+            $matches,
+            PREG_SET_ORDER
+        );
+        foreach ($matches as $match) {
+            $html = str_replace($match[0], '[[Adresse:'.$this->getAddressName($match[2]).'|'.$match[3].']]', $html);
+        }
+
         return $html;
     }
 
