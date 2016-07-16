@@ -328,6 +328,17 @@ class ExportAddressCommand extends ExportCommand
                     'format'=>'grand'
                 )
             );
+            if (!$mainImageInfo['trouve']) {
+                $mainImageInfo = $this->a->getUrlImageFromAdresse($address['idAdresse']);
+                $reqImages = "
+                    SELECT idImage
+                    FROM historiqueImage
+                    WHERE idHistoriqueImage = '".mysql_real_escape_string($mainImageInfo['idHistoriqueImage'])."'
+                    ";
+
+                $resImages = $this->i->connexionBdd->requete($reqImages);
+                $mainImageInfo = mysql_fetch_assoc($resImages);
+            }
             $command = $this->getApplication()->find('export:image');
             $command->run(
                 new ArrayInput(array('id'=>$mainImageInfo['idImage'])),
