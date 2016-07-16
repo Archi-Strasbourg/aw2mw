@@ -49,11 +49,6 @@ class ExportStreetCommand extends ExportCommand
         } else {
             $pageName = 'Catégorie:'.$subdistrict['nom'];
             $this->output->writeln('<info>Exporting "'.$pageName.'"…</info>');
-            $this->loginAsAdmin();
-            $this->deletePage($pageName);
-
-            //Login as bot
-            $this->login('aw2mw bot');
 
             $html = '{{Infobox sous-quartier}}'.PHP_EOL.
                 '[[Catégorie:'.$district['nom'].']]';
@@ -81,11 +76,6 @@ class ExportStreetCommand extends ExportCommand
         } else {
             $pageName = 'Catégorie:'.$district['nom'];
             $this->output->writeln('<info>Exporting "'.$pageName.'"…</info>');
-            $this->loginAsAdmin();
-            $this->deletePage($pageName);
-
-            //Login as bot
-            $this->login('aw2mw bot');
 
             $html = '{{Infobox quartier}}'.PHP_EOL.
                 '[[Catégorie:'.$city['nom'].']]';
@@ -110,11 +100,6 @@ class ExportStreetCommand extends ExportCommand
 
         $pageName = 'Catégorie:'.$city['nom'];
         $this->output->writeln('<info>Exporting "'.$pageName.'"…</info>');
-        $this->loginAsAdmin();
-        $this->deletePage($pageName);
-
-        //Login as bot
-        $this->login('aw2mw bot');
 
         $html = '{{Infobox ville}}'.PHP_EOL.
             '[[Catégorie:'.$country['nom'].']]';
@@ -136,9 +121,6 @@ class ExportStreetCommand extends ExportCommand
 
         $pageName = 'Catégorie:'.$country['nom'];
         $this->output->writeln('<info>Exporting "'.$pageName.'"…</info>');
-
-        //Login as bot
-        $this->login('aw2mw bot');
 
         $html = '{{Infobox pays}}'.PHP_EOL.
             '[[Catégorie:Pays]]';
@@ -169,22 +151,23 @@ class ExportStreetCommand extends ExportCommand
 
         $resStreet = $this->a->connexionBdd->requete($reqStreet);
         $street = mysql_fetch_assoc($resStreet);
-        if ($street) {
+        if ($street && !empty($street['nom'])) {
             $pageName = 'Catégorie:'.$street['prefixe'].' '.$street['nom'];
+            $pageName = str_replace("l' ", "l'", $pageName);
 
             $output->writeln('<info>Exporting "'.$pageName.'"…</info>');
+
+            //Login as bot
+            $this->login('aw2mw bot');
 
             $subdistrict = $this->exportSubdistrict($street['idSousQuartier']);
 
             $html = '{{Infobox rue}}'.PHP_EOL.
                 '[[Catégorie:'.$subdistrict['nom'].'|'.$street['nom'].'|]]';
 
-            //Login as bot
-            $this->login('aw2mw bot');
-
             $this->savePage($pageName, $html, 'Rue importée depuis Archi-Wiki');
         } else {
-            throw new \Exception("Can't find this street");
+            $output->writeln('<error>Can\'t find this street: '.$id.'</error>');
         }
     }
 }

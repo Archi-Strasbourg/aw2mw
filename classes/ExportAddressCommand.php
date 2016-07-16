@@ -312,7 +312,9 @@ class ExportAddressCommand extends ExportCommand
                 $addresses[] = $fetchAddressGroup;
             }
             foreach ($addresses as $i => $subAddress) {
-                $intro .= '|numéro'.($i + 1).' = '.$subAddress['numero'].PHP_EOL;
+                if ($subAddress['numero'] > 0) {
+                    $intro .= '|numéro'.($i + 1).' = '.$subAddress['numero'].PHP_EOL;
+                }
                 $intro .= '|rue'.($i + 1).' = '.$subAddress['nomRue'].PHP_EOL;
                 $intro .= '|complément_rue'.($i + 1).' = '.$subAddress['prefixeRue'].PHP_EOL;
             }
@@ -534,6 +536,7 @@ class ExportAddressCommand extends ExportCommand
         $basePageName = $this->getAddressName($input->getArgument('id'));
 
         $pageName = 'Adresse:'.$basePageName;
+        $pageName = str_replace("l' ", "l'", $pageName);
 
         $groupInfo = mysql_fetch_assoc($this->a->getIdEvenementsFromAdresse($input->getArgument('id')));
 

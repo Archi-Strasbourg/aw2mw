@@ -41,12 +41,16 @@ abstract class ExportCommand extends Command
         try {
             $this->api->login(new Api\ApiUser($username, $password));
         } catch (Api\UsageException $error) {
-            //No email for now
-            $this->services->newUserCreator()->create(
-                $username,
-                $password
-            );
-            $this->api->login(new Api\ApiUser($username, $password));
+            try {
+                //No email for now
+                $this->services->newUserCreator()->create(
+                    $username,
+                    $password
+                );
+                $this->api->login(new Api\ApiUser($username, $password));
+            } catch (Api\UsageException $error) {
+                $this->login('aw2mw bot');
+            }
         }
     }
 
