@@ -6,6 +6,7 @@ use AW2MW\ExportSourceCommand;
 use AW2MW\ExportImageCommand;
 use AW2MW\ExportUserCommand;
 use AW2MW\ExportPersonCommand;
+use AW2MW\ExportStreetCommand;
 use Symfony\Component\Console\Application;
 
 $application = new Application();
@@ -15,4 +16,5 @@ $application->add(new ExportSourceCommand());
 $application->add(new ExportImageCommand());
 $application->add(new ExportUserCommand());
 $application->add(new ExportPersonCommand());
+$application->add(new ExportStreetCommand());
 $application->run();
