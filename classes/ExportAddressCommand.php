@@ -134,7 +134,11 @@ class ExportAddressCommand extends ExportCommand
 
             $info['type'] = $event['nomTypeEvenement'];
             $info['structure'] = $event['nomTypeStructure'];
-            $info['date'] = $this->convertDate($event['dateDebut'], $event['dateFin'], $event['isDateDebutEnviron']);
+            $info['date'] = array(
+                'pretty'=>$this->convertDate($event['dateDebut'], $event['dateFin'], $event['isDateDebutEnviron']),
+                'start'=>$event['dateDebut'],
+                'end'=>$event['dateFin']
+            );
 
             foreach ($people as $person) {
                 $info['people'][$person->metier] = $person->prenom.' '.$person->nom;
@@ -292,11 +296,9 @@ class ExportAddressCommand extends ExportCommand
                 foreach ($info['people'] as $job => $name) {
                     $intro .= '|'.$job.($i + 1).' = '.$name.PHP_EOL;
                 }
-                if (strlen($info['date']) == 4) {
-                    $intro .= '|année'.($i + 1).' = '.$info['date'].PHP_EOL;
-                } else {
-                    $intro .= '|date'.($i + 1).' = '.$info['date'].PHP_EOL;
-                }
+                $intro .= '|date'.($i + 1).'_afficher = '.$info['date']['pretty'].PHP_EOL;
+                $intro .= '|date'.($i + 1).'_début = '.$info['date']['start'].PHP_EOL;
+                $intro .= '|date'.($i + 1).'_fin = '.$info['date']['end'].PHP_EOL;
                 if ($i > 0 && $info['structure'] == $infobox[$i-1]['structure']) {
                     $info['structure'] = '';
                 }
