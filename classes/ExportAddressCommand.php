@@ -321,6 +321,20 @@ class ExportAddressCommand extends ExportCommand
             if (isset($txtAdresses)) {
                 $intro .= '|nom_complet = '.$txtAdresses.PHP_EOL;
             }
+            $mainImageInfo = $this->i->getArrayInfosImagePrincipaleFromIdGroupeAdresse(
+                array(
+                    'idEvenementGroupeAdresse'=>
+                        $this->a->getIdEvenementGroupeAdresseFromIdAdresse($address['idAdresse']),
+                    'format'=>'grand'
+                )
+            );
+            $command = $this->getApplication()->find('export:image');
+            $command->run(
+                new ArrayInput(array('id'=>$mainImageInfo['idImage'])),
+                $this->output
+            );
+            $filename = $this->getImageName($mainImageInfo['idImage']);
+            $intro .= '|photo = '.$filename.PHP_EOL;
             $intro .= '}}'.PHP_EOL.PHP_EOL;
             $sections[0] = $intro;
 
