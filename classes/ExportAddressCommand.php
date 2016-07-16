@@ -534,9 +534,10 @@ class ExportAddressCommand extends ExportCommand
         $city = $this->a->getInfosVille($address['idVille']);
 
         $basePageName = $this->getAddressName($input->getArgument('id'));
+        $basePageName = str_replace("l' ", "l'", $basePageName);
+        $basePageName = str_replace("d' ", "d'", $basePageName);
 
         $pageName = 'Adresse:'.$basePageName;
-        $pageName = str_replace("l' ", "l'", $pageName);
 
         $groupInfo = mysql_fetch_assoc($this->a->getIdEvenementsFromAdresse($input->getArgument('id')));
 

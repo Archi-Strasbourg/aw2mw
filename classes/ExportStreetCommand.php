@@ -154,6 +154,7 @@ class ExportStreetCommand extends ExportCommand
         if ($street && !empty($street['nom'])) {
             $pageName = 'Catégorie:'.$street['prefixe'].' '.$street['nom'];
             $pageName = str_replace("l' ", "l'", $pageName);
+            $pageName = str_replace("d' ", "d'", $pageName);
 
             $output->writeln('<info>Exporting "'.$pageName.'"…</info>');
 
