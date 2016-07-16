@@ -132,7 +132,7 @@ class ExportAddressCommand extends ExportCommand
                 )
             );
 
-            $info['type'] = $event['nomTypeEvenement'];
+            $info['type'] = str_replace('(Nouveautés)', '', $event['nomTypeEvenement']);
             $info['structure'] = $event['nomTypeStructure'];
             $info['date'] = array(
                 'pretty'=>$this->convertDate($event['dateDebut'], $event['dateFin'], $event['isDateDebutEnviron']),
