@@ -538,6 +538,7 @@ class ExportAddressCommand extends ExportCommand
         $groupInfo = mysql_fetch_assoc($this->a->getIdEvenementsFromAdresse($input->getArgument('id')));
 
         $events = array();
+        $newsEvents = array();
 
         $requete ="
             SELECT DISTINCT evt.idEvenement, pe.idEvenement, pe.position
