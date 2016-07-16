@@ -409,16 +409,6 @@ class ExportAddressCommand extends ExportCommand
                     $content .= '{{Infobox actualité'.PHP_EOL.
                     '|date = '.$date.PHP_EOL.
                     '}}'.PHP_EOL;
-                } else {
-                    $content .= '{{Infobox événement'.PHP_EOL;
-                    if (strlen($date) == 4) {
-                        $content .= '|année = '.$date.PHP_EOL;
-                    } else {
-                        $content .= '|date = '.$date.PHP_EOL;
-                    }
-                    $content .= '|type = '.strtolower($event['nomTypeEvenement']).PHP_EOL;
-                    $content .= '|structure = '.strtolower($event['nomTypeStructure']).PHP_EOL;
-                    $content .= '}}'.PHP_EOL;
                 }
 
                 $html = $this->convertHtml(
