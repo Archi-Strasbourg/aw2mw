@@ -151,6 +151,7 @@ class ExportStreetCommand extends ExportCommand
 
         $resStreet = $this->a->connexionBdd->requete($reqStreet);
         $street = mysql_fetch_assoc($resStreet);
+        $street['nom'] = trim($street['nom']);
         if ($street && !empty($street['nom'])) {
             $pageName = 'Catégorie:'.$street['prefixe'].' '.$street['nom'];
             $pageName = str_replace("l' ", "l'", $pageName);
