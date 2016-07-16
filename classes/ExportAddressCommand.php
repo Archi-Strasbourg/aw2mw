@@ -550,7 +550,6 @@ class ExportAddressCommand extends ExportCommand
         }
 
         $this->exportEvents($events, $pageName, $address);
-        $newsEvents = array_reverse($newsEvents);
         $this->exportEvents($newsEvents, 'Actualités_adresse:'.$basePageName, $address);
     }
 }
