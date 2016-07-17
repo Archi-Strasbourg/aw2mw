@@ -54,7 +54,7 @@ class ExportStreetCommand extends ExportCommand
 
             $html = '{{Infobox sous-quartier}}'.PHP_EOL.
                 '[[Catégorie:'.$district['nom'].']]';
-            $this->savePage($pageName, $html, 'Sous-qartier importée depuis Archi-Wiki');
+            $this->savePage($pageName, $html, 'Sous-quartier importé depuis Archi-Wiki');
 
             return $subdistrict;
         }
@@ -84,7 +84,7 @@ class ExportStreetCommand extends ExportCommand
 
             $html = '{{Infobox quartier}}'.PHP_EOL.
                 '[[Catégorie:'.$city['nom'].']]';
-            $this->savePage($pageName, $html, 'Quartier importée depuis Archi-Wiki');
+            $this->savePage($pageName, $html, 'Quartier importé depuis Archi-Wiki');
 
             return $district;
         }
