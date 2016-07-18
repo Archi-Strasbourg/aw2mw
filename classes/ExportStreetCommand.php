@@ -74,20 +74,16 @@ class ExportStreetCommand extends ExportCommand
 
         $city = $this->exportCity($district['idVille']);
 
-        if ($district['nom'] == 'autre') {
-            return $city;
-        } else {
-            $district['ville'] = $city['nom'];
-            $district['nom'] .= ' ('.$district['ville'].')';
-            $pageName = 'Catégorie:'.$district['nom'];
-            $this->output->writeln('<info>Exporting "'.$pageName.'"…</info>');
+        $district['ville'] = $city['nom'];
+        $district['nom'] .= ' ('.$district['ville'].')';
+        $pageName = 'Catégorie:'.$district['nom'];
+        $this->output->writeln('<info>Exporting "'.$pageName.'"…</info>');
 
-            $html = '{{Infobox quartier}}'.PHP_EOL.
-                '[[Catégorie:'.$city['nom'].']]';
-            $this->savePage($pageName, $html, 'Quartier importé depuis Archi-Wiki');
+        $html = '{{Infobox quartier}}'.PHP_EOL.
+            '[[Catégorie:'.$city['nom'].']]';
+        $this->savePage($pageName, $html, 'Quartier importé depuis Archi-Wiki');
 
-            return $district;
-        }
+        return $district;
     }
 
     private function exportCity($id)
