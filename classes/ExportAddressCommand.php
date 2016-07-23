@@ -423,11 +423,11 @@ class ExportAddressCommand extends ExportCommand
 
                 if ($event['idSource'] > 0) {
                     $sourceName = $this->s->getSourceLibelle($event['idSource']);
-                    $title .= '<ref>[[Source:'.$sourceName.'|'.$sourceName.']]</ref>';
+                    $title .= '<ref>[[Source::Source:'.$sourceName.'|'.$sourceName.']]</ref>';
                 }
                 if (!empty($event['numeroArchive'])) {
                     $sourceName = $this->s->getSourceLibelle(24);
-                    $title .= '<ref>[[Source:'.$sourceName.'|'.$sourceName.']] - Cote '.
+                    $title .= '<ref>[[Source::Source:'.$sourceName.'|'.$sourceName.']] - Cote '.
                         $event['numeroArchive'].'</ref>';
                 }
 
