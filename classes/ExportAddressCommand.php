@@ -296,6 +296,9 @@ class ExportAddressCommand extends ExportCommand
                 foreach ($info['people'] as $job => $name) {
                     $intro .= '|'.$job.($i + 1).' = '.$name.PHP_EOL;
                 }
+                if (substr($info['date']['start'], 5)=="00-00") {
+                    $info['date']['start'] = substr($info['date']['start'], 0, 4);
+                }
                 $intro .= '|date'.($i + 1).'_afficher = '.$info['date']['pretty'].PHP_EOL;
                 $intro .= '|date'.($i + 1).'_début = '.$info['date']['start'].PHP_EOL;
                 $intro .= '|date'.($i + 1).'_fin = '.$info['date']['end'].PHP_EOL;
