@@ -59,11 +59,9 @@ class ExportSourceCommand extends ExportCommand
 
         $output->writeln('<info>Exporting "'.$pageName.'"…</info>');
 
-        $html = $this->convertHtml(
-            $this->s->afficheDescriptionSource(
-                $id
-            )
-        );
+        $html = $this->s->afficheDescriptionSource($id);
+        $html = preg_replace('#<h2>.+</h2>#', '', $html);
+        $html = $this->convertHtml($html);
         $html = $this->replaceSubtitles($html);
 
         $this->loginAsAdmin();
