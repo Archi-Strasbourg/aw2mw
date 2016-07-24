@@ -44,20 +44,20 @@ class ExportStreetCommand extends ExportCommand
 
         $district = $this->exportDistrict($subdistrict['idQuartier']);
 
+        $subdistrict['ville'] = $district['ville'];
         if ($subdistrict['nom'] == 'autre') {
-            return $district;
+            $subdistrict['nom'] .= ' ('.$district['origNom'].') ('.$subdistrict['ville'].')';
         } else {
-            $subdistrict['ville'] = $district['ville'];
             $subdistrict['nom'] .= ' ('.$subdistrict['ville'].')';
-            $pageName = 'Catégorie:'.$subdistrict['nom'];
-            $this->output->writeln('<info>Exporting "'.$pageName.'"…</info>');
-
-            $html = '{{Infobox sous-quartier}}'.PHP_EOL.
-                '[[Catégorie:'.$district['nom'].']]';
-            $this->savePage($pageName, $html, 'Sous-quartier importé depuis Archi-Wiki');
-
-            return $subdistrict;
         }
+        $pageName = 'Catégorie:'.$subdistrict['nom'];
+        $this->output->writeln('<info>Exporting "'.$pageName.'"…</info>');
+
+        $html = '{{Infobox sous-quartier}}'.PHP_EOL.
+            '[[Catégorie:'.$district['nom'].']]';
+        $this->savePage($pageName, $html, 'Sous-quartier importé depuis Archi-Wiki');
+
+        return $subdistrict;
 
     }
 
@@ -75,6 +75,7 @@ class ExportStreetCommand extends ExportCommand
         $city = $this->exportCity($district['idVille']);
 
         $district['ville'] = $city['nom'];
+        $district['origNom'] = $district['nom'];
         $district['nom'] .= ' ('.$district['ville'].')';
         $pageName = 'Catégorie:'.$district['nom'];
         $this->output->writeln('<info>Exporting "'.$pageName.'"…</info>');
