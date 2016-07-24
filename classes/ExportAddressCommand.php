@@ -299,6 +299,9 @@ class ExportAddressCommand extends ExportCommand
                 if (substr($info['date']['start'], 5)=="00-00") {
                     $info['date']['start'] = substr($info['date']['start'], 0, 4);
                 }
+                if (substr($info['date']['end'], 5)=="00-00") {
+                    $info['date']['end'] = substr($info['date']['end'], 0, 4);
+                }
                 $intro .= '|date'.($i + 1).'_afficher = '.$info['date']['pretty'].PHP_EOL;
                 $intro .= '|date'.($i + 1).'_début = '.$info['date']['start'].PHP_EOL;
                 $intro .= '|date'.($i + 1).'_fin = '.$info['date']['end'].PHP_EOL;
