@@ -62,10 +62,58 @@ class ExportPersonCommand extends ExportCommand
 
         $events = $person->getEvents($id);
 
-        $content = '';
+        $reqImage = "
+            SELECT idImage
+            FROM _personneImage
+            WHERE idPersonne = '".mysql_real_escape_string($id)."'
+        ";
+
+        $resImage = $config->connexionBdd->requete($reqImage);
+
+        $intro = '{{Infobox personne'.PHP_EOL;
+        $intro .= '|nom='.$person->nom.PHP_EOL;
+        $intro .= '|prenom='.$person->prenom.PHP_EOL;
+        if ($person->dateNaissance != '0000-00-00') {
+            $intro .= '|date_naissance='.$person->dateNaissance.PHP_EOL;
+        }
+        if ($person->dateDeces != '0000-00-00') {
+            $intro .= '|date_décès='.$person->dateDeces.PHP_EOL;
+        }
+        if ($fetch=mysql_fetch_object($resImage)) {
+            $command = $this->getApplication()->find('export:image');
+            $command->run(
+                new ArrayInput(array('id'=>$fetch->idImage)),
+                $this->output
+            );
+            $filename = $this->getImageName($fetch->idImage);
+            $intro .= '|photo='.$filename.PHP_EOL;
+        }
+        $reqJob="SELECT nom
+            FROM `metier`
+            WHERE `idMetier` =".$person->idMetier;
+        $resJob = $config->connexionBdd->requete($reqJob);
+        if ($fetch=mysql_fetch_object($resJob)) {
+            $intro .= '|métier='.$fetch->nom.PHP_EOL;
+        }
+        $intro .= '}}'.PHP_EOL;
 
         $sections = array();
-        $sections[0] = $content;
+        $sections[0] = $content = $intro;
+
+        $this->api->postRequest(
+            new Api\SimpleRequest(
+                'edit',
+                array(
+                    'title'=>$pageName,
+                    'md5'=>md5($intro),
+                    'text'=>$intro,
+                    'section'=>0,
+                    'bot'=>true,
+                    'summary'=>'Informations importées depuis Archi-Wiki',
+                    'token'=>$this->api->getToken()
+                )
+            )
+        );
 
         //Create page structure
         foreach ($events as $event) {
