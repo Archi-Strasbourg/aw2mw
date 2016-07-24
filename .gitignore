@@ -2,3 +2,4 @@ vendor/
 config.php
 config.yml
 config_prod.yml
+node_modules/
