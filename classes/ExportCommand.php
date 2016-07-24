@@ -154,13 +154,13 @@ abstract class ExportCommand extends Command
 
         //Convert URLs
         preg_match_all(
-            '#\[http:\/\/www.archi-wiki.org\/adresse-(.+)-([0-9]+)\.html\?[a-zA-z0-9=&\#]+\s([\s\w°]+)\]#i',
+            '#\[http:\/\/(www\.)?archi-wiki.org\/adresse-(.+)-([0-9]+)\.html\?[\w=&\#]+\s(.+)\]#i',
             $html,
             $matches,
             PREG_SET_ORDER
         );
         foreach ($matches as $match) {
-            $html = str_replace($match[0], '[[Adresse:'.$this->getAddressName($match[2]).'|'.$match[3].']]', $html);
+            $html = str_replace($match[0], '[[Adresse:'.$this->getAddressName($match[3]).'|'.$match[4].']]', $html);
         }
 
         return $html;
