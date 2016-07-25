@@ -54,7 +54,16 @@ class ExportSourceCommand extends ExportCommand
         parent::setup($input, $output);
 
         $id = $input->getArgument('id');
-        $origPageName = $this->s->getSourceLibelle($id);
+        $origPageName = stripslashes($this->s->getSourceLibelle($id));
+        $origPageName = str_replace('/', '-', $origPageName);
+        $origPageName = str_replace('.', '-', $origPageName);
+        $origPageName = str_replace('"', '', $origPageName);
+        $origPageName = urldecode($origPageName);
+        $origPageName = trim($origPageName);
+        if (empty($origPageName)) {
+            $output->writeln('<error>Empty source name (ID '.$id.')</error>');
+            return;
+        }
         $pageName = 'Source:'.$origPageName;
 
         $output->writeln('<info>Exporting "'.$pageName.'"…</info>');
@@ -63,9 +72,6 @@ class ExportSourceCommand extends ExportCommand
         $html = preg_replace('#<h2>.+</h2>#', '', $html);
         $html = $this->convertHtml($html);
         $html = $this->replaceSubtitles($html);
-
-        $this->loginAsAdmin();
-        $this->deletePage($pageName);
 
         //Login as bot
         $this->login('aw2mw bot');
@@ -92,8 +98,12 @@ class ExportSourceCommand extends ExportCommand
                     array()
                 )
             );
-            $html = '[[File:'.$filename.'|thumb]]'.PHP_EOL.$html;
+            $html = '{{Infobox source'.PHP_EOL.
+                '|image='.$filename.''.PHP_EOL.
+                '}}'.PHP_EOL.
+                $html;
         }
+        $html .= PHP_EOL.'{{Liste utilisations source}}';
 
         $this->savePage($pageName, $html, 'Source importée depuis Archi-Wiki');
     }
