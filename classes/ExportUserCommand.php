@@ -50,14 +50,13 @@ class ExportUserCommand extends ExportCommand
 
         $id = $input->getArgument('id');
         $user = $this->u->getArrayInfosFromUtilisateur($id);
+        $user['prenom'] = stripslashes($user['prenom']);
+        $user['nom'] = stripslashes($user['nom']);
         $pageName = 'Utilisateur:'.$user['prenom'].' '.$user['nom'];
 
         $output->writeln('<info>Exporting "'.$pageName.'"…</info>');
 
         $content = '';
-
-        $this->loginAsAdmin();
-        $this->deletePage($pageName);
 
         //Login as user
         $this->login($user['prenom'].' '.$user['nom']);
@@ -90,10 +89,10 @@ class ExportUserCommand extends ExportCommand
 
         $this->savePage(
             $pageName,
-            '{{Infobox utilisateur
-            |site='.$user['urlSiteWeb'].'
-            |avatar='.$filename.'
-            }}',
+            '{{Infobox utilisateur'.PHP_EOL.
+            '|site='.$user['urlSiteWeb'].PHP_EOL.
+            '|avatar='.$filename.PHP_EOL.
+            '}}',
             "Profil importé depuis Archi-Wiki"
         );
     }
