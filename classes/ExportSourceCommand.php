@@ -99,11 +99,13 @@ class ExportSourceCommand extends ExportCommand
                     array()
                 )
             );
-            $html = '{{Infobox source'.PHP_EOL.
-                '|image='.$filename.''.PHP_EOL.
-                '}}'.PHP_EOL.
-                $html;
+        } else {
+            $filename = '';
         }
+        $html = '{{Infobox source'.PHP_EOL.
+            '|image='.$filename.''.PHP_EOL.
+            '}}'.PHP_EOL.
+            $html;
         $html .= PHP_EOL.'{{Liste utilisations source}}';
 
         $this->savePage($pageName, $html, 'Source importée depuis Archi-Wiki');
