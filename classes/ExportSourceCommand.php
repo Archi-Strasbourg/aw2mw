@@ -55,8 +55,6 @@ class ExportSourceCommand extends ExportCommand
 
         $id = $input->getArgument('id');
         $origPageName = stripslashes($this->s->getSourceLibelle($id));
-        $origPageName = str_replace('/', '-', $origPageName);
-        $origPageName = str_replace('.', '-', $origPageName);
         $origPageName = str_replace('"', '', $origPageName);
         $origPageName = urldecode($origPageName);
         $origPageName = trim($origPageName);
@@ -79,7 +77,10 @@ class ExportSourceCommand extends ExportCommand
         $oldPath = 'http://www.archi-wiki.org/images/logosSources/'.$id.'_original.jpg';
         $headers = get_headers($oldPath, 1);
         if ($headers[0] == 'HTTP/1.1 200 OK') {
-            $filename = 'Source '.$origPageName.'.jpg';
+            $filename = 'Source '.$origPageName;
+            $filename = str_replace('/', '-', $filename);
+            $filename = str_replace('.', '-', $filename);
+            $filename .= '.jpg';
 
             $params = array(
                 'filename'=>$filename,
