@@ -318,6 +318,10 @@ class ExportAddressCommand extends ExportCommand
                 $addresses[] = $fetchAddressGroup;
             }
             foreach ($addresses as $i => $subAddress) {
+                if ($subAddress['longitude'] > 0 && $subAddress['latitude'] > 0) {
+                    $intro .= '|longitude'.($i + 1).' = '.$subAddress['longitude'].PHP_EOL;
+                    $intro .= '|latitude'.($i + 1).' = '.$subAddress['latitude'].PHP_EOL;
+                }
                 if ($subAddress['numero'] > 0) {
                     $intro .= '|numéro'.($i + 1).' = '.$subAddress['numero'].PHP_EOL;
                 }
