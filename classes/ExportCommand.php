@@ -141,7 +141,8 @@ abstract class ExportCommand extends Command
         $html = $process->getOutput();
 
         //Don't use <br>
-        $html = str_replace('<br />', PHP_EOL, $html);
+        $html = preg_replace('/(\<br \/\>)+/', '<br />', $html);
+        $html = str_replace('<br />', PHP_EOL.PHP_EOL, $html);
 
         //Trim each line
         $html = implode(PHP_EOL, array_map('trim', explode(PHP_EOL, $html)));
