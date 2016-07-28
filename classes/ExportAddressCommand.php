@@ -552,6 +552,7 @@ class ExportAddressCommand extends ExportCommand
         $basePageName = $this->getAddressName($input->getArgument('id'));
         $basePageName = str_replace("l' ", "l'", $basePageName);
         $basePageName = str_replace("d' ", "d'", $basePageName);
+        $basePageName = trim($basePageName, '.');
 
         $pageName = 'Adresse:'.$basePageName;
 
