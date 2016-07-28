@@ -292,10 +292,29 @@ class ExportAddressCommand extends ExportCommand
                 $txtAdresses = trim($txtAdresses, ', ');
             }
 
-            foreach ($infobox as $i => $info) {
-                foreach ($info['people'] as $job => $name) {
-                    $intro .= '|'.$job.($i + 1).' = '.$name.PHP_EOL;
+            $intro .= '|pays = '.$address['nomPays'].PHP_EOL;
+            $intro .= '|ville = '.$address['nomVille'].PHP_EOL;
+            $resAddressGroup = $this->a->getAdressesFromEvenementGroupeAdresses(
+                $this->a->getIdEvenementGroupeAdresseFromIdAdresse($address['idAdresse'])
+            );
+            while ($fetchAddressGroup= mysql_fetch_assoc($resAddressGroup)) {
+                $addresses[] = $fetchAddressGroup;
+            }
+            foreach ($addresses as $i => $subAddress) {
+                $intro .= '|complément_rue'.($i + 1).' = '.$subAddress['prefixeRue'].PHP_EOL;
+                $intro .= '|rue'.($i + 1).' = '.$subAddress['nomRue'].PHP_EOL;
+                if ($subAddress['numero'] > 0) {
+                    $intro .= '|numéro'.($i + 1).' = '.$subAddress['numero'].PHP_EOL;
                 }
+                if ($subAddress['longitude'] > 0 && $subAddress['latitude'] > 0) {
+                    $intro .= '|longitude'.($i + 1).' = '.$subAddress['longitude'].PHP_EOL;
+                    $intro .= '|latitude'.($i + 1).' = '.$subAddress['latitude'].PHP_EOL;
+                }
+            }
+            if (isset($txtAdresses)) {
+                $intro .= '|nom_complet = '.$txtAdresses.PHP_EOL;
+            }
+            foreach ($infobox as $i => $info) {
                 if (substr($info['date']['start'], 5)=="00-00") {
                     $info['date']['start'] = substr($info['date']['start'], 0, 4);
                 }
@@ -316,28 +335,9 @@ class ExportAddressCommand extends ExportCommand
                 }
                 $intro .= '|structure'.($i + 1).' = '.$info['structure'].PHP_EOL;
                 $intro .= '|type'.($i + 1).' = '.strtolower($info['type']).PHP_EOL;
-            }
-            $resAddressGroup = $this->a->getAdressesFromEvenementGroupeAdresses(
-                $this->a->getIdEvenementGroupeAdresseFromIdAdresse($address['idAdresse'])
-            );
-            while ($fetchAddressGroup= mysql_fetch_assoc($resAddressGroup)) {
-                $addresses[] = $fetchAddressGroup;
-            }
-            foreach ($addresses as $i => $subAddress) {
-                if ($subAddress['longitude'] > 0 && $subAddress['latitude'] > 0) {
-                    $intro .= '|longitude'.($i + 1).' = '.$subAddress['longitude'].PHP_EOL;
-                    $intro .= '|latitude'.($i + 1).' = '.$subAddress['latitude'].PHP_EOL;
+                foreach ($info['people'] as $job => $name) {
+                    $intro .= '|'.$job.($i + 1).' = '.$name.PHP_EOL;
                 }
-                if ($subAddress['numero'] > 0) {
-                    $intro .= '|numéro'.($i + 1).' = '.$subAddress['numero'].PHP_EOL;
-                }
-                $intro .= '|rue'.($i + 1).' = '.$subAddress['nomRue'].PHP_EOL;
-                $intro .= '|complément_rue'.($i + 1).' = '.$subAddress['prefixeRue'].PHP_EOL;
-            }
-            $intro .= '|ville = '.$address['nomVille'].PHP_EOL;
-            $intro .= '|pays = '.$address['nomPays'].PHP_EOL;
-            if (isset($txtAdresses)) {
-                $intro .= '|nom_complet = '.$txtAdresses.PHP_EOL;
             }
             $mainImageInfo = $this->i->getArrayInfosImagePrincipaleFromIdGroupeAdresse(
                 array(
