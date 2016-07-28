@@ -182,7 +182,11 @@ abstract class ExportCommand extends Command
             )
         ).' ('.$addressInfo['nomVille'].')';
         $return = explode('#', $return);
-        return $return[0];
+        $name = $return[0];
+        $name = str_replace("l' ", "l'", $name);
+        $name = str_replace("d' ", "d'", $name);
+        $name = trim($name, '.');
+        return $name;
     }
 
     protected function getImageName($id)

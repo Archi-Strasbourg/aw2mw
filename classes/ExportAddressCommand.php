@@ -109,6 +109,7 @@ class ExportAddressCommand extends ExportCommand
                 $title = substr($event['dateDebut'], 0, 4);
             }
             $title = stripslashes($title);
+            $title = trim($title, '.');
             $content .= '=='.$title.'=='.PHP_EOL;
 
             $rep = $this->e->connexionBdd->requete('
@@ -550,9 +551,6 @@ class ExportAddressCommand extends ExportCommand
         $city = $this->a->getInfosVille($address['idVille']);
 
         $basePageName = $this->getAddressName($input->getArgument('id'));
-        $basePageName = str_replace("l' ", "l'", $basePageName);
-        $basePageName = str_replace("d' ", "d'", $basePageName);
-        $basePageName = trim($basePageName, '.');
 
         $pageName = 'Adresse:'.$basePageName;
 
