@@ -54,10 +54,7 @@ class ExportSourceCommand extends ExportCommand
         parent::setup($input, $output);
 
         $id = $input->getArgument('id');
-        $origPageName = stripslashes($this->s->getSourceLibelle($id));
-        $origPageName = str_replace('"', '', $origPageName);
-        $origPageName = urldecode($origPageName);
-        $origPageName = trim($origPageName);
+        $origPageName = $this->escapeSourceName($this->s->getSourceLibelle($id));
         if (empty($origPageName)) {
             $output->writeln('<error>Empty source name (ID '.$id.')</error>');
             return;

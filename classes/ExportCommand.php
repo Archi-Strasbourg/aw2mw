@@ -196,4 +196,13 @@ abstract class ExportCommand extends Command
             $addressInfo['nomRue'].' '.$addressInfo['nomVille'].' '.$id.'.jpg'
         );
     }
+
+    protected function escapeSourceName($name)
+    {
+        $name = stripslashes($name);
+        $name = str_replace('"', '', $name);
+        $name = urldecode($name);
+        $name = trim($name);
+        return $name;
+    }
 }
