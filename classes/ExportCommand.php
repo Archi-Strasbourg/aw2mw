@@ -1,23 +1,20 @@
 <?php
+
 namespace AW2MW;
 
+use Chain\Chain;
+use Mediawiki\Api;
+use Mediawiki\DataModel;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Process\Process;
 use Symfony\Component\Process\ProcessBuilder;
-use Mediawiki\Api;
-use Mediawiki\DataModel;
-use AW2MW\Config;
-use Chain\Chain;
 
 abstract class ExportCommand extends Command
 {
-
     /**
-     * Configure command
+     * Configure command.
      *
      * @return void
      */
@@ -36,7 +33,7 @@ abstract class ExportCommand extends Command
         $password = password_hash(
             $username.$this->config->userSecret,
             PASSWORD_BCRYPT,
-            array('salt'=>$this->config->salt)
+            ['salt' => $this->config->salt]
         );
         try {
             $this->api->login(new Api\ApiUser($username, $password));
@@ -77,24 +74,25 @@ abstract class ExportCommand extends Command
     protected function convertDate($startDate, $endDate, $approximately)
     {
         $date = '';
-        if ($approximately=='1') {
-            $date .= "environ ";
+        if ($approximately == '1') {
+            $date .= 'environ ';
         }
-        if (substr($startDate, 5)=="00-00") {
-            $datetime=substr($startDate, 0, 4);
+        if (substr($startDate, 5) == '00-00') {
+            $datetime = substr($startDate, 0, 4);
         } else {
             $datetime = $startDate;
         }
-        if ($startDate!='0000-00-00') {
+        if ($startDate != '0000-00-00') {
             $date .= $this->e->date->toFrenchAffichage($datetime);
         }
-        if ($endDate!='0000-00-00') {
-            if (strlen($this->e->date->toFrench($endDate))<=4) {
+        if ($endDate != '0000-00-00') {
+            if (strlen($this->e->date->toFrench($endDate)) <= 4) {
                 $date .= ' à '.$this->e->date->toFrenchAffichage($endDate);
             } else {
                 $date .= ' au '.$this->e->date->toFrenchAffichage($endDate);
             }
         }
+
         return $date;
     }
 
@@ -128,12 +126,12 @@ abstract class ExportCommand extends Command
     protected function convertHtml($html)
     {
         $chain = new Chain(
-            ProcessBuilder::create(array('echo', $html))
+            ProcessBuilder::create(['echo', $html])
         );
         $chain->add(
             '|',
             ProcessBuilder::create(
-                array('html2wiki', '--dialect', 'MediaWiki')
+                ['html2wiki', '--dialect', 'MediaWiki']
             )
         );
         $process = $chain->getProcess();
@@ -174,11 +172,11 @@ abstract class ExportCommand extends Command
             $this->a->getIntituleAdresseFrom(
                 $id,
                 'idAdresse',
-                array(
-                    'noHTML'=>true, 'noQuartier'=>true, 'noSousQuartier'=>true, 'noVille'=>true,
-                    'displayFirstTitreAdresse'=>true,
-                    'setSeparatorAfterTitle'=>'#'
-                )
+                [
+                    'noHTML'                   => true, 'noQuartier' => true, 'noSousQuartier' => true, 'noVille' => true,
+                    'displayFirstTitreAdresse' => true,
+                    'setSeparatorAfterTitle'   => '#',
+                ]
             )
         ).' ('.$addressInfo['nomVille'].')';
         $return = explode('#', $return);
@@ -186,6 +184,7 @@ abstract class ExportCommand extends Command
         $name = str_replace("l' ", "l'", $name);
         $name = str_replace("d' ", "d'", $name);
         $name = trim($name, '.');
+
         return $name;
     }
 
@@ -195,6 +194,7 @@ abstract class ExportCommand extends Command
         if ($addressInfo['numero'] == 0) {
             $addressInfo['numero'] = '';
         }
+
         return trim(
             $addressInfo['numero'].' '.$addressInfo['prefixeRue'].' '.
             $addressInfo['nomRue'].' '.$addressInfo['nomVille'].' '.$id.'.jpg'
@@ -207,6 +207,7 @@ abstract class ExportCommand extends Command
         $name = str_replace('"', '', $name);
         $name = urldecode($name);
         $name = trim($name);
+
         return $name;
     }
 }

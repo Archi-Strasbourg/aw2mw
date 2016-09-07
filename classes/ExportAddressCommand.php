@@ -1,21 +1,18 @@
 <?php
+
 namespace AW2MW;
 
+use Mediawiki\Api;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Process\Process;
-use Mediawiki\Api;
-use Mediawiki\DataModel;
-use AW2MW\Config;
 
 class ExportAddressCommand extends ExportCommand
 {
     /**
-     * Configure command
+     * Configure command.
      *
      * @return void
      */
@@ -38,26 +35,27 @@ class ExportAddressCommand extends ExportCommand
         foreach ($images as $image) {
             $command = $this->getApplication()->find('export:image');
             $command->run(
-                new ArrayInput(array('id'=>$image['idImage'])),
+                new ArrayInput(['id' => $image['idImage']]),
                 $this->output
             );
             $filename = $this->getImageName($image['idImage']);
             $description = strip_tags(
                 $this->convertHtml(
-                    $this->bbCode->convertToDisplay(array('text'=>$image['description']))
+                    $this->bbCode->convertToDisplay(['text' => $image['description']])
                 )
             );
             $return .= 'File:'.$filename.'|'.$description.PHP_EOL;
         }
         $return .= '</gallery>'.PHP_EOL;
+
         return $return;
     }
 
     private function exportEvents($events, $pageName, $address)
     {
         $content = '';
-        $infobox = array();
-        $sections = array();
+        $infobox = [];
+        $sections = [];
 
         $this->output->writeln('<info>Exporting "'.$pageName.'"…</info>');
 
@@ -86,7 +84,7 @@ class ExportAddressCommand extends ExportCommand
                     tE.groupe,
                     hE.ISMH,
                     hE.MH,
-                    date_format(hE.dateCreationEvenement,"'._("%e/%m/%Y à %kh%i").'") as dateCreationEvenement,
+                    date_format(hE.dateCreationEvenement,"'._('%e/%m/%Y à %kh%i').'") as dateCreationEvenement,
                     hE.isDateDebutEnviron as isDateDebutEnviron,
                     u.idUtilisateur as idUtilisateur,
                     hE.numeroArchive as numeroArchive
@@ -119,27 +117,27 @@ class ExportAddressCommand extends ExportCommand
                     LEFT JOIN metier m ON m.idMetier = p.idMetier
                     WHERE _eP.idEvenement='.mysql_real_escape_string($id).'
                     ORDER BY p.nom DESC');
-            $people = array();
+            $people = [];
             while ($res = mysql_fetch_object($rep)) {
                 $people[] = $res;
             }
 
-            $info = array(
-                'type'=>'',
-                'structure'=>'',
-                'date'=>'',
-                'people'=> array(
-                    'architecte'=>''
-                )
-            );
+            $info = [
+                'type'      => '',
+                'structure' => '',
+                'date'      => '',
+                'people'    => [
+                    'architecte' => '',
+                ],
+            ];
 
             $info['type'] = str_replace('(Nouveautés)', '', $event['nomTypeEvenement']);
             $info['structure'] = $event['nomTypeStructure'];
-            $info['date'] = array(
-                'pretty'=>$this->convertDate($event['dateDebut'], $event['dateFin'], $event['isDateDebutEnviron']),
-                'start'=>$event['dateDebut'],
-                'end'=>$event['dateFin']
-            );
+            $info['date'] = [
+                'pretty' => $this->convertDate($event['dateDebut'], $event['dateFin'], $event['isDateDebutEnviron']),
+                'start'  => $event['dateDebut'],
+                'end'    => $event['dateFin'],
+            ];
 
             foreach ($people as $person) {
                 $info['people'][$person->metier] = $person->prenom.' '.$person->nom;
@@ -149,7 +147,7 @@ class ExportAddressCommand extends ExportCommand
         }
 
         if (!$isNews) {
-            $reqPhotos = "
+            $reqPhotos = '
                 SELECT hi1.idHistoriqueImage, hi1.idImage as idImage,
                 hi1.dateUpload, ai.idAdresse, hi1.description,
                 ae.idEvenement as idEvenementGroupeAdresseCourant
@@ -157,7 +155,7 @@ class ExportAddressCommand extends ExportCommand
                 LEFT JOIN _adresseImage ai ON ai.idImage = hi1.idImage
                 LEFT JOIN _adresseEvenement ae ON ae.idAdresse = ai.idAdresse
                 WHERE hi2.idImage = hi1.idImage
-                AND ai.idAdresse = ".mysql_real_escape_string($address['idAdresse'])."
+                AND ai.idAdresse = '.mysql_real_escape_string($address['idAdresse'])."
                 AND ai.prisDepuis='1'
                 GROUP BY hi1.idImage,  hi1.idHistoriqueImage
                 HAVING hi1.idHistoriqueImage = max(hi2.idHistoriqueImage)
@@ -165,17 +163,17 @@ class ExportAddressCommand extends ExportCommand
 
             $resPhotos = $this->i->connexionBdd->requete($reqPhotos);
 
-            $otherImagesInfo = array();
+            $otherImagesInfo = [];
             $otherImages = '';
             while ($fetchPhotos = mysql_fetch_assoc($resPhotos)) {
-                $reqPriseDepuis = "SELECT ai.idAdresse,  ai.idEvenementGroupeAdresse
+                $reqPriseDepuis = 'SELECT ai.idAdresse,  ai.idEvenementGroupeAdresse
                                     FROM _adresseImage ai
-                                    WHERE ai.idImage = ".$fetchPhotos['idImage']."
+                                    WHERE ai.idImage = '.$fetchPhotos['idImage']."
                                     AND ai.vueSur='1'
                 ";
                 $resPriseDepuis = $this->a->connexionBdd->requete($reqPriseDepuis);
                 $fetchPhotos['description'] = 'Vue sur';
-                $otherAddresses = array();
+                $otherAddresses = [];
                 while ($otherAddress = mysql_fetch_assoc($resPriseDepuis)) {
                     $otherAddress = $this->a->getArrayAdresseFromIdAdresse($otherAddress['idAdresse']);
                     $otherAddressName = $this->getAddressName($otherAddress['idAdresse']);
@@ -223,72 +221,72 @@ class ExportAddressCommand extends ExportCommand
 
             $resAdresseDuGroupeAdresse = $this->a->connexionBdd->requete($reqAdresseDuGroupeAdresse);
 
-            if (mysql_num_rows($resAdresseDuGroupeAdresse)>1) {
+            if (mysql_num_rows($resAdresseDuGroupeAdresse) > 1) {
                 $txtAdresses = '';
-                $arrayNumero = array();
+                $arrayNumero = [];
                 while ($fetchAdressesGroupeAdresse = mysql_fetch_assoc($resAdresseDuGroupeAdresse)) {
                     $isAdresseCourante = false;
                     if ($address['idAdresse'] == $fetchAdressesGroupeAdresse['idAdresse']) {
                         $isAdresseCourante = true;
                     }
 
-                    if ($fetchAdressesGroupeAdresse['idRue']=='0' || $fetchAdressesGroupeAdresse['idRue']=='') {
-                        if ($fetchAdressesGroupeAdresse['idQuartier']!=''
-                            && $fetchAdressesGroupeAdresse['idQuartier']!='0'
+                    if ($fetchAdressesGroupeAdresse['idRue'] == '0' || $fetchAdressesGroupeAdresse['idRue'] == '') {
+                        if ($fetchAdressesGroupeAdresse['idQuartier'] != ''
+                            && $fetchAdressesGroupeAdresse['idQuartier'] != '0'
                         ) {
                             $arrayNumero[$this->getIntituleAdresseFrom(
                                 $fetchAdressesGroupeAdresse['idAdresse'],
                                 'idAdresse',
-                                array('noSousQuartier'=>true,'noQuartier'=>false,'noVille'=>true)
+                                ['noSousQuartier' => true, 'noQuartier' => false, 'noVille' => true]
                             )][] =
-                                array(
-                                    'indicatif'=>$fetchAdressesGroupeAdresse['nomIndicatif'],
-                                    'numero'=>$fetchAdressesGroupeAdresse['numero'],
-                                    'isAdresseCourante'=>$isAdresseCourante
-                                );
+                                [
+                                    'indicatif'         => $fetchAdressesGroupeAdresse['nomIndicatif'],
+                                    'numero'            => $fetchAdressesGroupeAdresse['numero'],
+                                    'isAdresseCourante' => $isAdresseCourante,
+                                ];
                         }
 
-                        if ($fetchAdressesGroupeAdresse['idSousQuartier']!=''
-                            && $fetchAdressesGroupeAdresse['idSousQuartier']!='0'
+                        if ($fetchAdressesGroupeAdresse['idSousQuartier'] != ''
+                            && $fetchAdressesGroupeAdresse['idSousQuartier'] != '0'
                         ) {
                             $arrayNumero[$this->getIntituleAdresseFrom(
                                 $fetchAdressesGroupeAdresse['idAdresse'],
                                 'idAdresse',
-                                array('noSousQuartier'=>false,'noQuartier'=>true,'noVille'=>true)
+                                ['noSousQuartier' => false, 'noQuartier' => true, 'noVille' => true]
                             )][] =
-                                array(
-                                    'indicatif'=>$fetchAdressesGroupeAdresse['nomIndicatif'],
-                                    'numero'=>$fetchAdressesGroupeAdresse['numero'],
-                                    'isAdresseCourante'=>$isAdresseCourante
-                                );
+                                [
+                                    'indicatif'         => $fetchAdressesGroupeAdresse['nomIndicatif'],
+                                    'numero'            => $fetchAdressesGroupeAdresse['numero'],
+                                    'isAdresseCourante' => $isAdresseCourante,
+                                ];
                         }
                     } else {
                         $arrayNumero[$this->a->getIntituleAdresseFrom(
                             $fetchAdressesGroupeAdresse['idRue'],
                             'idRueWithNoNumeroAuthorized',
-                            array('noSousQuartier'=>true,'noQuartier'=>true,'noVille'=>true)
+                            ['noSousQuartier' => true, 'noQuartier' => true, 'noVille' => true]
                         )][] =
-                            array(
-                                'indicatif'=>$fetchAdressesGroupeAdresse['nomIndicatif'],
-                                'numero'=>$fetchAdressesGroupeAdresse['numero'],
-                                'isAdresseCourante'=>$isAdresseCourante
-                            );
+                            [
+                                'indicatif'         => $fetchAdressesGroupeAdresse['nomIndicatif'],
+                                'numero'            => $fetchAdressesGroupeAdresse['numero'],
+                                'isAdresseCourante' => $isAdresseCourante,
+                            ];
                     }
                 }
 
                 // affichage adresses regroupees
                 foreach ($arrayNumero as $intituleRue => $arrayInfosNumero) {
                     foreach ($arrayInfosNumero as $indice => $infosNumero) {
-                        if ($infosNumero['numero']=='' || $infosNumero['numero']=='0') {
-                        //rien
+                        if ($infosNumero['numero'] == '' || $infosNumero['numero'] == '0') {
+                            //rien
                         } else {
-                            $txtAdresses.=$infosNumero['numero'].$infosNumero['indicatif']."-";
+                            $txtAdresses .= $infosNumero['numero'].$infosNumero['indicatif'].'-';
                         }
                     }
 
                     $txtAdresses = trim($txtAdresses, '-');
 
-                    $txtAdresses.= $intituleRue.', ';
+                    $txtAdresses .= $intituleRue.', ';
                 }
                 $txtAdresses = trim($txtAdresses, ', ');
             }
@@ -298,7 +296,7 @@ class ExportAddressCommand extends ExportCommand
             $resAddressGroup = $this->a->getAdressesFromEvenementGroupeAdresses(
                 $this->a->getIdEvenementGroupeAdresseFromIdAdresse($address['idAdresse'])
             );
-            while ($fetchAddressGroup= mysql_fetch_assoc($resAddressGroup)) {
+            while ($fetchAddressGroup = mysql_fetch_assoc($resAddressGroup)) {
                 $addresses[] = $fetchAddressGroup;
             }
             foreach ($addresses as $i => $subAddress) {
@@ -316,10 +314,10 @@ class ExportAddressCommand extends ExportCommand
                 $intro .= '|nom_complet = '.$txtAdresses.PHP_EOL;
             }
             foreach ($infobox as $i => $info) {
-                if (substr($info['date']['start'], 5)=="00-00") {
+                if (substr($info['date']['start'], 5) == '00-00') {
                     $info['date']['start'] = substr($info['date']['start'], 0, 4);
                 }
-                if (substr($info['date']['end'], 5)=="00-00") {
+                if (substr($info['date']['end'], 5) == '00-00') {
                     $info['date']['end'] = substr($info['date']['end'], 0, 4);
                 }
                 if ($info['date']['start'] == '0000') {
@@ -331,7 +329,7 @@ class ExportAddressCommand extends ExportCommand
                 $intro .= '|date'.($i + 1).'_afficher = '.$info['date']['pretty'].PHP_EOL;
                 $intro .= '|date'.($i + 1).'_début = '.$info['date']['start'].PHP_EOL;
                 $intro .= '|date'.($i + 1).'_fin = '.$info['date']['end'].PHP_EOL;
-                if ($i > 0 && $info['structure'] == $infobox[$i-1]['structure']) {
+                if ($i > 0 && $info['structure'] == $infobox[$i - 1]['structure']) {
                     $info['structure'] = '';
                 }
                 $intro .= '|structure'.($i + 1).' = '.$info['structure'].PHP_EOL;
@@ -341,11 +339,10 @@ class ExportAddressCommand extends ExportCommand
                 }
             }
             $mainImageInfo = $this->i->getArrayInfosImagePrincipaleFromIdGroupeAdresse(
-                array(
-                    'idEvenementGroupeAdresse'=>
-                        $this->a->getIdEvenementGroupeAdresseFromIdAdresse($address['idAdresse']),
-                    'format'=>'grand'
-                )
+                [
+                    'idEvenementGroupeAdresse' => $this->a->getIdEvenementGroupeAdresseFromIdAdresse($address['idAdresse']),
+                    'format'                   => 'grand',
+                ]
             );
             if (!$mainImageInfo['trouve']) {
                 $mainImageInfo = $this->a->getUrlImageFromAdresse($address['idAdresse']);
@@ -360,7 +357,7 @@ class ExportAddressCommand extends ExportCommand
             }
             $command = $this->getApplication()->find('export:image');
             $command->run(
-                new ArrayInput(array('id'=>$mainImageInfo['idImage'])),
+                new ArrayInput(['id' => $mainImageInfo['idImage']]),
                 $this->output
             );
             $filename = $this->getImageName($mainImageInfo['idImage']);
@@ -371,23 +368,23 @@ class ExportAddressCommand extends ExportCommand
             $this->api->postRequest(
                 new Api\SimpleRequest(
                     'edit',
-                    array(
-                        'title'=>$pageName,
-                        'md5'=>md5($intro),
-                        'text'=>$intro,
-                        'section'=>0,
-                        'bot'=>true,
-                        'summary'=>'Informations importées depuis Archi-Wiki',
-                        'token'=>$this->api->getToken()
-                    )
+                    [
+                        'title'   => $pageName,
+                        'md5'     => md5($intro),
+                        'text'    => $intro,
+                        'section' => 0,
+                        'bot'     => true,
+                        'summary' => 'Informations importées depuis Archi-Wiki',
+                        'token'   => $this->api->getToken(),
+                    ]
                 )
             );
         }
 
         foreach ($events as $section => $id) {
-            $req = "SELECT idHistoriqueEvenement
+            $req = 'SELECT idHistoriqueEvenement
                     FROM historiqueEvenement
-                    WHERE idEvenement=".$id." order by dateCreationEvenement ASC";
+                    WHERE idEvenement='.$id.' order by dateCreationEvenement ASC';
             $res = $this->e->connexionBdd->requete($req);
 
             while ($fetch = mysql_fetch_assoc($res)) {
@@ -408,7 +405,7 @@ class ExportAddressCommand extends ExportCommand
                         tE.groupe,
                         hE.ISMH ,
                         hE.MH,
-                        date_format(hE.dateCreationEvenement,"'._("%e/%m/%Y à %kh%i").'") as dateCreationEvenement,
+                        date_format(hE.dateCreationEvenement,"'._('%e/%m/%Y à %kh%i').'") as dateCreationEvenement,
                         hE.isDateDebutEnviron as isDateDebutEnviron,
                         u.idUtilisateur as idUtilisateur,
                         hE.numeroArchive as numeroArchive
@@ -458,7 +455,7 @@ class ExportAddressCommand extends ExportCommand
                 }
 
                 $html = $this->convertHtml(
-                    $this->bbCode->convertToDisplay(array('text'=>$event['description']))
+                    $this->bbCode->convertToDisplay(['text' => $event['description']])
                 );
 
 
@@ -466,15 +463,15 @@ class ExportAddressCommand extends ExportCommand
                 $this->api->postRequest(
                     new Api\SimpleRequest(
                         'edit',
-                        array(
-                            'title'=>$pageName,
-                            'md5'=>md5($content),
-                            'text'=>$content,
-                            'section'=>$section + 1,
-                            'bot'=>true,
-                            'summary'=>'Révision du '.$event['dateCreationEvenement'].' importée depuis Archi-Wiki',
-                            'token'=>$this->api->getToken()
-                        )
+                        [
+                            'title'   => $pageName,
+                            'md5'     => md5($content),
+                            'text'    => $content,
+                            'section' => $section + 1,
+                            'bot'     => true,
+                            'summary' => 'Révision du '.$event['dateCreationEvenement'].' importée depuis Archi-Wiki',
+                            'token'   => $this->api->getToken(),
+                        ]
                     )
                 );
                 $sections[$section + 1] = $content;
@@ -491,7 +488,7 @@ class ExportAddressCommand extends ExportCommand
                 ";
 
             $resImages = $this->i->connexionBdd->requete($reqImages);
-            $images = array();
+            $images = [];
             while ($fetchImages = mysql_fetch_assoc($resImages)) {
                 $images[] = $fetchImages;
             }
@@ -502,15 +499,15 @@ class ExportAddressCommand extends ExportCommand
             $this->api->postRequest(
                 new Api\SimpleRequest(
                     'edit',
-                    array(
-                        'title'=>$pageName,
-                        'md5'=>md5($sections[$section + 1]),
-                        'text'=>$sections[$section + 1],
-                        'section'=>$section + 1,
-                        'bot'=>true,
-                        'summary'=>'Images importées depuis Archi-Wiki',
-                        'token'=>$this->api->getToken()
-                    )
+                    [
+                        'title'   => $pageName,
+                        'md5'     => md5($sections[$section + 1]),
+                        'text'    => $sections[$section + 1],
+                        'section' => $section + 1,
+                        'bot'     => true,
+                        'summary' => 'Images importées depuis Archi-Wiki',
+                        'token'   => $this->api->getToken(),
+                    ]
                 )
             );
         }
@@ -532,7 +529,7 @@ class ExportAddressCommand extends ExportCommand
     }
 
     /**
-     * Execute command
+     * Execute command.
      *
      * @param InputInterface  $input  Input
      * @param OutputInterface $output Output
@@ -546,6 +543,7 @@ class ExportAddressCommand extends ExportCommand
         $address = $this->a->getArrayAdresseFromIdAdresse($input->getArgument('id'));
         if (!$address) {
             $this->output->writeln('<error>Adresse introuvable</error>');
+
             return;
         }
         $city = $this->a->getInfosVille($address['idVille']);
@@ -556,21 +554,21 @@ class ExportAddressCommand extends ExportCommand
 
         $groupInfo = mysql_fetch_assoc($this->a->getIdEvenementsFromAdresse($input->getArgument('id')));
 
-        $events = array();
-        $newsEvents = array();
+        $events = [];
+        $newsEvents = [];
 
-        $requete ="
+        $requete = '
             SELECT DISTINCT evt.idEvenement, pe.idEvenement, pe.position
             FROM evenements evt
-            LEFT JOIN _evenementEvenement ee on ee.idEvenement = ".
+            LEFT JOIN _evenementEvenement ee on ee.idEvenement = '.
                 mysql_real_escape_string($groupInfo['idEvenementGroupeAdresse']).
-            "
+            '
             LEFT JOIN positionsEvenements pe on pe.idEvenement = ee.idEvenementAssocie
             WHERE evt.idEvenement = ee.idEvenementAssocie
             ORDER BY pe.position ASC
-            ";
+            ';
         $result = $this->e->connexionBdd->requete($requete);
-        $arrayIdEvenement = array();
+        $arrayIdEvenement = [];
         while ($res = mysql_fetch_assoc($result)) {
             $allEvents[] = $res['idEvenement'];
         }
@@ -583,7 +581,7 @@ class ExportAddressCommand extends ExportCommand
                     LEFT JOIN metier m ON m.idMetier = p.idMetier
                     WHERE _eP.idEvenement='.mysql_real_escape_string($id).'
                     ORDER BY p.nom DESC');
-            $people = array();
+            $people = [];
             while ($res = mysql_fetch_object($rep)) {
                 $people[] = $res;
             }

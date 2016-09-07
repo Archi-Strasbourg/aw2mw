@@ -1,21 +1,18 @@
 <?php
+
 namespace AW2MW;
 
+use Mediawiki\Api;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Process\Process;
-use Mediawiki\Api;
-use Mediawiki\DataModel;
-use AW2MW\Config;
 
 class ExportPersonCommand extends ExportCommand
 {
     /**
-     * Configure command
+     * Configure command.
      *
      * @return void
      */
@@ -33,7 +30,7 @@ class ExportPersonCommand extends ExportCommand
     }
 
     /**
-     * Execute command
+     * Execute command.
      *
      * @param InputInterface  $input  Input
      * @param OutputInterface $output Output
@@ -49,6 +46,7 @@ class ExportPersonCommand extends ExportCommand
         @$person = new \ArchiPersonne($id);
         if (!isset($person->nom)) {
             $this->output->writeln('<error>Personne introuvable</error>');
+
             return;
         }
 
@@ -79,39 +77,39 @@ class ExportPersonCommand extends ExportCommand
         if ($person->dateDeces != '0000-00-00') {
             $intro .= '|date_décès='.$person->dateDeces.PHP_EOL;
         }
-        if ($fetch=mysql_fetch_object($resImage)) {
+        if ($fetch = mysql_fetch_object($resImage)) {
             $command = $this->getApplication()->find('export:image');
             $command->run(
-                new ArrayInput(array('id'=>$fetch->idImage)),
+                new ArrayInput(['id' => $fetch->idImage]),
                 $this->output
             );
             $filename = $this->getImageName($fetch->idImage);
             $intro .= '|photo='.$filename.PHP_EOL;
         }
-        $reqJob="SELECT nom
+        $reqJob = 'SELECT nom
             FROM `metier`
-            WHERE `idMetier` =".$person->idMetier;
+            WHERE `idMetier` ='.$person->idMetier;
         $resJob = $config->connexionBdd->requete($reqJob);
-        if ($fetch=mysql_fetch_object($resJob)) {
+        if ($fetch = mysql_fetch_object($resJob)) {
             $intro .= '|métier='.$fetch->nom.PHP_EOL;
         }
         $intro .= '}}'.PHP_EOL;
 
-        $sections = array();
+        $sections = [];
         $sections[0] = $content = $intro;
 
         $this->api->postRequest(
             new Api\SimpleRequest(
                 'edit',
-                array(
-                    'title'=>$pageName,
-                    'md5'=>md5($intro),
-                    'text'=>$intro,
-                    'section'=>0,
-                    'bot'=>true,
-                    'summary'=>'Informations importées depuis Archi-Wiki',
-                    'token'=>$this->api->getToken()
-                )
+                [
+                    'title'   => $pageName,
+                    'md5'     => md5($intro),
+                    'text'    => $intro,
+                    'section' => 0,
+                    'bot'     => true,
+                    'summary' => 'Informations importées depuis Archi-Wiki',
+                    'token'   => $this->api->getToken(),
+                ]
             )
         );
 
@@ -134,7 +132,7 @@ class ExportPersonCommand extends ExportCommand
                     tE.groupe,
                     hE.ISMH,
                     hE.MH,
-                    date_format(hE.dateCreationEvenement,"'._("%e/%m/%Y à %kh%i").'") as dateCreationEvenement,
+                    date_format(hE.dateCreationEvenement,"'._('%e/%m/%Y à %kh%i').'") as dateCreationEvenement,
                     hE.isDateDebutEnviron as isDateDebutEnviron,
                     u.idUtilisateur as idUtilisateur,
                     hE.numeroArchive as numeroArchive
@@ -144,7 +142,7 @@ class ExportPersonCommand extends ExportCommand
                     LEFT JOIN typeStructure tS  ON tS.idTypeStructure = hE.idTypeStructure
                     LEFT JOIN typeEvenement tE  ON tE.idTypeEvenement = hE.idTypeEvenement
                     LEFT JOIN utilisateur u     ON u.idUtilisateur = hE.idUtilisateur
-                    WHERE hE.idEvenement = '.mysql_real_escape_string($event["idEvenementAssocie"]).'
+                    WHERE hE.idEvenement = '.mysql_real_escape_string($event['idEvenementAssocie']).'
             ORDER BY hE.idHistoriqueEvenement DESC';
 
             $res = $this->e->connexionBdd->requete($sql);
@@ -180,10 +178,10 @@ class ExportPersonCommand extends ExportCommand
         $this->savePage($pageName, $content, 'Sections importées depuis Archi-Wiki');
 
         foreach ($events as $section => $event) {
-            $req = "SELECT idHistoriqueEvenement
+            $req = 'SELECT idHistoriqueEvenement
                     FROM historiqueEvenement
-                    WHERE idEvenement=".mysql_real_escape_string($event["idEvenementAssocie"])."
-                    order by dateCreationEvenement ASC";
+                    WHERE idEvenement='.mysql_real_escape_string($event['idEvenementAssocie']).'
+                    order by dateCreationEvenement ASC';
             $res = $this->e->connexionBdd->requete($req);
 
             while ($fetch = mysql_fetch_assoc($res)) {
@@ -204,7 +202,7 @@ class ExportPersonCommand extends ExportCommand
                         tE.groupe,
                         hE.ISMH ,
                         hE.MH,
-                        date_format(hE.dateCreationEvenement,"'._("%e/%m/%Y à %kh%i").'") as dateCreationEvenement,
+                        date_format(hE.dateCreationEvenement,"'._('%e/%m/%Y à %kh%i').'") as dateCreationEvenement,
                         hE.isDateDebutEnviron as isDateDebutEnviron,
                         u.idUtilisateur as idUtilisateur,
                         hE.numeroArchive as numeroArchive
@@ -258,7 +256,7 @@ class ExportPersonCommand extends ExportCommand
                 $content .= '=='.$title.'=='.PHP_EOL;
 
                 $html = $this->convertHtml(
-                    $this->bbCode->convertToDisplay(array('text'=>$eventInfo['description']))
+                    $this->bbCode->convertToDisplay(['text' => $eventInfo['description']])
                 );
 
 
@@ -266,22 +264,22 @@ class ExportPersonCommand extends ExportCommand
                 $this->api->postRequest(
                     new Api\SimpleRequest(
                         'edit',
-                        array(
-                            'title'=>$pageName,
-                            'md5'=>md5($content),
-                            'text'=>$content,
-                            'section'=>$section + 1,
-                            'bot'=>true,
-                            'summary'=>'Révision du '.$eventInfo['dateCreationEvenement'].
+                        [
+                            'title'   => $pageName,
+                            'md5'     => md5($content),
+                            'text'    => $content,
+                            'section' => $section + 1,
+                            'bot'     => true,
+                            'summary' => 'Révision du '.$eventInfo['dateCreationEvenement'].
                                 ' importée depuis Archi-Wiki',
-                            'token'=>$this->api->getToken()
-                        )
+                            'token' => $this->api->getToken(),
+                        ]
                     )
                 );
                 $sections[$section + 1] = $content;
             }
 
-            $linkedEvents=$person->getEvenementsLies($id, $eventInfo['dateDebut'], 3000);
+            $linkedEvents = $person->getEvenementsLies($id, $eventInfo['dateDebut'], 3000);
             if (!empty($linkedEvents)) {
                 $html = '=== Adresses liées ==='.PHP_EOL;
             }
@@ -294,41 +292,41 @@ class ExportPersonCommand extends ExportCommand
                 ";
 
                 $resEvent = $config->connexionBdd->requete($req);
-                $linkedEventInfo=mysql_fetch_object($resEvent);
+                $linkedEventInfo = mysql_fetch_object($resEvent);
 
-                $linkedEventAddress=$this->a->getIntituleAdresseFrom(
+                $linkedEventAddress = $this->a->getIntituleAdresseFrom(
                     $linkedEvent,
-                    "idEvenement",
-                    array(
-                        'noHTML'=>true, 'noQuartier'=>true, 'noSousQuartier'=>true, 'noVille'=>true,
-                        'displayFirstTitreAdresse'=>true,
-                        'setSeparatorAfterTitle'=>'_'
-                    )
+                    'idEvenement',
+                    [
+                        'noHTML'                   => true, 'noQuartier' => true, 'noSousQuartier' => true, 'noVille' => true,
+                        'displayFirstTitreAdresse' => true,
+                        'setSeparatorAfterTitle'   => '_',
+                    ]
                 );
 
                 if (!empty($linkedEventAddress)) {
-                    $req = "
+                    $req = '
                             SELECT  idAdresse
                             FROM _adresseEvenement
-                            WHERE idEvenement = ".
+                            WHERE idEvenement = '.
                             $this->e->getIdEvenementGroupeAdresseFromIdEvenement($linkedEvent);
                     $resAddress = $config->connexionBdd->requete($req);
                     $fetchAddress = mysql_fetch_object($resAddress);
                     if (isset($fetchAddress->idAdresse)) {
-                        $linkedEventIdAddress=$fetchAddress->idAdresse;
+                        $linkedEventIdAddress = $fetchAddress->idAdresse;
                         $address = $this->a->getArrayAdresseFromIdAdresse($input->getArgument('id'));
                         $city = $address['nomVille'];
                     }
                 }
 
-                $linkedEventImg=$this->a->getUrlImageFromEvenement($linkedEvent, "mini");
-                if ($linkedEventImg["url"]==$config->getUrlImage("", "transparent.gif")) {
-                    $linkedEventImg=$this->a->getUrlImageFromAdresse($linkedEventIdAddress, "mini");
+                $linkedEventImg = $this->a->getUrlImageFromEvenement($linkedEvent, 'mini');
+                if ($linkedEventImg['url'] == $config->getUrlImage('', 'transparent.gif')) {
+                    $linkedEventImg = $this->a->getUrlImageFromAdresse($linkedEventIdAddress, 'mini');
                 }
-                $linkedEventUrl=$config->creerUrl(
-                    "",
-                    "adresseDetail",
-                    array("archiIdAdresse"=>$linkedEventIdAddress, "archiIdEvenementGroupeAdresse"=>$linkedEvent)
+                $linkedEventUrl = $config->creerUrl(
+                    '',
+                    'adresseDetail',
+                    ['archiIdAdresse' => $linkedEventIdAddress, 'archiIdEvenementGroupeAdresse' => $linkedEvent]
                 );
                 $html .= '{{Adresse liée
                     |adresse='.$this->getAddressName($linkedEventIdAddress).PHP_EOL;
@@ -340,14 +338,14 @@ class ExportPersonCommand extends ExportCommand
                 if (isset($imageInfo->idImage)) {
                     $command = $this->getApplication()->find('export:image');
                     $command->run(
-                        new ArrayInput(array('id'=>$imageInfo->idImage)),
+                        new ArrayInput(['id' => $imageInfo->idImage]),
                         $this->output
                     );
                     $filename = $this->getImageName($imageInfo->idImage);
                     $html .= '|photo='.$filename.PHP_EOL;
                 }
-                if ($linkedEventInfo->dateDebut != "0000-00-00") {
-                    if ($linkedEventInfo->dateFin != "0000-00-00") {
+                if ($linkedEventInfo->dateDebut != '0000-00-00') {
+                    if ($linkedEventInfo->dateFin != '0000-00-00') {
                         $linkedDate = $linkedEventInfo->dateFin;
                     } else {
                         $linkedDate = $linkedEventInfo->dateDebut;
@@ -359,15 +357,15 @@ class ExportPersonCommand extends ExportCommand
             $this->api->postRequest(
                 new Api\SimpleRequest(
                     'edit',
-                    array(
-                        'title'=>$pageName,
-                        'md5'=>md5($html),
-                        'text'=>$html,
-                        'section'=>$section + 1,
-                        'bot'=>true,
-                        'summary'=>'Importation des adresses liées depuis Archi-Wiki',
-                        'token'=>$this->api->getToken()
-                    )
+                    [
+                        'title'   => $pageName,
+                        'md5'     => md5($html),
+                        'text'    => $html,
+                        'section' => $section + 1,
+                        'bot'     => true,
+                        'summary' => 'Importation des adresses liées depuis Archi-Wiki',
+                        'token'   => $this->api->getToken(),
+                    ]
                 )
             );
             $sections[$section + 1] .= $html;
@@ -385,6 +383,5 @@ class ExportPersonCommand extends ExportCommand
         $content = $this->replaceSubtitles($content);
 
         $this->savePage($pageName, $content, 'Conversion des titres de section');
-
     }
 }

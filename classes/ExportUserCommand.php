@@ -1,20 +1,18 @@
 <?php
+
 namespace AW2MW;
 
+use Mediawiki\Api;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Process\Process;
-use Mediawiki\Api;
-use Mediawiki\DataModel;
-use AW2MW\Config;
 
 class ExportUserCommand extends ExportCommand
 {
     /**
-     * Configure command
+     * Configure command.
      *
      * @return void
      */
@@ -37,7 +35,7 @@ class ExportUserCommand extends ExportCommand
     }
 
     /**
-     * Execute command
+     * Execute command.
      *
      * @param InputInterface  $input  Input
      * @param OutputInterface $output Output
@@ -66,11 +64,11 @@ class ExportUserCommand extends ExportCommand
         if ($headers[0] == 'HTTP/1.1 200 OK') {
             $filename = 'Avatar '.$user['prenom'].' '.$user['nom'].'.jpg';
 
-            $params = array(
-                'filename'=>$filename,
-                'token'=>$this->api->getToken('edit'),
-                'url'=>$oldPath
-            );
+            $params = [
+                'filename' => $filename,
+                'token'    => $this->api->getToken('edit'),
+                'url'      => $oldPath,
+            ];
             if ($input->getOption('force')) {
                 $params['ignorewarnings'] = true;
             }
@@ -80,7 +78,7 @@ class ExportUserCommand extends ExportCommand
                 new Api\SimpleRequest(
                     'upload',
                     $params,
-                    array()
+                    []
                 )
             );
         } else {
@@ -93,7 +91,7 @@ class ExportUserCommand extends ExportCommand
             '|site='.$user['urlSiteWeb'].PHP_EOL.
             '|avatar='.$filename.PHP_EOL.
             '}}',
-            "Profil importé depuis Archi-Wiki"
+            'Profil importé depuis Archi-Wiki'
         );
     }
 }

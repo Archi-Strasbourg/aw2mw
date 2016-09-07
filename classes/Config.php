@@ -1,4 +1,5 @@
 <?php
+
 namespace AW2MW;
 
 use Symfony\Component\Yaml\Yaml;
@@ -11,9 +12,10 @@ class Config
     public $apiUrl = '';
     public $userSecret = '';
     public $salt = '';
-    public $admin = array();
+    public $admin = [];
+
     /**
-     * Config constructor
+     * Config constructor.
      */
     private function __construct($prod = false)
     {
@@ -29,15 +31,18 @@ class Config
             }
         }
     }
+
     /**
-     * Get singleton instance
+     * Get singleton instance.
+     *
      * @return Config
      */
     public static function getInstance($prod = false)
     {
         if (is_null(self::$instance)) {
-            self::$instance = new Config($prod);
+            self::$instance = new self($prod);
         }
+
         return self::$instance;
     }
 }

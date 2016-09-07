@@ -1,20 +1,16 @@
 <?php
+
 namespace AW2MW;
 
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Process\Process;
-use Mediawiki\Api;
-use Mediawiki\DataModel;
-use AW2MW\Config;
 
 class ExportStreetCommand extends ExportCommand
 {
     /**
-     * Configure command
+     * Configure command.
      *
      * @return void
      */
@@ -33,7 +29,7 @@ class ExportStreetCommand extends ExportCommand
 
     private function exportSubdistrict($id)
     {
-        $req="
+        $req = "
             SELECT nom, idQuartier
             FROM sousQuartier
             WHERE idSousQuartier = '".mysql_real_escape_string($id)."'
@@ -58,12 +54,11 @@ class ExportStreetCommand extends ExportCommand
         $this->savePage($pageName, $html, 'Sous-quartier importé depuis Archi-Wiki');
 
         return $subdistrict;
-
     }
 
     private function exportDistrict($id)
     {
-        $req="
+        $req = "
             SELECT nom, idVille
             FROM quartier
             WHERE idQuartier = '".mysql_real_escape_string($id)."'
@@ -89,7 +84,7 @@ class ExportStreetCommand extends ExportCommand
 
     private function exportCity($id)
     {
-        $req="
+        $req = "
             SELECT nom, idPays
             FROM ville
             WHERE idVille = '".mysql_real_escape_string($id)."'
@@ -113,7 +108,7 @@ class ExportStreetCommand extends ExportCommand
 
     private function exportCountry($id)
     {
-        $req="
+        $req = "
             SELECT nom
             FROM pays
             WHERE idPays = '".mysql_real_escape_string($id)."'
@@ -133,7 +128,7 @@ class ExportStreetCommand extends ExportCommand
     }
 
     /**
-     * Execute command
+     * Execute command.
      *
      * @param InputInterface  $input  Input
      * @param OutputInterface $output Output
@@ -146,7 +141,7 @@ class ExportStreetCommand extends ExportCommand
         $this->output = $output;
 
         $id = $input->getArgument('id');
-        $reqStreet="
+        $reqStreet = "
             SELECT idSousQuartier, nom, prefixe
             FROM rue
             WHERE idRue = '".mysql_real_escape_string($id)."'

@@ -1,20 +1,18 @@
 <?php
+
 namespace AW2MW;
 
+use Mediawiki\Api;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Process\Process;
-use Mediawiki\Api;
-use Mediawiki\DataModel;
-use AW2MW\Config;
 
 class ExportSourceCommand extends ExportCommand
 {
     /**
-     * Configure command
+     * Configure command.
      *
      * @return void
      */
@@ -42,7 +40,7 @@ class ExportSourceCommand extends ExportCommand
     }
 
     /**
-     * Execute command
+     * Execute command.
      *
      * @param InputInterface  $input  Input
      * @param OutputInterface $output Output
@@ -57,6 +55,7 @@ class ExportSourceCommand extends ExportCommand
         $origPageName = $this->escapeSourceName($this->s->getSourceLibelle($id));
         if (empty($origPageName)) {
             $output->writeln('<error>Empty source name (ID '.$id.')</error>');
+
             return;
         }
         $pageName = 'Source:'.$origPageName;
@@ -79,11 +78,11 @@ class ExportSourceCommand extends ExportCommand
             $filename = str_replace('.', '-', $filename);
             $filename .= '.jpg';
 
-            $params = array(
-                'filename'=>$filename,
-                'token'=>$this->api->getToken('edit'),
-                'url'=>$oldPath
-            );
+            $params = [
+                'filename' => $filename,
+                'token'    => $this->api->getToken('edit'),
+                'url'      => $oldPath,
+            ];
             if ($input->getOption('force')) {
                 $params['ignorewarnings'] = true;
             }
@@ -93,7 +92,7 @@ class ExportSourceCommand extends ExportCommand
                 new Api\SimpleRequest(
                     'upload',
                     $params,
-                    array()
+                    []
                 )
             );
         } else {
