@@ -1,21 +1,16 @@
 <?php
+
 namespace AW2MW;
 
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Process\Process;
-use Mediawiki\Api;
-use Mediawiki\DataModel;
-use AW2MW\Config;
 
 class ExportAllSourceCommand extends ExportCommand
 {
     /**
-     * Configure command
+     * Configure command.
      *
      * @return void
      */
@@ -27,9 +22,8 @@ class ExportAllSourceCommand extends ExportCommand
             ->setDescription('Export every source');
     }
 
-
     /**
-     * Execute command
+     * Execute command.
      *
      * @param InputInterface  $input  Input
      * @param OutputInterface $output Output
@@ -39,10 +33,10 @@ class ExportAllSourceCommand extends ExportCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         parent::setup($input, $output);
-        $reqSource="
+        $reqSource = '
             SELECT idSource
             FROM source
-            ";
+            ';
 
         $resSource = $this->a->connexionBdd->requete($reqSource);
         while ($source = mysql_fetch_assoc($resSource)) {
@@ -50,7 +44,7 @@ class ExportAllSourceCommand extends ExportCommand
                 try {
                     $command = $this->getApplication()->find('export:source');
                     $command->run(
-                        new ArrayInput(array('id'=>$source['idSource'])),
+                        new ArrayInput(['id' => $source['idSource']]),
                         $output
                     );
                 } catch (Exception $e) {
@@ -58,6 +52,5 @@ class ExportAllSourceCommand extends ExportCommand
                 }
             }
         }
-
     }
 }

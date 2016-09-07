@@ -1,21 +1,16 @@
 <?php
+
 namespace AW2MW;
 
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Process\Process;
-use Mediawiki\Api;
-use Mediawiki\DataModel;
-use AW2MW\Config;
 
 class ExportAllUserCommand extends ExportCommand
 {
     /**
-     * Configure command
+     * Configure command.
      *
      * @return void
      */
@@ -27,9 +22,8 @@ class ExportAllUserCommand extends ExportCommand
             ->setDescription('Export every user');
     }
 
-
     /**
-     * Execute command
+     * Execute command.
      *
      * @param InputInterface  $input  Input
      * @param OutputInterface $output Output
@@ -39,10 +33,10 @@ class ExportAllUserCommand extends ExportCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         parent::setup($input, $output);
-        $reqUser="
+        $reqUser = '
             SELECT idUtilisateur
             FROM utilisateur
-            ";
+            ';
 
         $resUser = $this->a->connexionBdd->requete($reqUser);
         while ($user = mysql_fetch_assoc($resUser)) {
@@ -50,7 +44,7 @@ class ExportAllUserCommand extends ExportCommand
                 try {
                     $command = $this->getApplication()->find('export:user');
                     $command->run(
-                        new ArrayInput(array('id'=>$user['idUtilisateur'])),
+                        new ArrayInput(['id' => $user['idUtilisateur']]),
                         $output
                     );
                 } catch (Exception $e) {
@@ -58,6 +52,5 @@ class ExportAllUserCommand extends ExportCommand
                 }
             }
         }
-
     }
 }

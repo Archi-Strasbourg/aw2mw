@@ -1,15 +1,16 @@
 <?php
+
 require_once 'vendor/autoload.php';
-use AW2MW\ExportAllCommand;
-use AW2MW\ExportAllStreetCommand;
-use AW2MW\ExportAllSourceCommand;
-use AW2MW\ExportAllUserCommand;
 use AW2MW\ExportAddressCommand;
-use AW2MW\ExportSourceCommand;
+use AW2MW\ExportAllCommand;
+use AW2MW\ExportAllSourceCommand;
+use AW2MW\ExportAllStreetCommand;
+use AW2MW\ExportAllUserCommand;
 use AW2MW\ExportImageCommand;
-use AW2MW\ExportUserCommand;
 use AW2MW\ExportPersonCommand;
+use AW2MW\ExportSourceCommand;
 use AW2MW\ExportStreetCommand;
+use AW2MW\ExportUserCommand;
 use Symfony\Component\Console\Application;
 
 $application = new Application();

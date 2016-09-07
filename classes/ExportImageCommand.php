@@ -1,20 +1,18 @@
 <?php
+
 namespace AW2MW;
 
+use Mediawiki\Api;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Process\Process;
-use Mediawiki\Api;
-use Mediawiki\DataModel;
-use AW2MW\Config;
 
 class ExportImageCommand extends ExportCommand
 {
     /**
-     * Configure command
+     * Configure command.
      *
      * @return void
      */
@@ -42,7 +40,7 @@ class ExportImageCommand extends ExportCommand
     }
 
     /**
-     * Execute command
+     * Execute command.
      *
      * @param InputInterface  $input  Input
      * @param OutputInterface $output Output
@@ -98,11 +96,11 @@ class ExportImageCommand extends ExportCommand
             $oldPath = 'http://www.archi-wiki.org/photos--'.$image['dateUpload'].
                 '-'.$image['idHistoriqueImage'].'-originaux.jpg';
 
-            $params = array(
-                'filename'=>$filename,
-                'token'=>$this->api->getToken('edit'),
-                'url'=>$oldPath
-            );
+            $params = [
+                'filename' => $filename,
+                'token'    => $this->api->getToken('edit'),
+                'url'      => $oldPath,
+            ];
             if ($input->getOption('force')) {
                 $params['ignorewarnings'] = true;
             }
@@ -111,7 +109,7 @@ class ExportImageCommand extends ExportCommand
                 new Api\SimpleRequest(
                     'upload',
                     $params,
-                    array()
+                    []
                 )
             );
         }
@@ -136,7 +134,7 @@ class ExportImageCommand extends ExportCommand
         $licence = $this->i->getLicence($image['idImage']);
         $this->login('aw2mw bot');
         $description = $this->convertHtml(
-            $this->bbCode->convertToDisplay(array('text'=>$image['description']))
+            $this->bbCode->convertToDisplay(['text' => $image['description']])
         );
         $this->savePage(
             'File:'.$filename,
