@@ -39,11 +39,14 @@ class ExportAddressCommand extends ExportCommand
                 $this->output
             );
             $filename = $this->getImageName($image['idImage']);
-            $description = strip_tags(
-                $this->convertHtml(
-                    $this->bbCode->convertToDisplay(['text' => $image['description']])
+            $description = str_replace(PHP_EOL, ' ',
+                strip_tags(
+                    $this->convertHtml(
+                        $this->bbCode->convertToDisplay(['text' => $image['description']])
+                    )
                 )
             );
+            dump($description);
             $return .= 'File:'.$filename.'|'.$description.PHP_EOL;
         }
         $return .= '</gallery>'.PHP_EOL;
