@@ -153,7 +153,7 @@ abstract class ExportCommand extends Command
 
         //Convert URLs
         preg_match_all(
-            '#\[http:\/\/(www\.)?archi-wiki.org\/adresse-(.+)-([0-9]+)\.html\?[\w=&\#]+\s(.+)\]#i',
+            '#\[http:\/\/(www\.)?archi-wiki.org\/adresse-(.+)-([0-9]+)\.html\?[\w=&\#]+\s(.+)\]#iU',
             $html,
             $matches,
             PREG_SET_ORDER

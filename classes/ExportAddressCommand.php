@@ -519,6 +519,35 @@ class ExportAddressCommand extends ExportCommand
             $sections[] = $references;
         }
 
+        $reqComments = "SELECT c.idCommentaire as idCommentaire,c.nom as nom,c.prenom as prenom,c.email as email,DATE_FORMAT(c.date,'"._("%d/%m/%Y à %kh%i")."') as dateF,c.commentaire as commentaire,c.idUtilisateur as idUtilisateur, u.urlSiteWeb as urlSiteWeb
+        		 ,date_format( c.date, '%Y%m%d%H%i%s' ) AS dateTri
+        		FROM commentaires c
+        		LEFT JOIN utilisateur u ON u.idUtilisateur = c.idUtilisateur
+        		WHERE c.idEvenementGroupeAdresse = '".$this->a->getIdEvenementGroupeAdresseFromIdAdresse($address['idAdresse'])."'
+        				AND CommentaireValide=1
+        				ORDER BY DateTri DESC
+        				";
+
+        $resComments = $this->a->connexionBdd->requete($reqComments);
+        $pageID = $this->services->newPageGetter()->getFromTitle($pageName)->getID();
+        while ($comment = mysql_fetch_assoc($resComments)) {
+            $this->login($comment['prenom'].' '.$comment['nom']);
+            $this->api->postRequest(
+                new Api\SimpleRequest(
+                    'commentsubmit',
+                    [
+                        'pageID'   => $pageID,
+                        'parentID' => 0,
+                        'commentText' => $this->convertHtml(
+                            $this->bbCode->convertToDisplay(['text' => $comment['commentaire']])
+                        )
+                    ]
+                )
+            );
+            //This is to make sure comments are posted in the right order
+            sleep(1);
+        }
+
         //Login with bot
         $this->login('aw2mw bot');
 
