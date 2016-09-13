@@ -525,7 +525,7 @@ class ExportAddressCommand extends ExportCommand
         		LEFT JOIN utilisateur u ON u.idUtilisateur = c.idUtilisateur
         		WHERE c.idEvenementGroupeAdresse = '".$this->a->getIdEvenementGroupeAdresseFromIdAdresse($address['idAdresse'])."'
         				AND CommentaireValide=1
-        				ORDER BY DateTri DESC
+        				ORDER BY DateTri ASC
         				";
 
         $resComments = $this->a->connexionBdd->requete($reqComments);
