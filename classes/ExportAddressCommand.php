@@ -46,7 +46,6 @@ class ExportAddressCommand extends ExportCommand
                     )
                 )
             );
-            dump($description);
             $return .= 'File:'.$filename.'|'.$description.PHP_EOL;
         }
         $return .= '</gallery>'.PHP_EOL;
