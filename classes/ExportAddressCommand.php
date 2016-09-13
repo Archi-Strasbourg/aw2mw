@@ -519,7 +519,7 @@ class ExportAddressCommand extends ExportCommand
             $sections[] = $references;
         }
 
-        $reqComments = "SELECT c.idCommentaire as idCommentaire,c.nom as nom,c.prenom as prenom,c.email as email,DATE_FORMAT(c.date,'"._("%d/%m/%Y à %kh%i")."') as dateF,c.commentaire as commentaire,c.idUtilisateur as idUtilisateur, u.urlSiteWeb as urlSiteWeb
+        $reqComments = "SELECT c.idCommentaire as idCommentaire,c.nom as nom,c.prenom as prenom,c.email as email,DATE_FORMAT(c.date,'"._('%d/%m/%Y à %kh%i')."') as dateF,c.commentaire as commentaire,c.idUtilisateur as idUtilisateur, u.urlSiteWeb as urlSiteWeb
         		 ,date_format( c.date, '%Y%m%d%H%i%s' ) AS dateTri
         		FROM commentaires c
         		LEFT JOIN utilisateur u ON u.idUtilisateur = c.idUtilisateur
@@ -536,11 +536,11 @@ class ExportAddressCommand extends ExportCommand
                 new Api\SimpleRequest(
                     'commentsubmit',
                     [
-                        'pageID'   => $pageID,
-                        'parentID' => 0,
+                        'pageID'      => $pageID,
+                        'parentID'    => 0,
                         'commentText' => $this->convertHtml(
                             $this->bbCode->convertToDisplay(['text' => $comment['commentaire']])
-                        )
+                        ),
                     ]
                 )
             );
