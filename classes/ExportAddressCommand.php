@@ -527,7 +527,7 @@ class ExportAddressCommand extends ExportCommand
         $comments = [];
 
         foreach ($events as $section => $id) {
-            $reqEventsComments = "SELECT c.idCommentairesEvenement as idCommentaire,c.nom as nom,c.prenom as prenom,c.email as email,DATE_FORMAT(c.date,'"._("%d/%m/%Y à %kh%i")."') as dateF,c.commentaire as commentaire,c.idUtilisateur as idUtilisateur
+            $reqEventsComments = "SELECT c.idCommentairesEvenement as idCommentaire,c.nom as nom,c.prenom as prenom,c.email as email,DATE_FORMAT(c.date,'"._('%d/%m/%Y à %kh%i')."') as dateF,c.commentaire as commentaire,c.idUtilisateur as idUtilisateur
                      ,date_format( c.date, '%Y%m%d%H%i%s' ) AS dateTri
                     FROM commentairesEvenement c
                     LEFT JOIN utilisateur u ON u.idUtilisateur = c.idUtilisateur
@@ -557,8 +557,7 @@ class ExportAddressCommand extends ExportCommand
         }
 
         $commentDates = [];
-        foreach ($comments as $key => $comment)
-        {
+        foreach ($comments as $key => $comment) {
             $commentDates[$key] = $comment['dateTri'];
         }
         array_multisort($commentDates, SORT_ASC, $comments);
