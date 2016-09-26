@@ -142,7 +142,11 @@ class ExportAddressCommand extends ExportCommand
             ];
 
             foreach ($people as $person) {
-                $info['people'][$person->metier] = $person->prenom.' '.$person->nom;
+                if (isset($info['people'][$person->metier]) && !empty($info['people'][$person->metier])) {
+                    $info['people'][$person->metier] .= ';'.$person->prenom.' '.$person->nom;
+                } else {
+                    $info['people'][$person->metier] = $person->prenom.' '.$person->nom;
+                }
             }
 
             $infobox[] = $info;
