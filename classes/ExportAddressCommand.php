@@ -523,6 +523,24 @@ class ExportAddressCommand extends ExportCommand
             $sections[] = $references;
         }
 
+
+        $comments = [];
+
+        foreach ($events as $section => $id) {
+            $reqEventsComments = "SELECT c.idCommentairesEvenement as idCommentaire,c.nom as nom,c.prenom as prenom,c.email as email,DATE_FORMAT(c.date,'"._("%d/%m/%Y à %kh%i")."') as dateF,c.commentaire as commentaire,c.idUtilisateur as idUtilisateur
+                     ,date_format( c.date, '%Y%m%d%H%i%s' ) AS dateTri
+                    FROM commentairesEvenement c
+                    LEFT JOIN utilisateur u ON u.idUtilisateur = c.idUtilisateur
+                    WHERE c.idEvenement = '".$id."'
+                    AND CommentaireValide=1
+                    ORDER BY DateTri ASC
+                    ";
+            $resEventsComments = $this->a->connexionBdd->requete($reqEventsComments);
+            while ($comment = mysql_fetch_assoc($resEventsComments)) {
+                $comments[] = $comment;
+            }
+        }
+
         $reqComments = "SELECT c.idCommentaire as idCommentaire,c.nom as nom,c.prenom as prenom,c.email as email,DATE_FORMAT(c.date,'"._('%d/%m/%Y à %kh%i')."') as dateF,c.commentaire as commentaire,c.idUtilisateur as idUtilisateur, u.urlSiteWeb as urlSiteWeb
         		 ,date_format( c.date, '%Y%m%d%H%i%s' ) AS dateTri
         		FROM commentaires c
@@ -535,6 +553,17 @@ class ExportAddressCommand extends ExportCommand
         $resComments = $this->a->connexionBdd->requete($reqComments);
         $pageID = $this->services->newPageGetter()->getFromTitle($pageName)->getID();
         while ($comment = mysql_fetch_assoc($resComments)) {
+            $comments[] = $comment;
+        }
+
+        $commentDates = [];
+        foreach ($comments as $key => $comment)
+        {
+            $commentDates[$key] = $comment['dateTri'];
+        }
+        array_multisort($commentDates, SORT_ASC, $comments);
+
+        foreach ($comments as $comment) {
             $this->login($comment['prenom'].' '.$comment['nom']);
             $this->api->postRequest(
                 new Api\SimpleRequest(
