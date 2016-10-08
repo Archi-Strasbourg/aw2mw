@@ -163,6 +163,8 @@ class ExportPersonCommand extends ExportCommand
         $relatedPeople = $person->getRelatedPeople($id);
         if (!empty($relatedPeople)) {
             $relatedPeopleContent = '==Personnes liées=='.PHP_EOL;
+        } else {
+            $relatedPeopleContent = '';
         }
         foreach ($relatedPeople as $relatedId) {
             $relatedPerson = new \ArchiPersonne($relatedId);
