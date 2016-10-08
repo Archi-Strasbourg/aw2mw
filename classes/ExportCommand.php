@@ -125,6 +125,7 @@ abstract class ExportCommand extends Command
 
     protected function convertHtml($html)
     {
+        global $config;
         $chain = new Chain(
             ProcessBuilder::create(['echo', $html])
         );
@@ -160,6 +161,17 @@ abstract class ExportCommand extends Command
         );
         foreach ($matches as $match) {
             $html = str_replace($match[0], '[[Adresse:'.$this->getAddressName($match[3]).'|'.$match[5].']]', $html);
+        }
+
+        preg_match_all(
+            '#\[http:\/\/(www\.)?archi-wiki.org\/personnalite-(.+)-([0-9]+)\.html(\?[\w=&\#]+)?\s(.+)\]#iU',
+            $html,
+            $matches,
+            PREG_SET_ORDER
+        );
+        foreach ($matches as $match) {
+            @$person = new \ArchiPersonne($match[3]);
+            $html = str_replace($match[0], '[[Personne:'.$person->prenom.' '.$person->nom.'|'.$match[5].']]', $html);
         }
 
         return $html;

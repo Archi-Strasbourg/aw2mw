@@ -50,6 +50,8 @@ class ExportImageCommand extends ExportCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         parent::setup($input, $output);
+        global $config;
+        $config = new \Config();
 
         $id = $input->getArgument('id');
 
