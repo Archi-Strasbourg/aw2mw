@@ -51,7 +51,7 @@ class ExportImageCommand extends ExportCommand
     {
         parent::setup($input, $output);
         global $config;
-        $config = new \Config();
+        $config = new \ArchiConfig();
 
         $id = $input->getArgument('id');
 

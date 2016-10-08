@@ -41,7 +41,7 @@ class ExportPersonCommand extends ExportCommand
     {
         parent::setup($input, $output);
         global $config;
-        $config = new \Config();
+        $config = new \ArchiConfig();
         $id = $input->getArgument('id');
         @$person = new \ArchiPersonne($id);
         if (!isset($person->nom)) {
