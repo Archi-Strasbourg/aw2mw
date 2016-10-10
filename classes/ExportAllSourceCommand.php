@@ -47,7 +47,7 @@ class ExportAllSourceCommand extends ExportCommand
                         new ArrayInput(['id' => $source['idSource']]),
                         $output
                     );
-                } catch (Exception $e) {
+                } catch (\Exception $e) {
                     $output->writeln('<info>Couldn\'t export ID '.$source['idSource'].' </info>');
                 }
             }
