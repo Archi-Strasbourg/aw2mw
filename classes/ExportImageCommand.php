@@ -116,7 +116,7 @@ class ExportImageCommand extends ExportCommand
             );
         }
         if (empty($image['auteur'])) {
-            if ($user) {
+            if (!empty($user)) {
                 $image['auteur'] = '[[Utilisateur:'.$user['prenom'].' '.$user['nom'].'|'.
                     $user['prenom'].' '.$user['nom'].']]';
             } else {
