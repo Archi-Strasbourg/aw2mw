@@ -13,7 +13,6 @@ use Symfony\Component\Process\ProcessBuilder;
 
 abstract class ExportCommand extends Command
 {
-
     protected $config;
     protected $a;
     protected $e;
