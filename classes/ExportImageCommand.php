@@ -80,6 +80,7 @@ class ExportImageCommand extends ExportCommand
         );
         $user = $this->u->getArrayInfosFromUtilisateur($origImage['idUtilisateur']);
 
+        $after2008 = false;
         if (!empty($user)) {
             $this->login($user['prenom'].' '.$user['nom']);
         } else {
