@@ -172,8 +172,10 @@ abstract class ExportCommand extends Command
             $matches,
             PREG_SET_ORDER
         );
-        foreach ($matches as $match) {
-            $html = str_replace($match[0], '[[Adresse:'.$this->getAddressName($match[3]).'|'.$match[5].']]', $html);
+        if (is_array($matches)) {
+            foreach ($matches as $match) {
+                $html = str_replace($match[0], '[[Adresse:'.$this->getAddressName($match[3]).'|'.$match[5].']]', $html);
+            }
         }
 
         preg_match_all(
@@ -182,9 +184,11 @@ abstract class ExportCommand extends Command
             $matches,
             PREG_SET_ORDER
         );
-        foreach ($matches as $match) {
-            @$person = new \ArchiPersonne($match[3]);
-            $html = str_replace($match[0], '[[Personne:'.$person->prenom.' '.$person->nom.'|'.$match[5].']]', $html);
+        if (is_array($matches)) {
+            foreach ($matches as $match) {
+                @$person = new \ArchiPersonne($match[3]);
+                $html = str_replace($match[0], '[[Personne:'.$person->prenom.' '.$person->nom.'|'.$match[5].']]', $html);
+            }
         }
 
         return $html;
