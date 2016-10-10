@@ -240,7 +240,7 @@ class ExportAddressCommand extends ExportCommand
                         if ($fetchAdressesGroupeAdresse['idQuartier'] != ''
                             && $fetchAdressesGroupeAdresse['idQuartier'] != '0'
                         ) {
-                            $arrayNumero[$this->getIntituleAdresseFrom(
+                            $arrayNumero[$this->a->getIntituleAdresseFrom(
                                 $fetchAdressesGroupeAdresse['idAdresse'],
                                 'idAdresse',
                                 ['noSousQuartier' => true, 'noQuartier' => false, 'noVille' => true]
@@ -255,7 +255,7 @@ class ExportAddressCommand extends ExportCommand
                         if ($fetchAdressesGroupeAdresse['idSousQuartier'] != ''
                             && $fetchAdressesGroupeAdresse['idSousQuartier'] != '0'
                         ) {
-                            $arrayNumero[$this->getIntituleAdresseFrom(
+                            $arrayNumero[$this->a->getIntituleAdresseFrom(
                                 $fetchAdressesGroupeAdresse['idAdresse'],
                                 'idAdresse',
                                 ['noSousQuartier' => false, 'noQuartier' => true, 'noVille' => true]
