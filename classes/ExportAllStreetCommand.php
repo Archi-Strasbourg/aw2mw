@@ -47,7 +47,7 @@ class ExportAllStreetCommand extends ExportCommand
                         new ArrayInput(['id' => $street['idRue']]),
                         $output
                     );
-                } catch (Exception $e) {
+                } catch (\Exception $e) {
                     $output->writeln('<info>Couldn\'t export ID '.$street['idRue'].' </info>');
                 }
             }

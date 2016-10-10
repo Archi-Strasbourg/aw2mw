@@ -47,7 +47,7 @@ class ExportAllUserCommand extends ExportCommand
                         new ArrayInput(['id' => $user['idUtilisateur']]),
                         $output
                     );
-                } catch (Exception $e) {
+                } catch (\Exception $e) {
                     $output->writeln('<info>Couldn\'t export ID '.$user['idUtilisateur'].' </info>');
                 }
             }
