@@ -41,6 +41,9 @@ abstract class ExportCommand extends Command
         );
     }
 
+    /**
+     * @param string $username
+     */
     protected function login($username)
     {
         $password = password_hash(
@@ -73,6 +76,9 @@ abstract class ExportCommand extends Command
         }
     }
 
+    /**
+     * @param string $note
+     */
     protected function savePage($pageName, $content, $note)
     {
         $this->revisionSaver->save(
@@ -131,11 +137,17 @@ abstract class ExportCommand extends Command
         $this->api->login(new Api\ApiUser($this->config->admin['login'], $this->config->admin['password']));
     }
 
+    /**
+     * @param string $content
+     */
     protected function replaceSubtitles($content)
     {
         return preg_replace('/<u>(.+)<\/u>(\s*:)?\s*/i', '===$1==='.PHP_EOL, $content);
     }
 
+    /**
+     * @param false|string $html
+     */
     protected function convertHtml($html)
     {
         global $config;
@@ -230,6 +242,9 @@ abstract class ExportCommand extends Command
         );
     }
 
+    /**
+     * @param string $name
+     */
     protected function escapeSourceName($name)
     {
         $name = stripslashes($name);
