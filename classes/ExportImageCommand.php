@@ -80,7 +80,7 @@ class ExportImageCommand extends ExportCommand
         );
         $user = $this->u->getArrayInfosFromUtilisateur($origImage['idUtilisateur']);
 
-        if ($user) {
+        if (!empty($user)) {
             $this->login($user['prenom'].' '.$user['nom']);
         } else {
             $after2008 = new \DateTime($origImage['dateUpload']) > new \DateTime('2008-04-01');
