@@ -151,7 +151,7 @@ class ExportStreetCommand extends ExportCommand
         $street = mysql_fetch_assoc($resStreet);
         $street['nom'] = trim($street['nom']);
 
-        if ($street && !empty($street['nom'])) {
+        if (!empty($street) && !empty($street['nom'])) {
             //Login as bot
             $this->login('aw2mw bot');
 
