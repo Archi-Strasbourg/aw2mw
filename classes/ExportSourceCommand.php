@@ -49,7 +49,7 @@ class ExportSourceCommand extends ExportCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        parent::setup($input, $output);
+        $this->setup($input, $output);
 
         $id = $input->getArgument('id');
         $origPageName = $this->escapeSourceName($this->s->getSourceLibelle($id));

@@ -32,7 +32,7 @@ class ExportAllStreetCommand extends ExportCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        parent::setup($input, $output);
+        $this->setup($input, $output);
         $reqStreet = '
             SELECT idRue
             FROM rue

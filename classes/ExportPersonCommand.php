@@ -39,7 +39,7 @@ class ExportPersonCommand extends ExportCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        parent::setup($input, $output);
+        $this->setup($input, $output);
         global $config;
         $config = new \ArchiConfig();
         $id = $input->getArgument('id');

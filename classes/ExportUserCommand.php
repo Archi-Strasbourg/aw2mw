@@ -44,7 +44,7 @@ class ExportUserCommand extends ExportCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        parent::setup($input, $output);
+        $this->setup($input, $output);
 
         $id = $input->getArgument('id');
         $user = $this->u->getArrayInfosFromUtilisateur($id);

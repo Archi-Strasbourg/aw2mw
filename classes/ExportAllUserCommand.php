@@ -32,7 +32,7 @@ class ExportAllUserCommand extends ExportCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        parent::setup($input, $output);
+        $this->setup($input, $output);
         $reqUser = '
             SELECT idUtilisateur
             FROM utilisateur

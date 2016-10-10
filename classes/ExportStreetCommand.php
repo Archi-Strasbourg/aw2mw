@@ -137,7 +137,7 @@ class ExportStreetCommand extends ExportCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        parent::setup($input, $output);
+        $this->setup($input, $output);
         $this->output = $output;
 
         $id = $input->getArgument('id');
