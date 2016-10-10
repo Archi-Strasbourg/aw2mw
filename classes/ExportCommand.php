@@ -67,6 +67,9 @@ abstract class ExportCommand extends Command
         }
     }
 
+    /**
+     * @param string $pageName
+     */
     protected function deletePage($pageName)
     {
         //Delete article if it already exists
@@ -78,6 +81,8 @@ abstract class ExportCommand extends Command
 
     /**
      * @param string $note
+     * @param string $pageName
+     * @param string $content
      */
     protected function savePage($pageName, $content, $note)
     {
