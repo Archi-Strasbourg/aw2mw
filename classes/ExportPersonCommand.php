@@ -230,11 +230,6 @@ class ExportPersonCommand extends ExportCommand
 
 
                 $content = '';
-                $date = $this->convertDate(
-                    $eventInfo['dateDebut'],
-                    $eventInfo['dateFin'],
-                    $eventInfo['isDateDebutEnviron']
-                );
 
                 if (!empty($eventInfo['titre'])) {
                     $title = $eventInfo['titre'];
@@ -316,8 +311,6 @@ class ExportPersonCommand extends ExportCommand
                     $fetchAddress = mysql_fetch_object($resAddress);
                     if (isset($fetchAddress->idAdresse)) {
                         $linkedEventIdAddress = $fetchAddress->idAdresse;
-                        $address = $this->a->getArrayAdresseFromIdAdresse($input->getArgument('id'));
-                        $city = $address['nomVille'];
                     }
                 }
 
@@ -325,11 +318,6 @@ class ExportPersonCommand extends ExportCommand
                 if ($linkedEventImg['url'] == $config->getUrlImage('', 'transparent.gif')) {
                     $linkedEventImg = $this->a->getUrlImageFromAdresse($linkedEventIdAddress, 'mini');
                 }
-                $linkedEventUrl = $config->creerUrl(
-                    '',
-                    'adresseDetail',
-                    ['archiIdAdresse' => $linkedEventIdAddress, 'archiIdEvenementGroupeAdresse' => $linkedEvent]
-                );
                 $html .= '{{Adresse liée
                     |adresse='.$this->getAddressName($linkedEventIdAddress).PHP_EOL;
                 $reqImage = 'SELECT idImage FROM historiqueImage
