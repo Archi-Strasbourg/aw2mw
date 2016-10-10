@@ -137,12 +137,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Archi-Strasbourg/archi-wiki.git",
-                "reference": "2ec658e359afe08dd79bb47ca89fd656741f5f0c"
+                "reference": "e7b59e49d155839a1ec7841825dc64e8a7892b1a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Archi-Strasbourg/archi-wiki/zipball/2ec658e359afe08dd79bb47ca89fd656741f5f0c",
-                "reference": "2ec658e359afe08dd79bb47ca89fd656741f5f0c",
+                "url": "https://api.github.com/repos/Archi-Strasbourg/archi-wiki/zipball/e7b59e49d155839a1ec7841825dc64e8a7892b1a",
+                "reference": "e7b59e49d155839a1ec7841825dc64e8a7892b1a",
                 "shasum": ""
             },
             "require": {
@@ -165,7 +165,7 @@
                 "GPL-3.0"
             ],
             "description": "Source code for http://archi-strasbourg.org/",
-            "time": "2016-10-10 20:32:43"
+            "time": "2016-10-10 20:43:01"
         },
         {
             "name": "eventviva/php-image-resize",
