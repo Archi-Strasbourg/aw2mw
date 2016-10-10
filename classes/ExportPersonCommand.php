@@ -252,7 +252,7 @@ class ExportPersonCommand extends ExportCommand
                 $content .= '=='.$title.'=='.PHP_EOL;
 
                 $html = $this->convertHtml(
-                    $this->bbCode->convertToDisplay(['text' => $eventInfo['description']])
+                    (string) $this->bbCode->convertToDisplay(['text' => $eventInfo['description']])
                 );
 
 

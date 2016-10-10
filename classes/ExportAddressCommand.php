@@ -41,7 +41,7 @@ class ExportAddressCommand extends ExportCommand
             $description = str_replace(PHP_EOL, ' ',
                 strip_tags(
                     $this->convertHtml(
-                        $this->bbCode->convertToDisplay(['text' => $image['description']])
+                        (string) $this->bbCode->convertToDisplay(['text' => $image['description']])
                     )
                 )
             );
@@ -463,7 +463,7 @@ class ExportAddressCommand extends ExportCommand
                 }
 
                 $html = $this->convertHtml(
-                    $this->bbCode->convertToDisplay(['text' => $event['description']])
+                    (string) $this->bbCode->convertToDisplay(['text' => $event['description']])
                 );
 
 
@@ -573,7 +573,7 @@ class ExportAddressCommand extends ExportCommand
                         'pageID'      => $pageID,
                         'parentID'    => 0,
                         'commentText' => $this->convertHtml(
-                            $this->bbCode->convertToDisplay(['text' => $comment['commentaire']])
+                            (string) $this->bbCode->convertToDisplay(['text' => $comment['commentaire']])
                         ),
                     ]
                 )

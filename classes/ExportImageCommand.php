@@ -137,7 +137,7 @@ class ExportImageCommand extends ExportCommand
         $licence = $this->i->getLicence($image['idImage']);
         $this->login('aw2mw bot');
         $description = $this->convertHtml(
-            $this->bbCode->convertToDisplay(['text' => $image['description']])
+            (string) $this->bbCode->convertToDisplay(['text' => $image['description']])
         );
         $this->savePage(
             'File:'.$filename,
