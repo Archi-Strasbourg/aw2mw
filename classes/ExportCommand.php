@@ -151,7 +151,7 @@ abstract class ExportCommand extends Command
     }
 
     /**
-     * @param false|string $html
+     * @param string $html
      */
     protected function convertHtml($html)
     {
