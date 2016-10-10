@@ -25,9 +25,11 @@ class Config
             $yamlfile = __DIR__.'/../config.yml';
         }
         $yaml = Yaml::parse(file_get_contents($yamlfile));
-        foreach ($yaml as $param => $value) {
-            if (isset($this->$param)) {
-                $this->$param = $value;
+        if (is_array($yaml)) {
+            foreach ($yaml as $param => $value) {
+                if (isset($this->$param)) {
+                    $this->$param = $value;
+                }
             }
         }
     }
