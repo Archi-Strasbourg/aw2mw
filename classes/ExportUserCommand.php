@@ -54,8 +54,6 @@ class ExportUserCommand extends ExportCommand
 
         $output->writeln('<info>Exporting "'.$pageName.'"…</info>');
 
-        $content = '';
-
         //Login as user
         $this->login($user['prenom'].' '.$user['nom']);
 
