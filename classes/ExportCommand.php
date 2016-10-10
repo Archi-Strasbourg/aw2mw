@@ -13,6 +13,20 @@ use Symfony\Component\Process\ProcessBuilder;
 
 abstract class ExportCommand extends Command
 {
+
+    protected $config;
+    protected $a;
+    protected $e;
+    protected $u;
+    protected $i;
+    protected $s;
+    protected $bbCode;
+    protected $api;
+    protected $services;
+    protected $revisionSaver;
+    protected $fileUploader;
+    protected $output;
+
     /**
      * Configure command.
      *
