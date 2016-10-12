@@ -5,7 +5,8 @@ module.exports = function (grunt) {
         {
             phpcs: {
                 options: {
-                    standard: 'PSR2'
+                    standard: 'PSR2',
+                    bin: 'vendor/bin/phpcs'
                 },
                 php: {
                     src: ['*.php', 'classes/*.php', 'controllers/*.php']
@@ -15,12 +16,27 @@ module.exports = function (grunt) {
                 Gruntfile: {
                     src: ['Gruntfile.js']
                 }
+            },
+            jsonlint: {
+                manifests: {
+                    src: '*.json',
+                    options: {
+                        format: true
+                    }
+                }
+            },
+            fixpack: {
+                package: {
+                    src: 'package.json'
+                }
             }
         }
     );
 
     grunt.loadNpmTasks('grunt-jslint');
     grunt.loadNpmTasks('grunt-phpcs');
+    grunt.loadNpmTasks('grunt-jsonlint');
+    grunt.loadNpmTasks('grunt-fixpack');
 
-    grunt.registerTask('lint', ['phpcs', 'jslint']);
+    grunt.registerTask('lint', ['jslint', 'fixpack', 'jsonlint', 'phpcs']);
 };

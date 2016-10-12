@@ -1,14 +1,25 @@
 {
-	"name": "aw2mw",
-	"version": "0.1.0",
-	"license": "GPL-3.0",
-	"dependencies": {
-		"grunt": "~1.0.1",
-		"grunt-phpcs": "~0.4.0",
-		"grunt-jslint": "~1.1.14"
-	},
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/Archi-Strasbourg/aw2mw.git"
-	}
+  "name": "aw2mw",
+  "description": "Export ArchiWiki data to MediaWiki",
+  "version": "0.1.0",
+  "author": "Pierre Rudloff",
+  "bugs": "https://github.com/Archi-Strasbourg/aw2mw/issues",
+  "dependencies": {
+    "grunt": "~1.0.1",
+    "grunt-fixpack": "~0.1.0",
+    "grunt-jslint": "~1.1.14",
+    "grunt-jsonlint": "~1.1.0",
+    "grunt-phpcs": "~0.4.0"
+  },
+  "homepage": "https://github.com/Archi-Strasbourg/aw2mw",
+  "keywords": [
+    "Archi-Wiki",
+    "Mediawiki"
+  ],
+  "license": "GPL-3.0",
+  "main": "aw2mw.php",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Archi-Strasbourg/aw2mw.git"
+  }
 }
