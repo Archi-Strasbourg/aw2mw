@@ -224,9 +224,9 @@ abstract class ExportCommand extends Command
                 'idAdresse',
                 [
                     'noHTML'                   => true,
-                    'noQuartier' => true,
-                    'noSousQuartier' => true,
-                    'noVille' => true,
+                    'noQuartier'               => true,
+                    'noSousQuartier'           => true,
+                    'noVille'                  => true,
                     'displayFirstTitreAdresse' => true,
                     'setSeparatorAfterTitle'   => '#',
                 ]

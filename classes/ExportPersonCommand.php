@@ -295,9 +295,9 @@ class ExportPersonCommand extends ExportCommand
                     'idEvenement',
                     [
                         'noHTML'                   => true,
-                        'noQuartier' => true,
-                        'noSousQuartier' => true,
-                        'noVille' => true,
+                        'noQuartier'               => true,
+                        'noSousQuartier'           => true,
+                        'noVille'                  => true,
                         'displayFirstTitreAdresse' => true,
                         'setSeparatorAfterTitle'   => '_',
                     ]
