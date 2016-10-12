@@ -294,7 +294,10 @@ class ExportPersonCommand extends ExportCommand
                     $linkedEvent,
                     'idEvenement',
                     [
-                        'noHTML'                   => true, 'noQuartier' => true, 'noSousQuartier' => true, 'noVille' => true,
+                        'noHTML'                   => true,
+                        'noQuartier' => true,
+                        'noSousQuartier' => true,
+                        'noVille' => true,
                         'displayFirstTitreAdresse' => true,
                         'setSeparatorAfterTitle'   => '_',
                     ]

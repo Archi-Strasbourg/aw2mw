@@ -204,7 +204,11 @@ abstract class ExportCommand extends Command
         if (is_array($matches)) {
             foreach ($matches as $match) {
                 @$person = new \ArchiPersonne($match[3]);
-                $html = str_replace($match[0], '[[Personne:'.$person->prenom.' '.$person->nom.'|'.$match[5].']]', $html);
+                $html = str_replace(
+                    $match[0],
+                    '[[Personne:'.$person->prenom.' '.$person->nom.'|'.$match[5].']]',
+                    $html
+                );
             }
         }
 
@@ -219,7 +223,10 @@ abstract class ExportCommand extends Command
                 $id,
                 'idAdresse',
                 [
-                    'noHTML'                   => true, 'noQuartier' => true, 'noSousQuartier' => true, 'noVille' => true,
+                    'noHTML'                   => true,
+                    'noQuartier' => true,
+                    'noSousQuartier' => true,
+                    'noVille' => true,
                     'displayFirstTitreAdresse' => true,
                     'setSeparatorAfterTitle'   => '#',
                 ]

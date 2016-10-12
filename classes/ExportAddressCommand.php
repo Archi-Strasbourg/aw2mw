@@ -38,7 +38,9 @@ class ExportAddressCommand extends ExportCommand
                 $this->output
             );
             $filename = $this->getImageName($image['idImage']);
-            $description = str_replace(PHP_EOL, ' ',
+            $description = str_replace(
+                PHP_EOL,
+                ' ',
                 strip_tags(
                     $this->convertHtml(
                         (string) $this->bbCode->convertToDisplay(['text' => $image['description']])
@@ -348,7 +350,9 @@ class ExportAddressCommand extends ExportCommand
             }
             $mainImageInfo = $this->i->getArrayInfosImagePrincipaleFromIdGroupeAdresse(
                 [
-                    'idEvenementGroupeAdresse' => $this->a->getIdEvenementGroupeAdresseFromIdAdresse($address['idAdresse']),
+                    'idEvenementGroupeAdresse' => $this->a->getIdEvenementGroupeAdresseFromIdAdresse(
+                        $address['idAdresse']
+                    ),
                     'format'                   => 'grand',
                 ]
             );
@@ -529,7 +533,9 @@ class ExportAddressCommand extends ExportCommand
         $comments = [];
 
         foreach ($events as $section => $id) {
-            $reqEventsComments = "SELECT c.idCommentairesEvenement as idCommentaire,c.nom as nom,c.prenom as prenom,c.email as email,DATE_FORMAT(c.date,'"._('%d/%m/%Y à %kh%i')."') as dateF,c.commentaire as commentaire,c.idUtilisateur as idUtilisateur
+            $reqEventsComments = "SELECT c.idCommentairesEvenement as idCommentaire, c.nom as nom,
+            c.prenom as prenom,c.email as email,DATE_FORMAT(c.date,'"._('%d/%m/%Y à %kh%i')."') as dateF,
+            c.commentaire as commentaire,c.idUtilisateur as idUtilisateur
                      ,date_format( c.date, '%Y%m%d%H%i%s' ) AS dateTri
                     FROM commentairesEvenement c
                     LEFT JOIN utilisateur u ON u.idUtilisateur = c.idUtilisateur
@@ -543,11 +549,14 @@ class ExportAddressCommand extends ExportCommand
             }
         }
 
-        $reqComments = "SELECT c.idCommentaire as idCommentaire,c.nom as nom,c.prenom as prenom,c.email as email,DATE_FORMAT(c.date,'"._('%d/%m/%Y à %kh%i')."') as dateF,c.commentaire as commentaire,c.idUtilisateur as idUtilisateur, u.urlSiteWeb as urlSiteWeb
+        $reqComments = "SELECT c.idCommentaire as idCommentaire, c.nom as nom, c.prenom as prenom,
+        c.email as email,DATE_FORMAT(c.date,'"._('%d/%m/%Y à %kh%i')."') as dateF,
+        c.commentaire as commentaire,c.idUtilisateur as idUtilisateur, u.urlSiteWeb as urlSiteWeb
         		 ,date_format( c.date, '%Y%m%d%H%i%s' ) AS dateTri
         		FROM commentaires c
         		LEFT JOIN utilisateur u ON u.idUtilisateur = c.idUtilisateur
-        		WHERE c.idEvenementGroupeAdresse = '".$this->a->getIdEvenementGroupeAdresseFromIdAdresse($address['idAdresse'])."'
+        		WHERE c.idEvenementGroupeAdresse = '".
+                    $this->a->getIdEvenementGroupeAdresseFromIdAdresse($address['idAdresse'])."'
         				AND CommentaireValide=1
         				ORDER BY DateTri ASC
         				";
