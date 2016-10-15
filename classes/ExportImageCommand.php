@@ -57,7 +57,7 @@ class ExportImageCommand extends ExportCommand
         $reqImages = "
             SELECT hi1.idImage,  hi1.idHistoriqueImage,  hi1.nom, hi1.auteur,
                 hi1.description,  hi1.dateUpload,  hi1.dateCliche, hi1.idUtilisateur,
-                hi1.licence, hi1.tags
+                hi1.licence, hi1.tags, hi1.idSource
             FROM _evenementImage ei
             LEFT JOIN historiqueImage hi1 ON hi1.idImage = ei.idImage
             LEFT JOIN historiqueImage hi2 ON hi2.idImage = hi1.idImage
@@ -138,15 +138,19 @@ class ExportImageCommand extends ExportCommand
         $description = $this->convertHtml(
             (string) $this->bbCode->convertToDisplay(['text' => $image['description']])
         );
+        if ($image['idSource'] > 0) {
+            $sourceName = $this->escapeSourceName($this->s->getSourceLibelle($image['idSource']));
+        }
         $this->savePage(
             'File:'.$filename,
-            '{{Infobox image
-            |description='.$description.'
-            |date='.$image['dateCliche'].'
-            |auteur='.$image['auteur'].'
-            |licence = {{Modèle:'.$licence['name'].'}}
-            |tags = '.$image['tags'].'
-            }}',
+            '{{Infobox image'.PHP_EOL.
+            '|description='.$description.PHP_EOL.
+            '|date='.$image['dateCliche'].PHP_EOL.
+            '|auteur='.$image['auteur'].PHP_EOL.
+            '|licence = {{Modèle:'.$licence['name'].'}}'.PHP_EOL.
+            '|tags = '.$image['tags'].PHP_EOL.
+            '|source=[[Source::Source:'.$sourceName.'|'.$sourceName.']]'.PHP_EOL.
+            '}}',
             "Description de l'image importée depuis Archi-Wiki"
         );
     }
