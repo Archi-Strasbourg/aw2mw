@@ -320,8 +320,8 @@ class ExportPersonCommand extends ExportCommand
                 if ($linkedEventImg['url'] == $config->getUrlImage('', 'transparent.gif')) {
                     $linkedEventImg = $this->a->getUrlImageFromAdresse($linkedEventIdAddress, 'mini');
                 }
-                $html .= '{{Adresse liée
-                    |adresse='.$this->getAddressName($linkedEventIdAddress).PHP_EOL;
+                $html .= '{{Adresse liée'.PHP_EOL.
+                    '|adresse='.$this->getAddressName($linkedEventIdAddress).PHP_EOL;
                 if (!empty($linkedEventImg['idHistoriqueImage'])) {
                     $reqImage = 'SELECT idImage FROM historiqueImage
                         WHERE idHistoriqueImage = '.mysql_real_escape_string($linkedEventImg['idHistoriqueImage']).'
