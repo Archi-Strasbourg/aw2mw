@@ -132,9 +132,7 @@ class ExportAddressCommand extends ExportCommand
                 'type'      => '',
                 'structure' => '',
                 'date'      => '',
-                'people'    => [
-                    'architecte' => '',
-                ],
+                'people'    => [],
             ];
 
             $info['type'] = str_replace('(Nouveautés)', '', $event['nomTypeEvenement']);
@@ -324,28 +322,30 @@ class ExportAddressCommand extends ExportCommand
                 $intro .= '|nom_complet = '.$txtAdresses.PHP_EOL;
             }
             foreach ($infobox as $i => $info) {
-                if (substr($info['date']['start'], 5) == '00-00') {
-                    $info['date']['start'] = substr($info['date']['start'], 0, 4);
-                }
-                if (substr($info['date']['end'], 5) == '00-00') {
-                    $info['date']['end'] = substr($info['date']['end'], 0, 4);
-                }
-                if ($info['date']['start'] == '0000') {
-                    $info['date']['start'] = '';
-                }
-                if ($info['date']['end'] == '0000') {
-                    $info['date']['end'] = '';
-                }
-                $intro .= '|date'.($i + 1).'_afficher = '.$info['date']['pretty'].PHP_EOL;
-                $intro .= '|date'.($i + 1).'_début = '.$info['date']['start'].PHP_EOL;
-                $intro .= '|date'.($i + 1).'_fin = '.$info['date']['end'].PHP_EOL;
-                if ($i > 0 && $info['structure'] == $infobox[$i - 1]['structure']) {
-                    $info['structure'] = '';
-                }
-                $intro .= '|structure'.($i + 1).' = '.$info['structure'].PHP_EOL;
-                $intro .= '|type'.($i + 1).' = '.strtolower($info['type']).PHP_EOL;
-                foreach ($info['people'] as $job => $name) {
-                    $intro .= '|'.$job.($i + 1).' = '.$name.PHP_EOL;
+                if (!empty($info['people'])) {
+                    if (substr($info['date']['start'], 5) == '00-00') {
+                        $info['date']['start'] = substr($info['date']['start'], 0, 4);
+                    }
+                    if (substr($info['date']['end'], 5) == '00-00') {
+                        $info['date']['end'] = substr($info['date']['end'], 0, 4);
+                    }
+                    if ($info['date']['start'] == '0000') {
+                        $info['date']['start'] = '';
+                    }
+                    if ($info['date']['end'] == '0000') {
+                        $info['date']['end'] = '';
+                    }
+                    $intro .= '|date'.($i + 1).'_afficher = '.$info['date']['pretty'].PHP_EOL;
+                    $intro .= '|date'.($i + 1).'_début = '.$info['date']['start'].PHP_EOL;
+                    $intro .= '|date'.($i + 1).'_fin = '.$info['date']['end'].PHP_EOL;
+                    if ($i > 0 && $info['structure'] == $infobox[$i - 1]['structure']) {
+                        $info['structure'] = '';
+                    }
+                    $intro .= '|structure'.($i + 1).' = '.$info['structure'].PHP_EOL;
+                    $intro .= '|type'.($i + 1).' = '.strtolower($info['type']).PHP_EOL;
+                    foreach ($info['people'] as $job => $name) {
+                        $intro .= '|'.$job.($i + 1).' = '.$name.PHP_EOL;
+                    }
                 }
             }
             $mainImageInfo = $this->i->getArrayInfosImagePrincipaleFromIdGroupeAdresse(
@@ -460,11 +460,9 @@ class ExportAddressCommand extends ExportCommand
                 $title = ucfirst(stripslashes($title));
                 $content .= '=='.$title.'=='.PHP_EOL;
 
-                if ($isNews) {
-                    $content .= '{{Infobox actualité'.PHP_EOL.
+                $content .= '{{Infobox actualité'.PHP_EOL.
                     '|date = '.$date.PHP_EOL.
                     '}}'.PHP_EOL;
-                }
 
                 $html = $this->convertHtml(
                     (string) $this->bbCode->convertToDisplay(['text' => $event['description']])
@@ -632,37 +630,46 @@ class ExportAddressCommand extends ExportCommand
         $newsEvents = [];
 
         $requete = '
-            SELECT DISTINCT evt.idEvenement, pe.position
+            SELECT DISTINCT evt.idEvenement, pe.position, te.nom as type, ISMH, MH
             FROM evenements evt
             LEFT JOIN _evenementEvenement ee on ee.idEvenement = '.
                 mysql_real_escape_string($groupInfo['idEvenementGroupeAdresse']).
             '
             LEFT JOIN positionsEvenements pe on pe.idEvenement = ee.idEvenementAssocie
+            LEFT JOIN typeEvenement te on te.idTypeEvenement = evt.idTypeEvenement
             WHERE evt.idEvenement = ee.idEvenementAssocie
             ORDER BY pe.position ASC
             ';
         $result = $this->e->connexionBdd->requete($requete);
         $arrayIdEvenement = [];
         while ($res = mysql_fetch_assoc($result)) {
-            $allEvents[] = $res['idEvenement'];
-        }
-
-        foreach ($allEvents as $id) {
-            $rep = $this->e->connexionBdd->requete('
-                    SELECT  p.idPersonne
-                    FROM _evenementPersonne _eP
-                    LEFT JOIN personne p ON p.idPersonne = _eP.idPersonne
-                    LEFT JOIN metier m ON m.idMetier = p.idMetier
-                    WHERE _eP.idEvenement='.mysql_real_escape_string($id).'
-                    ORDER BY p.nom DESC');
-            $people = [];
-            while ($res = mysql_fetch_object($rep)) {
-                $people[] = $res;
-            }
-            if (!empty($people)) {
-                $events[] = $id;
+            $isNews = false;
+            if (mysql_num_rows($result) <= 5) {
+                $isNews = false;
             } else {
-                $newsEvents[] = $id;
+                if (in_array(
+                    $res['type'],
+                    ['Construction', 'Rénovation', 'Transformation', 'Démolition', 'Extension', 'Ravalement']
+                )
+                ) {
+                    $isNews = true;
+                } elseif ($res['ISMH'] || $res['MH']) {
+                    $isNews = true;
+                } else {
+                    $rep = $this->e->connexionBdd->requete('
+                            SELECT  p.idPersonne
+                            FROM _evenementPersonne _eP
+                            LEFT JOIN personne p ON p.idPersonne = _eP.idPersonne
+                            LEFT JOIN metier m ON m.idMetier = p.idMetier
+                            WHERE _eP.idEvenement='.mysql_real_escape_string($res['idEvenement']).'
+                            ORDER BY p.nom DESC');
+                    $resPerson = mysql_fetch_object($rep);
+                }
+            }
+            if ($isNews) {
+                $newsEvents[] = $res['idEvenement'];
+            } else {
+                $events[] = $res['idEvenement'];
             }
         }
 
