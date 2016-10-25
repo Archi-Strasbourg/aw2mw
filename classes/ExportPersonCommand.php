@@ -245,7 +245,7 @@ class ExportPersonCommand extends ExportCommand
                 if (!empty($eventInfo['numeroArchive'])) {
                     $sourceName = $this->s->getSourceLibelle(24);
                     $title .= '<ref>[[Source:'.$sourceName.'|'.$sourceName.']] - Cote '.
-                        $event['numeroArchive'].'</ref>';
+                        $eventInfo['numeroArchive'].'</ref>';
                 }
 
                 $title = ucfirst(stripslashes($title));
