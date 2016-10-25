@@ -6,6 +6,7 @@ use Mediawiki\Api;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class ExportAddressCommand extends ExportCommand
@@ -25,6 +26,11 @@ class ExportAddressCommand extends ExportCommand
                 'id',
                 InputArgument::REQUIRED,
                 'Address ID'
+            )->addOption(
+                'noimage',
+                null,
+                InputOption::VALUE_NONE,
+                "Don't upload images"
             );
     }
 
@@ -32,11 +38,13 @@ class ExportAddressCommand extends ExportCommand
     {
         $return = '<gallery>'.PHP_EOL;
         foreach ($images as $image) {
-            $command = $this->getApplication()->find('export:image');
-            $command->run(
-                new ArrayInput(['id' => $image['idImage']]),
-                $this->output
-            );
+            if (!$this->input->getOption('noimage')) {
+                $command = $this->getApplication()->find('export:image');
+                $command->run(
+                    new ArrayInput(['id' => $image['idImage']]),
+                    $this->output
+                );
+            }
             $filename = $this->getImageName($image['idImage']);
             $description = str_replace(
                 PHP_EOL,
@@ -59,6 +67,8 @@ class ExportAddressCommand extends ExportCommand
      */
     private function exportEvents($events, $pageName, $address)
     {
+        global $config;
+
         $content = '';
         $infobox = [];
         $sections = [];
@@ -367,11 +377,13 @@ class ExportAddressCommand extends ExportCommand
                 $resImages = $this->i->connexionBdd->requete($reqImages);
                 $mainImageInfo = mysql_fetch_assoc($resImages);
             }
-            $command = $this->getApplication()->find('export:image');
-            $command->run(
-                new ArrayInput(['id' => $mainImageInfo['idImage']]),
-                $this->output
-            );
+            if (!$this->input->getOption('noimage')) {
+                $command = $this->getApplication()->find('export:image');
+                $command->run(
+                    new ArrayInput(['id' => $mainImageInfo['idImage']]),
+                    $this->output
+                );
+            }
             $filename = $this->getImageName($mainImageInfo['idImage']);
             $intro .= '|photo = '.$filename.PHP_EOL;
             $intro .= '}}'.PHP_EOL.PHP_EOL;
@@ -612,7 +624,10 @@ class ExportAddressCommand extends ExportCommand
     {
         $this->setup($input, $output);
 
-        $address = $this->a->getArrayAdresseFromIdAdresse($input->getArgument('id'));
+        global $config;
+        $config = new \ArchiConfig();
+
+        $address = $this->a->getArrayAdresseFromIdAdresse($this->input->getArgument('id'));
         if (!$address) {
             $this->output->writeln('<error>Adresse introuvable</error>');
 
@@ -620,11 +635,11 @@ class ExportAddressCommand extends ExportCommand
         }
         $city = $this->a->getInfosVille($address['idVille']);
 
-        $basePageName = $this->getAddressName($input->getArgument('id'));
+        $basePageName = $this->getAddressName($this->input->getArgument('id'));
 
         $pageName = 'Adresse:'.$basePageName;
 
-        $groupInfo = mysql_fetch_assoc($this->a->getIdEvenementsFromAdresse($input->getArgument('id')));
+        $groupInfo = mysql_fetch_assoc($this->a->getIdEvenementsFromAdresse($this->input->getArgument('id')));
 
         $events = [];
         $newsEvents = [];
@@ -643,7 +658,7 @@ class ExportAddressCommand extends ExportCommand
         $result = $this->e->connexionBdd->requete($requete);
         $arrayIdEvenement = [];
         while ($res = mysql_fetch_assoc($result)) {
-            $isNews = false;
+            $isNews = true;
             if (mysql_num_rows($result) <= 5) {
                 $isNews = false;
             } else {
@@ -652,9 +667,9 @@ class ExportAddressCommand extends ExportCommand
                     ['Construction', 'Rénovation', 'Transformation', 'Démolition', 'Extension', 'Ravalement']
                 )
                 ) {
-                    $isNews = true;
-                } elseif ($res['ISMH'] || $res['MH']) {
-                    $isNews = true;
+                    $isNews = false;
+                } elseif ($res['ISMH'] > 0 || $res['MH'] > 0) {
+                    $isNews = false;
                 } else {
                     $rep = $this->e->connexionBdd->requete('
                             SELECT  p.idPersonne
@@ -664,6 +679,9 @@ class ExportAddressCommand extends ExportCommand
                             WHERE _eP.idEvenement='.mysql_real_escape_string($res['idEvenement']).'
                             ORDER BY p.nom DESC');
                     $resPerson = mysql_fetch_object($rep);
+                    if ($resPerson) {
+                        $isNews = false;
+                    }
                 }
             }
             if ($isNews) {

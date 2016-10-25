@@ -134,6 +134,7 @@ abstract class ExportCommand extends Command
         $this->services = new Api\MediawikiFactory($this->api);
         $this->revisionSaver = $this->services->newRevisionSaver();
         $this->fileUploader = $this->services->newFileUploader();
+        $this->input = $input;
         $this->output = $output;
     }
 
