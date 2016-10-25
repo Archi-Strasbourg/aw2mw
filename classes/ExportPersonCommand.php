@@ -322,19 +322,21 @@ class ExportPersonCommand extends ExportCommand
                 }
                 $html .= '{{Adresse liée
                     |adresse='.$this->getAddressName($linkedEventIdAddress).PHP_EOL;
-                $reqImage = 'SELECT idImage FROM historiqueImage
-                    WHERE idHistoriqueImage = '.mysql_real_escape_string($linkedEventImg['idHistoriqueImage']).'
-                    ORDER BY idHistoriqueImage DESC LIMIT 1';
-                $resImage = $config->connexionBdd->requete($reqImage);
-                $imageInfo = mysql_fetch_object($resImage);
-                if (isset($imageInfo->idImage)) {
-                    $command = $this->getApplication()->find('export:image');
-                    $command->run(
-                        new ArrayInput(['id' => $imageInfo->idImage]),
-                        $this->output
-                    );
-                    $filename = $this->getImageName($imageInfo->idImage);
-                    $html .= '|photo='.$filename.PHP_EOL;
+                if (!empty($linkedEventImg['idHistoriqueImage'])) {
+                    $reqImage = 'SELECT idImage FROM historiqueImage
+                        WHERE idHistoriqueImage = '.mysql_real_escape_string($linkedEventImg['idHistoriqueImage']).'
+                        ORDER BY idHistoriqueImage DESC LIMIT 1';
+                    $resImage = $config->connexionBdd->requete($reqImage);
+                    $imageInfo = mysql_fetch_object($resImage);
+                    if (isset($imageInfo->idImage)) {
+                        $command = $this->getApplication()->find('export:image');
+                        $command->run(
+                            new ArrayInput(['id' => $imageInfo->idImage]),
+                            $this->output
+                        );
+                        $filename = $this->getImageName($imageInfo->idImage);
+                        $html .= '|photo='.$filename.PHP_EOL;
+                    }
                 }
                 if ($linkedEventInfo->dateDebut != '0000-00-00') {
                     if ($linkedEventInfo->dateFin != '0000-00-00') {
