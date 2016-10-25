@@ -140,6 +140,9 @@ class ExportImageCommand extends ExportCommand
         );
         if ($image['idSource'] > 0) {
             $sourceName = $this->escapeSourceName($this->s->getSourceLibelle($image['idSource']));
+            $sourceName = '[[Source::Source:'.$sourceName.'|'.$sourceName.']]';
+        } else {
+            $sourceName = '';
         }
         $this->savePage(
             'File:'.$filename,
@@ -149,7 +152,7 @@ class ExportImageCommand extends ExportCommand
             '|auteur='.$image['auteur'].PHP_EOL.
             '|licence = {{Modèle:'.$licence['name'].'}}'.PHP_EOL.
             '|tags = '.$image['tags'].PHP_EOL.
-            '|source=[[Source::Source:'.$sourceName.'|'.$sourceName.']]'.PHP_EOL.
+            '|source='.$sourceName.PHP_EOL.
             '}}',
             "Description de l'image importée depuis Archi-Wiki"
         );
