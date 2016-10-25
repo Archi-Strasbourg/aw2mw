@@ -152,6 +152,12 @@ class ExportAddressCommand extends ExportCommand
                 'start'  => $event['dateDebut'],
                 'end'    => $event['dateFin'],
             ];
+            if ($event['ISMH'] > 0) {
+                $info['ismh'] = true;
+            }
+            if ($event['MH'] > 0) {
+                $info['mh'] = true;
+            }
 
             foreach ($people as $person) {
                 if (isset($info['people'][$person->metier]) && !empty($info['people'][$person->metier])) {
@@ -356,6 +362,12 @@ class ExportAddressCommand extends ExportCommand
                     foreach ($info['people'] as $job => $name) {
                         $intro .= '|'.$job.($i + 1).' = '.$name.PHP_EOL;
                     }
+                }
+                if (isset($info['ismh'])) {
+                    $intro .= '|ismh='.$info['date']['pretty'].PHP_EOL;
+                }
+                if (isset($info['mh'])) {
+                    $intro .= '|mh='.$info['date']['pretty'].PHP_EOL;
                 }
             }
             $mainImageInfo = $this->i->getArrayInfosImagePrincipaleFromIdGroupeAdresse(
