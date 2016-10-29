@@ -215,7 +215,6 @@ class ExportAddressCommand extends ExportCommand
                     $this->createGallery($otherImagesInfo);
                 $content .= $otherImages;
             }
-
         }
 
         //Add References section
