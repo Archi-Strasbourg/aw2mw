@@ -175,6 +175,56 @@ class ExportAddressCommand extends ExportCommand
         }
 
         if (!$isNews) {
+            //Vues sur
+            $reqPhotos = '
+                SELECT hi1.idHistoriqueImage, hi1.idImage as idImage,
+                hi1.dateUpload, ai.idAdresse, hi1.description,
+                ae.idEvenement as idEvenementGroupeAdresseCourant
+                FROM historiqueImage hi2,  historiqueImage hi1
+                LEFT JOIN _adresseImage ai ON ai.idImage = hi1.idImage
+                LEFT JOIN _adresseEvenement ae ON ae.idAdresse = ai.idAdresse
+                WHERE hi2.idImage = hi1.idImage
+                AND ai.idAdresse = '.mysql_real_escape_string($address['idAdresse'])."
+                AND ai.vueSur='1'
+                GROUP BY hi1.idImage,  hi1.idHistoriqueImage
+                HAVING hi1.idHistoriqueImage = max(hi2.idHistoriqueImage)
+            ";
+            $resPhotos = $this->i->connexionBdd->requete($reqPhotos);
+
+            $otherImagesInfo = [];
+            $otherImages = '';
+            $linkedImages = $this->e->getArrayCorrespondancesIdImageVuesSurAndEvenementByDateFromGA($this->a->getIdEvenementGroupeAdresseFromIdAdresse($address['idAdresse']));
+            while ($fetchPhotos = mysql_fetch_assoc($resPhotos)) {
+                foreach ($linkedImages as $linkedImageGroup) {
+                    foreach ($linkedImageGroup as $linkedImage) {
+                        if ($linkedImage['idImage'] == $fetchPhotos['idImage']) {
+                            continue 3;
+                        }
+                    }
+                }
+                $reqPriseDepuis = 'SELECT ai.idAdresse,  ai.idEvenementGroupeAdresse
+                                    FROM _adresseImage ai
+                                    WHERE ai.idImage = '.$fetchPhotos['idImage']."
+                                    AND ai.prisDepuis='1'
+                ";
+                $resPriseDepuis = $this->a->connexionBdd->requete($reqPriseDepuis);
+                $fetchPhotos['description'] = 'Pris depuis';
+                $otherAddresses = [];
+                while ($otherAddress = mysql_fetch_assoc($resPriseDepuis)) {
+                    $otherAddress = $this->a->getArrayAdresseFromIdAdresse($otherAddress['idAdresse']);
+                    $otherAddressName = $this->getAddressName($otherAddress['idAdresse']);
+                    $otherAddresses[] = ' [[Adresse:'.$otherAddressName.'|'.$otherAddressName.']]';
+                }
+                $fetchPhotos['description'] .= implode(', ', $otherAddresses);
+                $otherImagesInfo[] = $fetchPhotos;
+            }
+            if (!empty($otherImagesInfo)) {
+                $otherImages = PHP_EOL.'==Autres vues sur cette adresse=='.PHP_EOL.
+                    $this->createGallery($otherImagesInfo);
+                $content .= $otherImages;
+            }
+
+            //Vues prises depuis
             $reqPhotos = '
                 SELECT hi1.idHistoriqueImage, hi1.idImage as idImage,
                 hi1.dateUpload, ai.idAdresse, hi1.description,
@@ -188,11 +238,9 @@ class ExportAddressCommand extends ExportCommand
                 GROUP BY hi1.idImage,  hi1.idHistoriqueImage
                 HAVING hi1.idHistoriqueImage = max(hi2.idHistoriqueImage)
             ";
-
             $resPhotos = $this->i->connexionBdd->requete($reqPhotos);
-
-            $otherImagesInfo = [];
-            $otherImages = '';
+            $imagesFromInfo = [];
+            $imagesFrom = '';
             while ($fetchPhotos = mysql_fetch_assoc($resPhotos)) {
                 $reqPriseDepuis = 'SELECT ai.idAdresse,  ai.idEvenementGroupeAdresse
                                     FROM _adresseImage ai
@@ -208,12 +256,12 @@ class ExportAddressCommand extends ExportCommand
                     $otherAddresses[] = ' [[Adresse:'.$otherAddressName.'|'.$otherAddressName.']]';
                 }
                 $fetchPhotos['description'] .= implode(', ', $otherAddresses);
-                $otherImagesInfo[] = $fetchPhotos;
+                $imagesFromInfo[] = $fetchPhotos;
             }
-            if (!empty($otherImagesInfo)) {
-                $otherImages = PHP_EOL.'==Vues prises depuis cette adresse=='.PHP_EOL.
-                    $this->createGallery($otherImagesInfo);
-                $content .= $otherImages;
+            if (!empty($imagesFromInfo)) {
+                $imagesFrom = PHP_EOL.'==Vues prises depuis cette adresse=='.PHP_EOL.
+                    $this->createGallery($imagesFromInfo);
+                $content .= $imagesFrom;
             }
         }
 
@@ -554,6 +602,7 @@ class ExportAddressCommand extends ExportCommand
 
         if (!$isNews) {
             $sections[] = $otherImages;
+            $sections[] = $imagesFrom;
         }
         $sections[] = $references;
 
@@ -641,6 +690,7 @@ class ExportAddressCommand extends ExportCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $this->setup($input, $output);
+        $this->allEvents = [];
 
         global $config;
         $config = new \ArchiConfig();
@@ -707,6 +757,7 @@ class ExportAddressCommand extends ExportCommand
             } else {
                 $events[] = $res['idEvenement'];
             }
+            $this->allEvents[] = $res['idEvenement'];
         }
 
         $this->exportEvents($events, $pageName, $address);
