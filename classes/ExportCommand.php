@@ -235,6 +235,10 @@ abstract class ExportCommand extends Command
         ).' ('.$addressInfo['nomVille'].')';
         $return = explode('#', $return);
         $name = $return[0];
+        if (!empty($addressInfo['nom'])) {
+            //If the address has a name, we need to manually add the city
+            $name .= ' ('.$addressInfo['nomVille'].')';
+        }
         $name = str_replace("l' ", "l'", $name);
         $name = str_replace("d' ", "d'", $name);
         $name = trim($name, '.');
