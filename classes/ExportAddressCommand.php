@@ -103,13 +103,16 @@ class ExportAddressCommand extends ExportCommand
                     date_format(hE.dateCreationEvenement,"'._('%e/%m/%Y à %kh%i').'") as dateCreationEvenement,
                     hE.isDateDebutEnviron as isDateDebutEnviron,
                     u.idUtilisateur as idUtilisateur,
-                    hE.numeroArchive as numeroArchive
+                    hE.numeroArchive as numeroArchive,
+                    cA.nom as courantArchitectural
 
                     FROM historiqueEvenement hE
                     LEFT JOIN source s      ON s.idSource = hE.idSource
                     LEFT JOIN typeStructure tS  ON tS.idTypeStructure = hE.idTypeStructure
                     LEFT JOIN typeEvenement tE  ON tE.idTypeEvenement = hE.idTypeEvenement
                     LEFT JOIN utilisateur u     ON u.idUtilisateur = hE.idUtilisateur
+                    LEFT JOIN _evenementCourantArchitectural _eCA ON _eCA.idEvenement = hE.idEvenement
+                    LEFT JOIN courantArchitectural cA ON cA.idCourantArchitectural = _eCA.idCourantArchitectural
                     WHERE hE.idEvenement = '.mysql_real_escape_string($id).'
             ORDER BY hE.idHistoriqueEvenement DESC';
 
@@ -158,6 +161,7 @@ class ExportAddressCommand extends ExportCommand
             if ($event['MH'] > 0) {
                 $info['mh'] = true;
             }
+            $info['courant'] = $event['courantArchitectural'];
 
             foreach ($people as $person) {
                 if (isset($info['people'][$person->metier]) && !empty($info['people'][$person->metier])) {
@@ -361,6 +365,7 @@ class ExportAddressCommand extends ExportCommand
                     }
                     $intro .= '|structure'.($j + 1).' = '.$info['structure'].PHP_EOL;
                     $intro .= '|type'.($j + 1).' = '.strtolower($info['type']).PHP_EOL;
+                    $intro .= '|courant'.($j + 1).' = '.strtolower($info['courant']).PHP_EOL;
                     foreach ($info['people'] as $job => $name) {
                         $intro .= '|'.$job.($j + 1).' = '.$name.PHP_EOL;
                     }
