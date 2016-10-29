@@ -216,11 +216,11 @@ class ExportAddressCommand extends ExportCommand
                 $content .= $otherImages;
             }
 
-            //Add References section
-            $references = PHP_EOL.'==Références=='.PHP_EOL.'<references />'.PHP_EOL;
-            $content .= $references;
         }
 
+        //Add References section
+        $references = PHP_EOL.'==Références=='.PHP_EOL.'<references />'.PHP_EOL;
+        $content .= $references;
 
         //Login as bot
         $this->login('aw2mw bot');
@@ -555,8 +555,8 @@ class ExportAddressCommand extends ExportCommand
 
         if (!$isNews) {
             $sections[] = $otherImages;
-            $sections[] = $references;
         }
+        $sections[] = $references;
 
 
         $comments = [];
