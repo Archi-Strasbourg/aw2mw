@@ -337,8 +337,10 @@ class ExportAddressCommand extends ExportCommand
             if (isset($txtAdresses)) {
                 $intro .= '|nom_complet = '.$txtAdresses.PHP_EOL;
             }
+            $j = 1;
             foreach ($infobox as $i => $info) {
                 if (!empty($info['people'])) {
+                    $j++;
                     if (substr($info['date']['start'], 5) == '00-00') {
                         $info['date']['start'] = substr($info['date']['start'], 0, 4);
                     }
@@ -351,16 +353,16 @@ class ExportAddressCommand extends ExportCommand
                     if ($info['date']['end'] == '0000') {
                         $info['date']['end'] = '';
                     }
-                    $intro .= '|date'.($i + 1).'_afficher = '.$info['date']['pretty'].PHP_EOL;
-                    $intro .= '|date'.($i + 1).'_début = '.$info['date']['start'].PHP_EOL;
-                    $intro .= '|date'.($i + 1).'_fin = '.$info['date']['end'].PHP_EOL;
-                    if ($i > 0 && $info['structure'] == $infobox[$i - 1]['structure']) {
+                    $intro .= '|date'.($j + 1).'_afficher = '.$info['date']['pretty'].PHP_EOL;
+                    $intro .= '|date'.($j + 1).'_début = '.$info['date']['start'].PHP_EOL;
+                    $intro .= '|date'.($j + 1).'_fin = '.$info['date']['end'].PHP_EOL;
+                    if ($j > 0 && $info['structure'] == $infobox[$j - 1]['structure']) {
                         $info['structure'] = '';
                     }
-                    $intro .= '|structure'.($i + 1).' = '.$info['structure'].PHP_EOL;
-                    $intro .= '|type'.($i + 1).' = '.strtolower($info['type']).PHP_EOL;
+                    $intro .= '|structure'.($j + 1).' = '.$info['structure'].PHP_EOL;
+                    $intro .= '|type'.($j + 1).' = '.strtolower($info['type']).PHP_EOL;
                     foreach ($info['people'] as $job => $name) {
-                        $intro .= '|'.$job.($i + 1).' = '.$name.PHP_EOL;
+                        $intro .= '|'.$job.($j + 1).' = '.$name.PHP_EOL;
                     }
                 }
                 if (isset($info['ismh'])) {
