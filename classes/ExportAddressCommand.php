@@ -709,6 +709,10 @@ class ExportAddressCommand extends ExportCommand
 
         $groupInfo = mysql_fetch_assoc($this->a->getIdEvenementsFromAdresse($this->input->getArgument('id')));
 
+        if (!$groupInfo) {
+            throw new \Exception("Can't find this address");
+        }
+
         $events = [];
         $newsEvents = [];
 
