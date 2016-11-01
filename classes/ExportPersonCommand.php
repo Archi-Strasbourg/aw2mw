@@ -6,6 +6,7 @@ use Mediawiki\Api;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class ExportPersonCommand extends ExportCommand
@@ -25,6 +26,11 @@ class ExportPersonCommand extends ExportCommand
                 'id',
                 InputArgument::REQUIRED,
                 'Person ID'
+            )->addOption(
+                'noimage',
+                null,
+                InputOption::VALUE_NONE,
+                "Don't upload images"
             );
     }
 
@@ -329,11 +335,13 @@ class ExportPersonCommand extends ExportCommand
                     $resImage = $config->connexionBdd->requete($reqImage);
                     $imageInfo = mysql_fetch_object($resImage);
                     if (isset($imageInfo->idImage)) {
-                        $command = $this->getApplication()->find('export:image');
-                        $command->run(
-                            new ArrayInput(['id' => $imageInfo->idImage]),
-                            $this->output
-                        );
+                        if (!$this->input->getOption('noimage')) {
+                            $command = $this->getApplication()->find('export:image');
+                            $command->run(
+                                new ArrayInput(['id' => $imageInfo->idImage]),
+                                $this->output
+                            );
+                        }
                         $filename = $this->getImageName($imageInfo->idImage);
                         $html .= '|photo='.$filename.PHP_EOL;
                     }
