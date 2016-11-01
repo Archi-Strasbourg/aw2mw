@@ -359,10 +359,11 @@ class ExportPersonCommand extends ExportCommand
                     }
                 }
 
-                $linkedEventImg = $this->a->getUrlImageFromEvenement($linkedEvent, 'mini');
-                if ($linkedEventImg['url'] == $config->getUrlImage('', 'transparent.gif')) {
-                    $linkedEventImg = $this->a->getUrlImageFromAdresse($linkedEventIdAddress, 'mini');
-                }
+                $linkedEventImg = $this->a->getUrlImageFromAdresse(
+                    $linkedEventIdAddress,
+                    'mini',
+                    ['idEvenementGroupeAdresse'=>$this->a->getIdEvenementGroupeAdresseFromIdAdresse($linkedEventIdAddress)]
+                );
                 $html .= '{{Adresse liée'.PHP_EOL.
                     '|adresse='.$this->getAddressName($linkedEventIdAddress).PHP_EOL;
                 if (!empty($linkedEventImg['idHistoriqueImage'])) {
