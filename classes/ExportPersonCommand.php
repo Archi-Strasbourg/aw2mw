@@ -93,7 +93,7 @@ class ExportPersonCommand extends ExportCommand
         }
         $job = $this->getJobName($person->idMetier);
         if (isset($job)) {
-            $intro .= '|métier='.$job.PHP_EOL;
+            $intro .= '|métier1='.$job.PHP_EOL;
         }
         $intro .= '}}'.PHP_EOL;
 
