@@ -162,12 +162,12 @@ class ExportPersonCommand extends ExportCommand
                 $title = 'Biographie';
             }
             $title = stripslashes($title);
-            $content .= '=='.$title.'=='.PHP_EOL;
+            $content .= '== '.$title.' =='.PHP_EOL;
         }
 
         $relatedPeople = $person->getRelatedPeople($id);
         if (!empty($relatedPeople)) {
-            $relatedPeopleContent = '==Personnes liées=='.PHP_EOL;
+            $relatedPeopleContent = '== Personnes liées =='.PHP_EOL;
         } else {
             $relatedPeopleContent = '';
         }
@@ -179,7 +179,7 @@ class ExportPersonCommand extends ExportCommand
 
         $content .= $relatedPeopleContent;
 
-        $references = PHP_EOL.'==Références=='.PHP_EOL.'<references />'.PHP_EOL;
+        $references = PHP_EOL.'== Références =='.PHP_EOL.'<references />'.PHP_EOL;
         $content .= $references;
 
         $this->savePage($pageName, $content, 'Sections importées depuis Archi-Wiki');
@@ -255,7 +255,7 @@ class ExportPersonCommand extends ExportCommand
                 }
 
                 $title = ucfirst(stripslashes($title));
-                $content .= '=='.$title.'=='.PHP_EOL;
+                $content .= '== '.$title.' =='.PHP_EOL;
 
                 $html = $this->convertHtml(
                     (string) $this->bbCode->convertToDisplay(['text' => $eventInfo['description']])

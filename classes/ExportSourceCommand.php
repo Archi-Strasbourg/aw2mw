@@ -36,7 +36,7 @@ class ExportSourceCommand extends ExportCommand
 
     protected function replaceSubtitles($content)
     {
-        return preg_replace('/<u>(.+)<\/u>\s*:\s*/i', '===$1==='.PHP_EOL, $content);
+        return preg_replace('/<u>(.+)<\/u>\s*:\s*/i', '=== $1 ==='.PHP_EOL, $content);
     }
 
     /**

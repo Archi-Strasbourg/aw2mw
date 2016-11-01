@@ -127,7 +127,7 @@ class ExportAddressCommand extends ExportCommand
             }
             $title = stripslashes($title);
             $title = trim($title, '.');
-            $content .= '=='.$title.'=='.PHP_EOL;
+            $content .= '== '.$title.' =='.PHP_EOL;
 
             $rep = $this->e->connexionBdd->requete('
                     SELECT  p.idPersonne, m.nom as metier, p.nom, p.prenom
@@ -219,7 +219,7 @@ class ExportAddressCommand extends ExportCommand
                 $otherImagesInfo[] = $fetchPhotos;
             }
             if (!empty($otherImagesInfo)) {
-                $otherImages = PHP_EOL.'==Autres vues sur cette adresse=='.PHP_EOL.
+                $otherImages = PHP_EOL.'== Autres vues sur cette adresse =='.PHP_EOL.
                     $this->createGallery($otherImagesInfo);
                 $content .= $otherImages;
             }
@@ -259,14 +259,14 @@ class ExportAddressCommand extends ExportCommand
                 $imagesFromInfo[] = $fetchPhotos;
             }
             if (!empty($imagesFromInfo)) {
-                $imagesFrom = PHP_EOL.'==Vues prises depuis cette adresse=='.PHP_EOL.
+                $imagesFrom = PHP_EOL.'== Vues prises depuis cette adresse =='.PHP_EOL.
                     $this->createGallery($imagesFromInfo);
                 $content .= $imagesFrom;
             }
         }
 
         //Add References section
-        $references = PHP_EOL.'==Références=='.PHP_EOL.'<references />'.PHP_EOL;
+        $references = PHP_EOL.'== Références =='.PHP_EOL.'<references />'.PHP_EOL;
         $content .= $references;
 
         //Login as bot
@@ -538,7 +538,7 @@ class ExportAddressCommand extends ExportCommand
                 }
 
                 $title = ucfirst(stripslashes($title));
-                $content .= '=='.$title.'=='.PHP_EOL;
+                $content .= '== '.$title.' =='.PHP_EOL;
 
                 $content .= '{{Infobox actualité'.PHP_EOL.
                     '|date = '.$date.PHP_EOL.
