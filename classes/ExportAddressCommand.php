@@ -34,34 +34,6 @@ class ExportAddressCommand extends ExportCommand
             );
     }
 
-    private function createGallery($images)
-    {
-        $return = '<gallery>'.PHP_EOL;
-        foreach ($images as $image) {
-            if (!$this->input->getOption('noimage')) {
-                $command = $this->getApplication()->find('export:image');
-                $command->run(
-                    new ArrayInput(['id' => $image['idImage']]),
-                    $this->output
-                );
-            }
-            $filename = $this->getImageName($image['idImage']);
-            $description = str_replace(
-                PHP_EOL,
-                ' ',
-                strip_tags(
-                    $this->convertHtml(
-                        (string) $this->bbCode->convertToDisplay(['text' => $image['description']])
-                    )
-                )
-            );
-            $return .= 'File:'.$filename.'|'.$description.PHP_EOL;
-        }
-        $return .= '</gallery>'.PHP_EOL;
-
-        return $return;
-    }
-
     /**
      * @param string $pageName
      */

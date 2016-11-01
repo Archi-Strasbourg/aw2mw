@@ -283,6 +283,41 @@ class ExportPersonCommand extends ExportCommand
                 $sections[$section + 1] = $content;
             }
 
+            $reqImages = "
+                SELECT hi1.idImage, hi1.description
+                FROM _evenementImage ei
+                LEFT JOIN historiqueImage hi1 ON hi1.idImage = ei.idImage
+                LEFT JOIN historiqueImage hi2 ON hi2.idImage = hi1.idImage
+                WHERE ei.idEvenement = '".mysql_real_escape_string($event['idEvenementAssocie'])."'
+                GROUP BY hi1.idImage ,  hi1.idHistoriqueImage
+                HAVING hi1.idHistoriqueImage = max(hi2.idHistoriqueImage)
+                ORDER BY ei.position, hi1.idHistoriqueImage
+                ";
+
+            $resImages = $this->i->connexionBdd->requete($reqImages);
+            $images = [];
+            while ($fetchImages = mysql_fetch_assoc($resImages)) {
+                $images[] = $fetchImages;
+            }
+
+            if (!empty($images)) {
+                $sections[$section + 1] .= $this->createGallery($images);
+            }
+            $this->api->postRequest(
+                new Api\SimpleRequest(
+                    'edit',
+                    [
+                        'title'   => $pageName,
+                        'md5'     => md5($sections[$section + 1]),
+                        'text'    => $sections[$section + 1],
+                        'section' => $section + 1,
+                        'bot'     => true,
+                        'summary' => 'Images importées depuis Archi-Wiki',
+                        'token'   => $this->api->getToken(),
+                    ]
+                )
+            );
+
             $linkedEvents = $person->getEvenementsLies($id, $eventInfo['dateDebut'], 3000);
             if (!empty($linkedEvents)) {
                 $html = '=== Adresses liées ==='.PHP_EOL;
