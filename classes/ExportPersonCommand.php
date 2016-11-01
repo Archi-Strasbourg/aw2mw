@@ -91,12 +91,9 @@ class ExportPersonCommand extends ExportCommand
             $filename = $this->getImageName($fetch->idImage);
             $intro .= '|photo='.$filename.PHP_EOL;
         }
-        $reqJob = 'SELECT nom
-            FROM `metier`
-            WHERE `idMetier` ='.$person->idMetier;
-        $resJob = $config->connexionBdd->requete($reqJob);
-        if ($fetch = mysql_fetch_object($resJob)) {
-            $intro .= '|métier='.$fetch->nom.PHP_EOL;
+        $job = $this->getJobName($person->idMetier);
+        if (isset($job)) {
+            $intro .= '|métier='.$job.PHP_EOL;
         }
         $intro .= '}}'.PHP_EOL;
 
@@ -173,8 +170,13 @@ class ExportPersonCommand extends ExportCommand
         }
         foreach ($relatedPeople as $relatedId) {
             $relatedPerson = new \ArchiPersonne($relatedId);
+            $job = $this->getJobName($relatedPerson->idMetier);
             $relatedPeopleContent .= '* [[Personne:'.$relatedPerson->prenom.' '.$relatedPerson->nom.'|'.
-                $relatedPerson->prenom.' '.$relatedPerson->nom.']]'.PHP_EOL;
+                $relatedPerson->prenom.' '.$relatedPerson->nom;
+            if (isset($job)) {
+                $relatedPeopleContent .= ' ('.$job.')';
+            }
+            $relatedPeopleContent .=']]'.PHP_EOL;
         }
 
         $content .= $relatedPeopleContent;

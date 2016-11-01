@@ -216,6 +216,17 @@ abstract class ExportCommand extends Command
         return $html;
     }
 
+    protected function getJobName($id)
+    {
+        $reqJob = 'SELECT nom
+            FROM `metier`
+            WHERE `idMetier` ='.mysql_real_escape_string($id);
+        $resJob = $this->a->connexionBdd->requete($reqJob);
+        if ($fetch = mysql_fetch_object($resJob)) {
+            return $fetch->nom;
+        }
+    }
+
     protected function getAddressName($id)
     {
         $addressInfo = $this->a->getArrayAdresseFromIdAdresse($id);
@@ -230,7 +241,7 @@ abstract class ExportCommand extends Command
                     'noVille'                  => true,
                     'displayFirstTitreAdresse' => true,
                     'setSeparatorAfterTitle'   => '#',
-                    'idEvenementGroupeAdresse' => $this->a->getIdEvenementGroupeAdresseFromIdAdresse($id)
+                    'idEvenementGroupeAdresse' => $this->a->getIdEvenementGroupeAdresseFromIdAdresse($id),
                 ]
             )
         ).' ('.$addressInfo['nomVille'].')';
