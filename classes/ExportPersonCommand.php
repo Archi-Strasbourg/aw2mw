@@ -176,7 +176,7 @@ class ExportPersonCommand extends ExportCommand
             if (isset($job)) {
                 $relatedPeopleContent .= ' ('.$job.')';
             }
-            $relatedPeopleContent .=']]'.PHP_EOL;
+            $relatedPeopleContent .= ']]'.PHP_EOL;
         }
 
         $content .= $relatedPeopleContent;
