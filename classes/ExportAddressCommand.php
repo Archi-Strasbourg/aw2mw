@@ -388,7 +388,7 @@ class ExportAddressCommand extends ExportCommand
             if (isset($txtAdresses)) {
                 $intro .= '|nom_complet = '.$txtAdresses.PHP_EOL;
             }
-            $j = 1;
+            $j = $k = $l = 0;
             foreach ($infobox as $i => $info) {
                 if (!empty($info['people'])) {
                     $j++;
@@ -404,24 +404,26 @@ class ExportAddressCommand extends ExportCommand
                     if ($info['date']['end'] == '0000') {
                         $info['date']['end'] = '';
                     }
-                    $intro .= '|date'.($j + 1).'_afficher = '.$info['date']['pretty'].PHP_EOL;
-                    $intro .= '|date'.($j + 1).'_début = '.$info['date']['start'].PHP_EOL;
-                    $intro .= '|date'.($j + 1).'_fin = '.$info['date']['end'].PHP_EOL;
-                    if ($j > 0 && $info['structure'] == $infobox[$j - 1]['structure']) {
+                    $intro .= '|date'.$j.'_afficher = '.$info['date']['pretty'].PHP_EOL;
+                    $intro .= '|date'.$j.'_début = '.$info['date']['start'].PHP_EOL;
+                    $intro .= '|date'.$j.'_fin = '.$info['date']['end'].PHP_EOL;
+                    if ($i > 0 && $info['structure'] == $infobox[$i - 1]['structure']) {
                         $info['structure'] = '';
                     }
-                    $intro .= '|structure'.($j + 1).' = '.$info['structure'].PHP_EOL;
-                    $intro .= '|type'.($j + 1).' = '.strtolower($info['type']).PHP_EOL;
-                    $intro .= '|courant'.($j + 1).' = '.strtolower($info['courant']).PHP_EOL;
+                    $intro .= '|structure'.$j.' = '.$info['structure'].PHP_EOL;
+                    $intro .= '|type'.$j.' = '.strtolower($info['type']).PHP_EOL;
+                    $intro .= '|courant'.$j.' = '.strtolower($info['courant']).PHP_EOL;
                     foreach ($info['people'] as $job => $name) {
-                        $intro .= '|'.$job.($j + 1).' = '.$name.PHP_EOL;
+                        $intro .= '|'.$job.$j.' = '.$name.PHP_EOL;
                     }
                 }
                 if (isset($info['ismh'])) {
-                    $intro .= '|ismh='.$info['date']['pretty'].PHP_EOL;
+                    $k++;
+                    $intro .= '|ismh'.$k.'='.$info['date']['pretty'].PHP_EOL;
                 }
                 if (isset($info['mh'])) {
-                    $intro .= '|mh='.$info['date']['pretty'].PHP_EOL;
+                    $l++;
+                    $intro .= '|mh'.$l.'='.$info['date']['pretty'].PHP_EOL;
                 }
             }
             $mainImageInfo = $this->i->getArrayInfosImagePrincipaleFromIdGroupeAdresse(
