@@ -362,7 +362,7 @@ class ExportPersonCommand extends ExportCommand
                 $linkedEventImg = $this->a->getUrlImageFromAdresse(
                     $linkedEventIdAddress,
                     'mini',
-                    ['idEvenementGroupeAdresse'=>$this->a->getIdEvenementGroupeAdresseFromIdAdresse($linkedEventIdAddress)]
+                    ['idEvenementGroupeAdresse' => $this->a->getIdEvenementGroupeAdresseFromIdAdresse($linkedEventIdAddress)]
                 );
                 $html .= '{{Adresse liée'.PHP_EOL.
                     '|adresse='.$this->getAddressName($linkedEventIdAddress).PHP_EOL;
