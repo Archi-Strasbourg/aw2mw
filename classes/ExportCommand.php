@@ -198,6 +198,18 @@ abstract class ExportCommand extends Command
         }
 
         preg_match_all(
+            '#\[http:\/\/(www\.)?archi-wiki.org\/\?archiAffichage=adresseDetail&archiIdAdresse=([0-9]+)\s(.+)\]#iU',
+            $html,
+            $matches,
+            PREG_SET_ORDER
+        );
+        if (is_array($matches)) {
+            foreach ($matches as $match) {
+                $html = str_replace($match[0], '[[Adresse:'.$this->getAddressName($match[2]).'|'.$match[3].']]', $html);
+            }
+        }
+
+        preg_match_all(
             '#\[http:\/\/(www\.)?archi-wiki.org\/personnalite-(.+)-([0-9]+)\.html(\?[\w=&\#]+)?\s(.+)\]#iU',
             $html,
             $matches,
