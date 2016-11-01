@@ -230,6 +230,7 @@ abstract class ExportCommand extends Command
                     'noVille'                  => true,
                     'displayFirstTitreAdresse' => true,
                     'setSeparatorAfterTitle'   => '#',
+                    'idEvenementGroupeAdresse' => $this->a->getIdEvenementGroupeAdresseFromIdAdresse($id)
                 ]
             )
         ).' ('.$addressInfo['nomVille'].')';
