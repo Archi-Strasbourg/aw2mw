@@ -270,12 +270,12 @@ abstract class ExportCommand extends Command
 
     protected function getSourceType($id)
     {
-        $reqTypeSource = "
+        $reqTypeSource = '
             SELECT tS.nom
             FROM source s
             LEFT JOIN typeSource tS USING (idTypeSource)
-            WHERE idSource = ".mysql_real_escape_string($id)." LIMIT 1
-        ";
+            WHERE idSource = '.mysql_real_escape_string($id).' LIMIT 1
+        ';
         $resTypeSource = $this->s->connexionBdd->requete($reqTypeSource);
         $typeSource = mysql_fetch_assoc($resTypeSource);
 
