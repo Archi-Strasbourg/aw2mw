@@ -268,6 +268,30 @@ abstract class ExportCommand extends Command
         }
     }
 
+    protected function getSourceType($id)
+    {
+        $reqTypeSource = "
+            SELECT tS.nom
+            FROM source s
+            LEFT JOIN typeSource tS USING (idTypeSource)
+            WHERE idSource = ".mysql_real_escape_string($id)." LIMIT 1
+        ";
+        $resTypeSource = $this->s->connexionBdd->requete($reqTypeSource);
+        $typeSource = mysql_fetch_assoc($resTypeSource);
+
+        return $typeSource['nom'];
+    }
+
+    protected function getSourceName($id)
+    {
+        $origPageName = $this->escapeSourceName($this->s->getSourceLibelle($id));
+        if (empty($origPageName)) {
+            throw new Exception('Empty source name (ID '.$id.')');
+        }
+
+        return $origPageName.' ('.$this->getSourceType($id).')';
+    }
+
     protected function getAddressName($id)
     {
         $addressInfo = $this->a->getArrayAdresseFromIdAdresse($id);

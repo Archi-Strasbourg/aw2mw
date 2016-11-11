@@ -247,11 +247,11 @@ class ExportPersonCommand extends ExportCommand
                 }
 
                 if ($eventInfo['idSource'] > 0) {
-                    $sourceName = $this->s->getSourceLibelle($eventInfo['idSource']);
+                    $sourceName = $this->getSourceName($eventInfo['idSource']);
                     $title .= '<ref>[[Source:'.$sourceName.'|'.$sourceName.']]</ref>';
                 }
                 if (!empty($eventInfo['numeroArchive'])) {
-                    $sourceName = $this->s->getSourceLibelle(24);
+                    $sourceName = $this->getSourceName(24);
                     $title .= '<ref>[[Source:'.$sourceName.'|'.$sourceName.']] - Cote '.
                         $eventInfo['numeroArchive'].'</ref>';
                 }
