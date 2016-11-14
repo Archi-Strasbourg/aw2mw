@@ -32,6 +32,9 @@ class Config
                 }
             }
         }
+        if (empty($this->apiUrl)) {
+            throw new \Exception('Missing API URL in config.yml');
+        }
     }
 
     /**
