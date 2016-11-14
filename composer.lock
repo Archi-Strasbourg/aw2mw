@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "220d83e96ad26faaedbd04fbb550ffbf",
-    "content-hash": "c3debd9fb09ecfde75d475edd902bdf2",
+    "hash": "c690777e505287f60c8be091255ff64f",
+    "content-hash": "3106ece56d4c43375e7d9e30fac81f27",
     "packages": [
         {
             "name": "addwiki/mediawiki-api",
@@ -166,6 +166,48 @@
             ],
             "description": "Source code for http://archi-strasbourg.org/",
             "time": "2016-11-01 19:21:23"
+        },
+        {
+            "name": "dshafik/php7-mysql-shim",
+            "version": "0.2.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/dshafik/php7-mysql-shim.git",
+                "reference": "615fb0f4111d584d5a36a9abc5f0c28e417a9c7e"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/dshafik/php7-mysql-shim/zipball/615fb0f4111d584d5a36a9abc5f0c28e417a9c7e",
+                "reference": "615fb0f4111d584d5a36a9abc5f0c28e417a9c7e",
+                "shasum": ""
+            },
+            "require": {
+                "ext-mysqli": "*"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "^1.9",
+                "phpunit/phpunit": "^5.2",
+                "squizlabs/php_codesniffer": "^2.3"
+            },
+            "type": "library",
+            "autoload": {
+                "files": [
+                    "lib/mysql.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Davey Shafik",
+                    "email": "me@daveyshafik.com",
+                    "homepage": "https://daveyshafik.com"
+                }
+            ],
+            "description": "A PHP 7 shim for ext/mysql",
+            "time": "2016-10-03 19:25:05"
         },
         {
             "name": "eventviva/php-image-resize",
@@ -419,6 +461,35 @@
             "time": "2014-10-12 19:18:40"
         },
         {
+            "name": "pear-pear.php.net/HTML_BBCodeParser2",
+            "version": "0.1.0",
+            "dist": {
+                "type": "file",
+                "url": "https://pear.php.net/get/HTML_BBCodeParser2-0.1.0.tgz",
+                "reference": null,
+                "shasum": null
+            },
+            "require": {
+                "php": ">=5.0.0.0"
+            },
+            "replace": {
+                "pear-pear/html_bbcodeparser2": "== 0.1.0.0"
+            },
+            "type": "pear-library",
+            "autoload": {
+                "classmap": [
+                    ""
+                ]
+            },
+            "include-path": [
+                "/"
+            ],
+            "license": [
+                "PHP"
+            ],
+            "description": "This is a parser to replace UBB style tags with their html equivalents.\n It does not simply do some regex calls, but is complete stack based parse engine. This ensures that all tags are properly nested, if not, extra tags are added to maintain the nesting. This parser should only produce xhtml 1.0 compliant code. All tags are validated and so are all their attributes. It should be easy to extend this parser with your own tags."
+        },
+        {
             "name": "psr/log",
             "version": "1.0.2",
             "source": {
@@ -665,16 +736,16 @@
         },
         {
             "name": "symfony/polyfill-mbstring",
-            "version": "v1.2.0",
+            "version": "v1.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-mbstring.git",
-                "reference": "dff51f72b0706335131b00a7f49606168c582594"
+                "reference": "e79d363049d1c2128f133a2667e4f4190904f7f4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/polyfill-mbstring/zipball/dff51f72b0706335131b00a7f49606168c582594",
-                "reference": "dff51f72b0706335131b00a7f49606168c582594",
+                "url": "https://api.github.com/repos/symfony/polyfill-mbstring/zipball/e79d363049d1c2128f133a2667e4f4190904f7f4",
+                "reference": "e79d363049d1c2128f133a2667e4f4190904f7f4",
                 "shasum": ""
             },
             "require": {
@@ -686,7 +757,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.2-dev"
+                    "dev-master": "1.3-dev"
                 }
             },
             "autoload": {
@@ -720,7 +791,7 @@
                 "portable",
                 "shim"
             ],
-            "time": "2016-05-18 14:26:46"
+            "time": "2016-11-14 01:06:16"
         },
         {
             "name": "symfony/process",
