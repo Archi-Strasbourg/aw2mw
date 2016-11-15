@@ -152,6 +152,23 @@ abstract class ExportCommand extends Command
         return preg_replace('/\n<u>(.+)(\s*:)<\/u>(\s*:)?\s*/i', PHP_EOL.'=== $1 ==='.PHP_EOL, $content);
     }
 
+    protected function replaceSourceLists($content)
+    {
+        $sources = '';
+        preg_match_all('/^\s*\(?sources\s*:(.*)\)?/im', $content, $sourceLists, PREG_SET_ORDER);
+        foreach ($sourceLists as $sourceList) {
+            if (!empty($sourceList)) {
+                $sources .= str_replace(' - ', PHP_EOL.'* ', $sourceList[1]);
+                $content = str_replace($sourceList[0], '', $content);
+            }
+        }
+        if (!empty($sources)) {
+            $content .= '== Sources =='.$sources;
+        }
+
+        return $content;
+    }
+
     /**
      * @param string $html
      */

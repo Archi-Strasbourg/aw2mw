@@ -651,6 +651,9 @@ class ExportAddressCommand extends ExportCommand
         $content = $this->replaceSubtitles($content);
         $this->savePage($pageName, $content, 'Conversion des titres de section');
 
+        $content = $this->replaceSourceLists($content);
+        $this->savePage($pageName, $content, 'Conversion des listes de sources');
+
         $content = '<translate>'.PHP_EOL.$content.PHP_EOL.'</translate>';
         $this->savePage($pageName, $content, 'Ajout des balises de traduction');
     }
