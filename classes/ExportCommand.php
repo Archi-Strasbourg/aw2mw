@@ -258,6 +258,20 @@ abstract class ExportCommand extends Command
                 );
             }
             $filename = $this->getImageName($image['idImage']);
+
+            $reqPriseDepuis = "SELECT ai.idAdresse,  ai.idEvenementGroupeAdresse
+                FROM _adresseImage ai
+                WHERE ai.idImage = ".$image['idImage']."
+                AND ai.prisDepuis='1'
+            ";
+            $resPriseDepuis = $this->i->connexionBdd->requete($reqPriseDepuis);
+            $linkedAdresses = [];
+            while ($fetchPriseDepuis = mysql_fetch_assoc($resPriseDepuis)) {
+                $addressName = $this->getAddressName($fetchPriseDepuis['idAdresse']);
+                $linkedAdresses[] = '[[Adresse:'.$addressName.'|'.$addressName.']]';
+
+            }
+
             $description = str_replace(
                 PHP_EOL,
                 ' ',
@@ -267,6 +281,9 @@ abstract class ExportCommand extends Command
                     )
                 )
             );
+            if (!empty($linkedAdresses)) {
+                $description .= '<br/><br/>Pris depuis '.implode(', ', $linkedAdresses);
+            }
             $return .= 'File:'.$filename.'|'.$description.PHP_EOL;
         }
         $return .= '</gallery>'.PHP_EOL;
