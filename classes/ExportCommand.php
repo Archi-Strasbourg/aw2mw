@@ -163,7 +163,7 @@ abstract class ExportCommand extends Command
             }
         }
         if (!empty($sources)) {
-            $content .= '== Sources =='.$sources;
+            $content .= '== Sources =='.PHP_EOL.$sources;
         }
 
         return $content;
@@ -203,10 +203,10 @@ abstract class ExportCommand extends Command
         if (!empty($externalLinks) || !empty($internalLinks)) {
             $content .= '== Annexes =='.PHP_EOL;
             if (!empty($internalLinks)) {
-                $content .= '=== Liens internes ==='.$internalLinks;
+                $content .= '=== Liens internes ==='.PHP_EOL.$internalLinks;
             }
             if (!empty($externalLinks)) {
-                $content .= '=== Liens externes ==='.$externalLinks;
+                $content .= '=== Liens externes ==='.PHP_EOL.$externalLinks;
             }
         }
 
