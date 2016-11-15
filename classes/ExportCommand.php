@@ -158,7 +158,15 @@ abstract class ExportCommand extends Command
         preg_match_all('/^\s*\(?sources\s*:(.*)\)?/im', $content, $sourceLists, PREG_SET_ORDER);
         foreach ($sourceLists as $sourceList) {
             if (!empty($sourceList)) {
-                $sources .= trim(preg_replace('/^\s*-\s/', PHP_EOL.'* ', $sourceList[1]));
+                $sources .= trim(
+                    str_replace(
+                        ' - ',
+                        PHP_EOL.'* ',
+                        preg_replace(
+                            '/^\s*-\s/', PHP_EOL.'* ', $sourceList[1]
+                        )
+                    )
+                );
                 $content = str_replace($sourceList[0], '', $content);
             }
         }
