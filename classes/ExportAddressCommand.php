@@ -654,7 +654,7 @@ class ExportAddressCommand extends ExportCommand
         $content = $this->replaceSourceLists($content);
         $this->savePage($pageName, $content, 'Conversion des listes de sources');
 
-        $content = $this->replaceRelatedLinks($content);
+        $content = $this->replaceRelatedLinks($content, $events);
         $this->savePage($pageName, $content, 'Conversion des annexes');
 
         $content = '<translate>'.PHP_EOL.$content.PHP_EOL.'</translate>';

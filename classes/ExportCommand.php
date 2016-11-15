@@ -169,7 +169,7 @@ abstract class ExportCommand extends Command
         return $content;
     }
 
-    protected function replaceRelatedLinks($content)
+    protected function replaceRelatedLinks($content, array $events)
     {
         $externalLinks = '';
         preg_match_all('/^===\s*Lien(?:s)? externe(?:s)?\s*===\n((?:(?:-.*)\n)*)/im', $content, $linkLists, PREG_SET_ORDER);
@@ -186,6 +186,17 @@ abstract class ExportCommand extends Command
             if (!empty($linkList)) {
                 $internalLinks .= preg_replace('/^\s*-\s/', PHP_EOL.'* ', $linkList[1]);
                 $content = str_replace($linkList[0], '', $content);
+            }
+        }
+
+        foreach ($events as $event) {
+            $req = 'SELECT distinct idEvenementGroupeAdresse
+    			FROM _evenementAdresseLiee
+    			WHERE idEvenement='.mysql_real_escape_string($event);
+            $res = $this->e->connexionBdd->requete($req);
+            while ($fetch = mysql_fetch_assoc($res)) {
+                $addressName = $this->getAddressName($this->a->getIdAdresseFromIdEvenementGroupeAdresse($fetch['idEvenementGroupeAdresse']));
+                $internalLinks .= PHP_EOL.'* [[Adresse:'.$addressName.'|'.$addressName.']]';
             }
         }
 
