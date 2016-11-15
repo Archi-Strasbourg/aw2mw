@@ -192,7 +192,7 @@ class ExportAddressCommand extends ExportCommand
             }
             if (!empty($otherImagesInfo)) {
                 $otherImages = PHP_EOL.'== Autres vues sur cette adresse =='.PHP_EOL.
-                    $this->createGallery($otherImagesInfo);
+                    $this->createGallery($otherImagesInfo, false);
                 $content .= $otherImages;
             }
 
@@ -232,7 +232,7 @@ class ExportAddressCommand extends ExportCommand
             }
             if (!empty($imagesFromInfo)) {
                 $imagesFrom = PHP_EOL.'== Vues prises depuis cette adresse =='.PHP_EOL.
-                    $this->createGallery($imagesFromInfo);
+                    $this->createGallery($imagesFromInfo, false);
                 $content .= $imagesFrom;
             }
         }

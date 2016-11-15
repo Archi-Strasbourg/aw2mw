@@ -246,7 +246,7 @@ abstract class ExportCommand extends Command
         return $html;
     }
 
-    protected function createGallery($images)
+    protected function createGallery($images, $addLinkedAddresses = true)
     {
         $return = '<gallery>'.PHP_EOL;
         foreach ($images as $image) {
@@ -259,29 +259,36 @@ abstract class ExportCommand extends Command
             }
             $filename = $this->getImageName($image['idImage']);
 
-            $reqPriseDepuis = 'SELECT ai.idAdresse,  ai.idEvenementGroupeAdresse
-                FROM _adresseImage ai
-                WHERE ai.idImage = '.$image['idImage']."
-                AND ai.prisDepuis='1'
-            ";
-            $resPriseDepuis = $this->i->connexionBdd->requete($reqPriseDepuis);
-            $linkedAdresses = [];
-            while ($fetchPriseDepuis = mysql_fetch_assoc($resPriseDepuis)) {
-                $addressName = $this->getAddressName($fetchPriseDepuis['idAdresse']);
-                $linkedAdresses[] = '[[Adresse:'.$addressName.'|'.$addressName.']]';
-            }
-
-            $description = str_replace(
-                PHP_EOL,
-                ' ',
-                strip_tags(
-                    $this->convertHtml(
-                        (string) $this->bbCode->convertToDisplay(['text' => $image['description']])
+            $description = trim(
+                str_replace(
+                    PHP_EOL,
+                    ' ',
+                    strip_tags(
+                        $this->convertHtml(
+                            (string) $this->bbCode->convertToDisplay(['text' => $image['description']])
+                        )
                     )
                 )
             );
-            if (!empty($linkedAdresses)) {
-                $description .= '<br/><br/>Pris depuis '.implode(', ', $linkedAdresses);
+
+            if ($addLinkedAddresses) {
+                $reqPriseDepuis = 'SELECT ai.idAdresse,  ai.idEvenementGroupeAdresse
+                    FROM _adresseImage ai
+                    WHERE ai.idImage = '.$image['idImage']."
+                    AND ai.prisDepuis='1'
+                ";
+                $resPriseDepuis = $this->i->connexionBdd->requete($reqPriseDepuis);
+                $linkedAdresses = [];
+                while ($fetchPriseDepuis = mysql_fetch_assoc($resPriseDepuis)) {
+                    $addressName = $this->getAddressName($fetchPriseDepuis['idAdresse']);
+                    $linkedAdresses[] = '[[Adresse:'.$addressName.'|'.$addressName.']]';
+                }
+                if (!empty($linkedAdresses)) {
+                    if (!empty($description)) {
+                        $description .= '<br/><br/>';
+                    };
+                    $description .= 'Pris depuis '.implode(', ', $linkedAdresses);
+                }
             }
             $return .= 'File:'.$filename.'|'.$description.PHP_EOL;
         }
