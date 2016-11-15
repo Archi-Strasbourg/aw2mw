@@ -149,7 +149,7 @@ abstract class ExportCommand extends Command
      */
     protected function replaceSubtitles($content)
     {
-        return preg_replace('/\n<u>(.+)(\s*:)<\/u>(\s*:)?\s*/i', PHP_EOL.'=== $1 ==='.PHP_EOL, $content);
+        return preg_replace('/\n<u>(.+)(\s*:)?<\/u>(\s*:)?\s*/i', PHP_EOL.'=== $1 ==='.PHP_EOL, $content);
     }
 
     protected function replaceSourceLists($content)
@@ -158,12 +158,45 @@ abstract class ExportCommand extends Command
         preg_match_all('/^\s*\(?sources\s*:(.*)\)?/im', $content, $sourceLists, PREG_SET_ORDER);
         foreach ($sourceLists as $sourceList) {
             if (!empty($sourceList)) {
-                $sources .= str_replace(' - ', PHP_EOL.'* ', $sourceList[1]);
+                $sources .= preg_replace('/^\s*-\s/', PHP_EOL.'* ', $sourceList[1]);
                 $content = str_replace($sourceList[0], '', $content);
             }
         }
         if (!empty($sources)) {
             $content .= '== Sources =='.$sources;
+        }
+
+        return $content;
+    }
+
+    protected function replaceRelatedLinks($content)
+    {
+        $externalLinks = '';
+        preg_match_all('/^===\s*Lien(?:s)? externe(?:s)?\s*===\n((?:(?:-.*)\n)*)/im', $content, $linkLists, PREG_SET_ORDER);
+        foreach ($linkLists as $linkList) {
+            if (!empty($linkList)) {
+                $externalLinks .= preg_replace('/^\s*-\s/', PHP_EOL.'* ', $linkList[1]);
+                $content = str_replace($linkList[0], '', $content);
+            }
+        }
+
+        $internalLinks = '';
+        preg_match_all('/^===\s*Lien(?:s)? interne(?:s)?\s*===\n((?:(?:-.*)\n)*)/im', $content, $linkLists, PREG_SET_ORDER);
+        foreach ($linkLists as $linkList) {
+            if (!empty($linkList)) {
+                $internalLinks .= preg_replace('/^\s*-\s/', PHP_EOL.'* ', $linkList[1]);
+                $content = str_replace($linkList[0], '', $content);
+            }
+        }
+
+        if (!empty($externalLinks) || !empty($internalLinks)) {
+            $content .= '== Annexes =='.PHP_EOL;
+            if (!empty($internalLinks)) {
+                $content .= '=== Liens internes ==='.$internalLinks;
+            }
+            if (!empty($externalLinks)) {
+                $content .= '=== Liens externes ==='.$externalLinks;
+            }
         }
 
         return $content;
