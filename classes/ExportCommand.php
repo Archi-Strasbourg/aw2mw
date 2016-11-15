@@ -259,9 +259,9 @@ abstract class ExportCommand extends Command
             }
             $filename = $this->getImageName($image['idImage']);
 
-            $reqPriseDepuis = "SELECT ai.idAdresse,  ai.idEvenementGroupeAdresse
+            $reqPriseDepuis = 'SELECT ai.idAdresse,  ai.idEvenementGroupeAdresse
                 FROM _adresseImage ai
-                WHERE ai.idImage = ".$image['idImage']."
+                WHERE ai.idImage = '.$image['idImage']."
                 AND ai.prisDepuis='1'
             ";
             $resPriseDepuis = $this->i->connexionBdd->requete($reqPriseDepuis);
@@ -269,7 +269,6 @@ abstract class ExportCommand extends Command
             while ($fetchPriseDepuis = mysql_fetch_assoc($resPriseDepuis)) {
                 $addressName = $this->getAddressName($fetchPriseDepuis['idAdresse']);
                 $linkedAdresses[] = '[[Adresse:'.$addressName.'|'.$addressName.']]';
-
             }
 
             $description = str_replace(
