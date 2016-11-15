@@ -286,7 +286,7 @@ abstract class ExportCommand extends Command
                 if (!empty($linkedAdresses)) {
                     if (!empty($description)) {
                         $description .= '<br/><br/>';
-                    };
+                    }
                     $description .= 'Pris depuis '.implode(', ', $linkedAdresses);
                 }
             }
