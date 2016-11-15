@@ -158,7 +158,7 @@ abstract class ExportCommand extends Command
         preg_match_all('/^\s*\(?sources\s*:(.*)\)?/im', $content, $sourceLists, PREG_SET_ORDER);
         foreach ($sourceLists as $sourceList) {
             if (!empty($sourceList)) {
-                $sources .= preg_replace('/^\s*-\s/', PHP_EOL.'* ', $sourceList[1]);
+                $sources .= trim(preg_replace('/^\s*-\s/', PHP_EOL.'* ', $sourceList[1]));
                 $content = str_replace($sourceList[0], '', $content);
             }
         }
@@ -175,7 +175,7 @@ abstract class ExportCommand extends Command
         preg_match_all('/^===\s*Lien(?:s)? externe(?:s)?\s*===\n((?:(?:-.*)\n)*)/im', $content, $linkLists, PREG_SET_ORDER);
         foreach ($linkLists as $linkList) {
             if (!empty($linkList)) {
-                $externalLinks .= preg_replace('/^\s*-\s/', PHP_EOL.'* ', $linkList[1]);
+                $externalLinks .= trim(preg_replace('/^\s*-\s/', PHP_EOL.'* ', $linkList[1]));
                 $content = str_replace($linkList[0], '', $content);
             }
         }
@@ -184,7 +184,7 @@ abstract class ExportCommand extends Command
         preg_match_all('/^===\s*Lien(?:s)? interne(?:s)?\s*===\n((?:(?:-.*)\n)*)/im', $content, $linkLists, PREG_SET_ORDER);
         foreach ($linkLists as $linkList) {
             if (!empty($linkList)) {
-                $internalLinks .= preg_replace('/^\s*-\s/', PHP_EOL.'* ', $linkList[1]);
+                $internalLinks .= trim(preg_replace('/^\s*-\s/', PHP_EOL.'* ', $linkList[1]));
                 $content = str_replace($linkList[0], '', $content);
             }
         }
