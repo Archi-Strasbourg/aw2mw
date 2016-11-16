@@ -155,14 +155,18 @@ abstract class ExportCommand extends Command
     protected function replaceSourceLists($content)
     {
         $sources = '';
-        preg_match_all('/^\s*\(?sources\s*:(.*)\)?/im', $content, $sourceLists, PREG_SET_ORDER);
+        preg_match_all('/^\s*\(?sources\s*:([^\)]*)\)?/im', $content, $sourceLists, PREG_SET_ORDER);
         foreach ($sourceLists as $sourceList) {
             if (!empty($sourceList)) {
-                $sources .= trim(
-                    str_replace(
-                        ' - ',
-                        PHP_EOL.'* ',
-                        $sourceList[1]
+                $sources .= str_replace(
+                    ','.PHP_EOL,
+                    PHP_EOL,
+                    trim(
+                        str_replace(
+                            ' - ',
+                            PHP_EOL.'* ',
+                            $sourceList[1]
+                        )
                     )
                 );
                 $content = str_replace($sourceList[0], '', $content);
