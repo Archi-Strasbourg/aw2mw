@@ -162,9 +162,7 @@ abstract class ExportCommand extends Command
                     str_replace(
                         ' - ',
                         PHP_EOL.'* ',
-                        preg_replace(
-                            '/^\s*-\s/', PHP_EOL.'* ', $sourceList[1]
-                        )
+                        $sourceList[1]
                     )
                 );
                 $content = str_replace($sourceList[0], '', $content);
