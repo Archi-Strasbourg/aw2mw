@@ -158,7 +158,7 @@ abstract class ExportCommand extends Command
         preg_match_all('/^\s*\(?sources\s*:([^\)]*)\)?/im', $content, $sourceLists, PREG_SET_ORDER);
         foreach ($sourceLists as $sourceList) {
             if (!empty($sourceList)) {
-                $sources .= str_replace(
+                $sources .= PHP_EOL.str_replace(
                     ','.PHP_EOL,
                     PHP_EOL,
                     trim(
@@ -173,7 +173,7 @@ abstract class ExportCommand extends Command
             }
         }
         if (!empty($sources)) {
-            $content .= '== Sources =='.PHP_EOL.$sources;
+            $content .= '== Sources =='.$sources;
         }
 
         return $content;
