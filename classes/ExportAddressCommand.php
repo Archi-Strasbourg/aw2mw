@@ -657,8 +657,8 @@ class ExportAddressCommand extends ExportCommand
         $content = $this->replaceRelatedLinks($content, $events);
         $this->savePage($pageName, $content, 'Conversion des annexes');
 
-        $content = '<translate>'.PHP_EOL.$content.PHP_EOL.'</translate>';
-        $this->savePage($pageName, $content, 'Ajout des balises de traduction');
+        //$content = '<translate>'.PHP_EOL.$content.PHP_EOL.'</translate>';
+        //$this->savePage($pageName, $content, 'Ajout des balises de traduction');
     }
 
     /**
