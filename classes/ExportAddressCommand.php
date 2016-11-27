@@ -11,6 +11,9 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class ExportAddressCommand extends ExportCommand
 {
+
+    const CONSTRUCTION_EVENTS_TYPE = ['Construction', 'Rénovation', 'Transformation', 'Démolition', 'Extension', 'Ravalement'];
+
     /**
      * Configure command.
      *
@@ -361,8 +364,14 @@ class ExportAddressCommand extends ExportCommand
                 $intro .= '|nom_complet = '.$txtAdresses.PHP_EOL;
             }
             $j = $k = $l = 0;
+            $nbConstructionEvents = 0;
             foreach ($infobox as $i => $info) {
-                if (!empty($info['people'])) {
+                if (in_array($info['type'], self::CONSTRUCTION_EVENTS_TYPE)) {
+                    $nbConstructionEvents++;
+                }
+            }
+            foreach ($infobox as $i => $info) {
+                if (in_array($info['type'], self::CONSTRUCTION_EVENTS_TYPE) && ($nbConstructionEvents <= 3 || !empty($info['people']))) {
                     $j++;
                     if (substr($info['date']['start'], 5) == '00-00') {
                         $info['date']['start'] = substr($info['date']['start'], 0, 4);
@@ -716,11 +725,7 @@ class ExportAddressCommand extends ExportCommand
             if (mysql_num_rows($result) <= 5) {
                 $isNews = false;
             } else {
-                if (in_array(
-                    $res['type'],
-                    ['Construction', 'Rénovation', 'Transformation', 'Démolition', 'Extension', 'Ravalement']
-                )
-                ) {
+                if (in_array($res['type'], self::CONSTRUCTION_EVENTS_TYPE)) {
                     $isNews = false;
                 } elseif ($res['ISMH'] > 0 || $res['MH'] > 0) {
                     $isNews = false;
