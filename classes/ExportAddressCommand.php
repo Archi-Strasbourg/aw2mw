@@ -11,7 +11,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class ExportAddressCommand extends ExportCommand
 {
-
     const CONSTRUCTION_EVENTS_TYPE = ['Construction', 'Rénovation', 'Transformation', 'Démolition', 'Extension', 'Ravalement'];
 
     /**
