@@ -69,6 +69,9 @@ class ExportImageCommand extends ExportCommand
 
         $resImages = $this->i->connexionBdd->requete($reqImages);
         $image = mysql_fetch_assoc($resImages);
+        if ($image === false) {
+            throw new \Exception("Can't find this image");
+        }
 
         $origImage = mysql_fetch_assoc(
             $this->i->connexionBdd->requete(
