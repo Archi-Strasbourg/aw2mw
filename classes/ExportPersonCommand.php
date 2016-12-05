@@ -235,7 +235,6 @@ class ExportPersonCommand extends ExportCommand
                     $this->login('aw2mw bot');
                 }
 
-
                 $content = '';
 
                 if (!empty($eventInfo['titre'])) {
@@ -262,7 +261,6 @@ class ExportPersonCommand extends ExportCommand
                 $html = $this->convertHtml(
                     (string) $this->bbCode->convertToDisplay(['text' => $eventInfo['description']])
                 );
-
 
                 $content .= trim($html).PHP_EOL.PHP_EOL;
                 $this->api->postRequest(

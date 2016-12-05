@@ -497,7 +497,6 @@ class ExportAddressCommand extends ExportCommand
                 //Login as user
                 $this->login($user['prenom'].' '.$user['nom']);
 
-
                 $content = '';
                 $date = $this->convertDate($event['dateDebut'], $event['dateFin'], $event['isDateDebutEnviron']);
 
@@ -527,7 +526,6 @@ class ExportAddressCommand extends ExportCommand
                 $html = $this->convertHtml(
                     (string) $this->bbCode->convertToDisplay(['text' => $event['description']])
                 );
-
 
                 $content .= trim($html).PHP_EOL.PHP_EOL;
                 $this->api->postRequest(
@@ -587,7 +585,6 @@ class ExportAddressCommand extends ExportCommand
             $sections[] = $imagesFrom;
         }
         $sections[] = $references;
-
 
         $comments = [];
 
