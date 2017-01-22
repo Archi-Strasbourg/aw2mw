@@ -640,6 +640,7 @@ class ExportAddressCommand extends ExportCommand
                         'commentText' => $this->convertHtml(
                             (string) $this->bbCode->convertToDisplay(['text' => $comment['commentaire']])
                         ),
+                        'token'       => $this->api->getToken(),
                     ]
                 )
             );

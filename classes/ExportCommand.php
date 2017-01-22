@@ -47,6 +47,8 @@ abstract class ExportCommand extends Command
      */
     protected function login($username)
     {
+        //We need to invalidate tokens if we change user
+        $this->api->clearTokens();
         $password = password_hash(
             $username.$this->config->userSecret,
             PASSWORD_BCRYPT,
