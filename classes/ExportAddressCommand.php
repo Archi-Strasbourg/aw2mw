@@ -520,6 +520,12 @@ class ExportAddressCommand extends ExportCommand
                 foreach ($people as $job => $person) {
                     $content .= '|'.$job.' = '.$person.PHP_EOL;
                 }
+                if ($event['ISMH'] > 0) {
+                    '|ismh = oui'.PHP_EOL;
+                }
+                if ($event['MH'] > 0) {
+                    '|mh = oui'.PHP_EOL;
+                }
                 $content .= '}}'.PHP_EOL;
 
                 $html = $this->convertHtml(
