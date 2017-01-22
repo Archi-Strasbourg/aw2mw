@@ -103,17 +103,7 @@ class ExportAddressCommand extends ExportCommand
             $title = trim($title, '.');
             $content .= '== '.$title.' =='.PHP_EOL;
 
-            $rep = $this->e->connexionBdd->requete('
-                    SELECT  p.idPersonne, m.nom as metier, p.nom, p.prenom
-                    FROM _evenementPersonne _eP
-                    LEFT JOIN personne p ON p.idPersonne = _eP.idPersonne
-                    LEFT JOIN metier m ON m.idMetier = p.idMetier
-                    WHERE _eP.idEvenement='.mysql_real_escape_string($id).'
-                    ORDER BY p.nom DESC');
-            $people = [];
-            while ($res = mysql_fetch_object($rep)) {
-                $people[] = $res;
-            }
+            $people = $this->getPeople($id);
 
             $info = [
                 'type'      => '',
@@ -363,14 +353,8 @@ class ExportAddressCommand extends ExportCommand
                 $intro .= '|nom_complet = '.$txtAdresses.PHP_EOL;
             }
             $j = $k = $l = 0;
-            $nbConstructionEvents = 0;
             foreach ($infobox as $i => $info) {
                 if (in_array($info['type'], self::CONSTRUCTION_EVENTS_TYPE)) {
-                    $nbConstructionEvents++;
-                }
-            }
-            foreach ($infobox as $i => $info) {
-                if (in_array($info['type'], self::CONSTRUCTION_EVENTS_TYPE) && ($nbConstructionEvents <= 3 || !empty($info['people']))) {
                     $j++;
                     if (substr($info['date']['start'], 5) == '00-00') {
                         $info['date']['start'] = substr($info['date']['start'], 0, 4);
@@ -519,9 +503,20 @@ class ExportAddressCommand extends ExportCommand
                 $title = ucfirst(stripslashes($title));
                 $content .= '== '.$title.' =='.PHP_EOL;
 
+                $people = [];
+                foreach ($this->getPeople($id) as $person) {
+                    if (isset($people[$person->metier]) && !empty($people[$person->metier])) {
+                        $people[$person->metier] .= ', '.$person->prenom.' '.$person->nom;
+                    } else {
+                        $people[$person->metier] = $person->prenom.' '.$person->nom;
+                    }
+                }
                 $content .= '{{Infobox actualité'.PHP_EOL.
-                    '|date = '.$date.PHP_EOL.
-                    '}}'.PHP_EOL;
+                    '|date = '.$date.PHP_EOL;
+                foreach ($people as $job => $person) {
+                    $content .= '|'.$job.' = '.$person.PHP_EOL;
+                }
+                $content .= '}}'.PHP_EOL;
 
                 $html = $this->convertHtml(
                     (string) $this->bbCode->convertToDisplay(['text' => $event['description']])
@@ -750,5 +745,23 @@ class ExportAddressCommand extends ExportCommand
 
         $this->exportEvents($events, $pageName, $address);
         $this->exportEvents($newsEvents, 'Actualités_adresse:'.$basePageName, $address);
+    }
+
+
+    private function getPeople($id)
+    {
+        $rep = $this->e->connexionBdd->requete('
+                SELECT  p.idPersonne, m.nom as metier, p.nom, p.prenom
+                FROM _evenementPersonne _eP
+                LEFT JOIN personne p ON p.idPersonne = _eP.idPersonne
+                LEFT JOIN metier m ON m.idMetier = p.idMetier
+                WHERE _eP.idEvenement='.mysql_real_escape_string($id).'
+                ORDER BY p.nom DESC');
+        $people = [];
+        while ($res = mysql_fetch_object($rep)) {
+            $people[] = $res;
+        }
+
+        return $people;
     }
 }
