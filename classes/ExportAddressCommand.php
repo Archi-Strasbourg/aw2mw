@@ -510,7 +510,7 @@ class ExportAddressCommand extends ExportCommand
                 $people = [];
                 foreach ($this->getPeople($id) as $person) {
                     if (isset($people[$person->metier]) && !empty($people[$person->metier])) {
-                        $people[$person->metier] .= ', '.$person->prenom.' '.$person->nom;
+                        $people[$person->metier] .= ';'.$person->prenom.' '.$person->nom;
                     } else {
                         $people[$person->metier] = $person->prenom.' '.$person->nom;
                     }
