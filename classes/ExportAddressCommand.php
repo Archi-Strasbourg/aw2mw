@@ -11,7 +11,9 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class ExportAddressCommand extends ExportCommand
 {
-    const CONSTRUCTION_EVENTS_TYPE = ['Construction', 'Rénovation', 'Transformation', 'Démolition', 'Extension', 'Ravalement'];
+    const CONSTRUCTION_EVENTS_TYPE = [
+        'Construction', 'Rénovation', 'Transformation', 'Démolition', 'Extension', 'Ravalement',
+    ];
 
     /**
      * Configure command.
@@ -157,7 +159,9 @@ class ExportAddressCommand extends ExportCommand
 
             $otherImagesInfo = [];
             $otherImages = '';
-            $linkedImages = $this->e->getArrayCorrespondancesIdImageVuesSurAndEvenementByDateFromGA($this->a->getIdEvenementGroupeAdresseFromIdAdresse($address['idAdresse']));
+            $linkedImages = $this->e->getArrayCorrespondancesIdImageVuesSurAndEvenementByDateFromGA(
+                $this->a->getIdEvenementGroupeAdresseFromIdAdresse($address['idAdresse'])
+            );
             while ($fetchPhotos = mysql_fetch_assoc($resPhotos)) {
                 foreach ($linkedImages as $linkedImageGroup) {
                     foreach ($linkedImageGroup as $linkedImage) {
@@ -746,7 +750,6 @@ class ExportAddressCommand extends ExportCommand
         $this->exportEvents($events, $pageName, $address);
         $this->exportEvents($newsEvents, 'Actualités_adresse:'.$basePageName, $address);
     }
-
 
     private function getPeople($id)
     {

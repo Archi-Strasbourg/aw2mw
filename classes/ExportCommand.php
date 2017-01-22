@@ -184,7 +184,12 @@ abstract class ExportCommand extends Command
     protected function replaceRelatedLinks($content, array $events)
     {
         $externalLinks = '';
-        preg_match_all('/^===\s*Lien(?:s)? externe(?:s)?\s*===\n((?:(?:-.*)\n)*)/im', $content, $linkLists, PREG_SET_ORDER);
+        preg_match_all(
+            '/^===\s*Lien(?:s)? externe(?:s)?\s*===\n((?:(?:-.*)\n)*)/im',
+            $content,
+            $linkLists,
+            PREG_SET_ORDER
+        );
         foreach ($linkLists as $linkList) {
             if (!empty($linkList)) {
                 $externalLinks .= trim(preg_replace('/^\s*-\s/', PHP_EOL.'* ', $linkList[1]));
@@ -193,7 +198,12 @@ abstract class ExportCommand extends Command
         }
 
         $internalLinks = '';
-        preg_match_all('/^===\s*Lien(?:s)? interne(?:s)?\s*===\n((?:(?:-.*)\n)*)/im', $content, $linkLists, PREG_SET_ORDER);
+        preg_match_all(
+            '/^===\s*Lien(?:s)? interne(?:s)?\s*===\n((?:(?:-.*)\n)*)/im',
+            $content,
+            $linkLists,
+            PREG_SET_ORDER
+        );
         foreach ($linkLists as $linkList) {
             if (!empty($linkList)) {
                 $internalLinks .= trim(preg_replace('/^\s*-\s/', PHP_EOL.'* ', $linkList[1]));
@@ -207,7 +217,9 @@ abstract class ExportCommand extends Command
     			WHERE idEvenement='.mysql_real_escape_string($event);
             $res = $this->e->connexionBdd->requete($req);
             while ($fetch = mysql_fetch_assoc($res)) {
-                $addressName = $this->getAddressName($this->a->getIdAdresseFromIdEvenementGroupeAdresse($fetch['idEvenementGroupeAdresse']));
+                $addressName = $this->getAddressName(
+                    $this->a->getIdAdresseFromIdEvenementGroupeAdresse($fetch['idEvenementGroupeAdresse'])
+                );
                 $internalLinks .= PHP_EOL.'* [[Adresse:'.$addressName.'|'.$addressName.']]';
             }
         }
