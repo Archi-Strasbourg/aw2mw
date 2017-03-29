@@ -11,6 +11,10 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class ExportAddressCommand extends ExportCommand
 {
+    const CONSTRUCTION_EVENTS_TYPE = [
+        'Construction', 'Rénovation', 'Transformation', 'Démolition', 'Extension', 'Ravalement',
+    ];
+
     /**
      * Configure command.
      *
@@ -101,17 +105,7 @@ class ExportAddressCommand extends ExportCommand
             $title = trim($title, '.');
             $content .= '== '.$title.' =='.PHP_EOL;
 
-            $rep = $this->e->connexionBdd->requete('
-                    SELECT  p.idPersonne, m.nom as metier, p.nom, p.prenom
-                    FROM _evenementPersonne _eP
-                    LEFT JOIN personne p ON p.idPersonne = _eP.idPersonne
-                    LEFT JOIN metier m ON m.idMetier = p.idMetier
-                    WHERE _eP.idEvenement='.mysql_real_escape_string($id).'
-                    ORDER BY p.nom DESC');
-            $people = [];
-            while ($res = mysql_fetch_object($rep)) {
-                $people[] = $res;
-            }
+            $people = $this->getPeople($id);
 
             $info = [
                 'type'      => '',
@@ -165,7 +159,9 @@ class ExportAddressCommand extends ExportCommand
 
             $otherImagesInfo = [];
             $otherImages = '';
-            $linkedImages = $this->e->getArrayCorrespondancesIdImageVuesSurAndEvenementByDateFromGA($this->a->getIdEvenementGroupeAdresseFromIdAdresse($address['idAdresse']));
+            $linkedImages = $this->e->getArrayCorrespondancesIdImageVuesSurAndEvenementByDateFromGA(
+                $this->a->getIdEvenementGroupeAdresseFromIdAdresse($address['idAdresse'])
+            );
             while ($fetchPhotos = mysql_fetch_assoc($resPhotos)) {
                 foreach ($linkedImages as $linkedImageGroup) {
                     foreach ($linkedImageGroup as $linkedImage) {
@@ -192,7 +188,7 @@ class ExportAddressCommand extends ExportCommand
             }
             if (!empty($otherImagesInfo)) {
                 $otherImages = PHP_EOL.'== Autres vues sur cette adresse =='.PHP_EOL.
-                    $this->createGallery($otherImagesInfo);
+                    $this->createGallery($otherImagesInfo, false);
                 $content .= $otherImages;
             }
 
@@ -232,7 +228,7 @@ class ExportAddressCommand extends ExportCommand
             }
             if (!empty($imagesFromInfo)) {
                 $imagesFrom = PHP_EOL.'== Vues prises depuis cette adresse =='.PHP_EOL.
-                    $this->createGallery($imagesFromInfo);
+                    $this->createGallery($imagesFromInfo, false);
                 $content .= $imagesFrom;
             }
         }
@@ -362,7 +358,7 @@ class ExportAddressCommand extends ExportCommand
             }
             $j = $k = $l = 0;
             foreach ($infobox as $i => $info) {
-                if (!empty($info['people'])) {
+                if (in_array($info['type'], self::CONSTRUCTION_EVENTS_TYPE)) {
                     $j++;
                     if (substr($info['date']['start'], 5) == '00-00') {
                         $info['date']['start'] = substr($info['date']['start'], 0, 4);
@@ -489,7 +485,6 @@ class ExportAddressCommand extends ExportCommand
                 //Login as user
                 $this->login($user['prenom'].' '.$user['nom']);
 
-
                 $content = '';
                 $date = $this->convertDate($event['dateDebut'], $event['dateFin'], $event['isDateDebutEnviron']);
 
@@ -512,14 +507,30 @@ class ExportAddressCommand extends ExportCommand
                 $title = ucfirst(stripslashes($title));
                 $content .= '== '.$title.' =='.PHP_EOL;
 
+                $people = [];
+                foreach ($this->getPeople($id) as $person) {
+                    if (isset($people[$person->metier]) && !empty($people[$person->metier])) {
+                        $people[$person->metier] .= ';'.$person->prenom.' '.$person->nom;
+                    } else {
+                        $people[$person->metier] = $person->prenom.' '.$person->nom;
+                    }
+                }
                 $content .= '{{Infobox actualité'.PHP_EOL.
-                    '|date = '.$date.PHP_EOL.
-                    '}}'.PHP_EOL;
+                    '|date = '.$date.PHP_EOL;
+                foreach ($people as $job => $person) {
+                    $content .= '|'.$job.' = '.$person.PHP_EOL;
+                }
+                if ($event['ISMH'] > 0) {
+                    '|ismh = oui'.PHP_EOL;
+                }
+                if ($event['MH'] > 0) {
+                    '|mh = oui'.PHP_EOL;
+                }
+                $content .= '}}'.PHP_EOL;
 
                 $html = $this->convertHtml(
                     (string) $this->bbCode->convertToDisplay(['text' => $event['description']])
                 );
-
 
                 $content .= trim($html).PHP_EOL.PHP_EOL;
                 $this->api->postRequest(
@@ -580,66 +591,68 @@ class ExportAddressCommand extends ExportCommand
         }
         $sections[] = $references;
 
+        if (!$isNews) {
+            $comments = [];
 
-        $comments = [];
+            foreach ($events as $section => $id) {
+                $reqEventsComments = "SELECT c.idCommentairesEvenement as idCommentaire, c.nom as nom,
+                c.prenom as prenom,c.email as email,DATE_FORMAT(c.date,'"._('%d/%m/%Y à %kh%i')."') as dateF,
+                c.commentaire as commentaire,c.idUtilisateur as idUtilisateur
+                         ,date_format( c.date, '%Y%m%d%H%i%s' ) AS dateTri
+                        FROM commentairesEvenement c
+                        LEFT JOIN utilisateur u ON u.idUtilisateur = c.idUtilisateur
+                        WHERE c.idEvenement = '".$id."'
+                        AND CommentaireValide=1
+                        ORDER BY DateTri ASC
+                        ";
+                $resEventsComments = $this->a->connexionBdd->requete($reqEventsComments);
+                while ($comment = mysql_fetch_assoc($resEventsComments)) {
+                    $comments[] = $comment;
+                }
+            }
 
-        foreach ($events as $section => $id) {
-            $reqEventsComments = "SELECT c.idCommentairesEvenement as idCommentaire, c.nom as nom,
-            c.prenom as prenom,c.email as email,DATE_FORMAT(c.date,'"._('%d/%m/%Y à %kh%i')."') as dateF,
-            c.commentaire as commentaire,c.idUtilisateur as idUtilisateur
-                     ,date_format( c.date, '%Y%m%d%H%i%s' ) AS dateTri
-                    FROM commentairesEvenement c
-                    LEFT JOIN utilisateur u ON u.idUtilisateur = c.idUtilisateur
-                    WHERE c.idEvenement = '".$id."'
-                    AND CommentaireValide=1
-                    ORDER BY DateTri ASC
-                    ";
-            $resEventsComments = $this->a->connexionBdd->requete($reqEventsComments);
-            while ($comment = mysql_fetch_assoc($resEventsComments)) {
+            $reqComments = "SELECT c.idCommentaire as idCommentaire, c.nom as nom, c.prenom as prenom,
+            c.email as email,DATE_FORMAT(c.date,'"._('%d/%m/%Y à %kh%i')."') as dateF,
+            c.commentaire as commentaire,c.idUtilisateur as idUtilisateur, u.urlSiteWeb as urlSiteWeb
+            		 ,date_format( c.date, '%Y%m%d%H%i%s' ) AS dateTri
+            		FROM commentaires c
+            		LEFT JOIN utilisateur u ON u.idUtilisateur = c.idUtilisateur
+            		WHERE c.idEvenementGroupeAdresse = '".
+                        $this->a->getIdEvenementGroupeAdresseFromIdAdresse($address['idAdresse'])."'
+            				AND CommentaireValide=1
+            				ORDER BY DateTri ASC
+            				";
+
+            $resComments = $this->a->connexionBdd->requete($reqComments);
+            $pageID = $this->services->newPageGetter()->getFromTitle($pageName)->getID();
+            while ($comment = mysql_fetch_assoc($resComments)) {
                 $comments[] = $comment;
             }
-        }
 
-        $reqComments = "SELECT c.idCommentaire as idCommentaire, c.nom as nom, c.prenom as prenom,
-        c.email as email,DATE_FORMAT(c.date,'"._('%d/%m/%Y à %kh%i')."') as dateF,
-        c.commentaire as commentaire,c.idUtilisateur as idUtilisateur, u.urlSiteWeb as urlSiteWeb
-        		 ,date_format( c.date, '%Y%m%d%H%i%s' ) AS dateTri
-        		FROM commentaires c
-        		LEFT JOIN utilisateur u ON u.idUtilisateur = c.idUtilisateur
-        		WHERE c.idEvenementGroupeAdresse = '".
-                    $this->a->getIdEvenementGroupeAdresseFromIdAdresse($address['idAdresse'])."'
-        				AND CommentaireValide=1
-        				ORDER BY DateTri ASC
-        				";
+            $commentDates = [];
+            foreach ($comments as $key => $comment) {
+                $commentDates[$key] = $comment['dateTri'];
+            }
+            array_multisort($commentDates, SORT_ASC, $comments);
 
-        $resComments = $this->a->connexionBdd->requete($reqComments);
-        $pageID = $this->services->newPageGetter()->getFromTitle($pageName)->getID();
-        while ($comment = mysql_fetch_assoc($resComments)) {
-            $comments[] = $comment;
-        }
-
-        $commentDates = [];
-        foreach ($comments as $key => $comment) {
-            $commentDates[$key] = $comment['dateTri'];
-        }
-        array_multisort($commentDates, SORT_ASC, $comments);
-
-        foreach ($comments as $comment) {
-            $this->login($comment['prenom'].' '.$comment['nom']);
-            $this->api->postRequest(
-                new Api\SimpleRequest(
-                    'commentsubmit',
-                    [
-                        'pageID'      => $pageID,
-                        'parentID'    => 0,
-                        'commentText' => $this->convertHtml(
-                            (string) $this->bbCode->convertToDisplay(['text' => $comment['commentaire']])
-                        ),
-                    ]
-                )
-            );
-            //This is to make sure comments are posted in the right order
-            sleep(1);
+            foreach ($comments as $comment) {
+                $this->login($comment['prenom'].' '.$comment['nom']);
+                $this->api->postRequest(
+                    new Api\SimpleRequest(
+                        'commentsubmit',
+                        [
+                            'pageID'      => $pageID,
+                            'parentID'    => 0,
+                            'commentText' => $this->convertHtml(
+                                (string) $this->bbCode->convertToDisplay(['text' => $comment['commentaire']])
+                            ),
+                            'token'       => $this->api->getToken(),
+                        ]
+                    )
+                );
+                //This is to make sure comments are posted in the right order
+                sleep(1);
+            }
         }
 
         //Login with bot
@@ -651,8 +664,14 @@ class ExportAddressCommand extends ExportCommand
         $content = $this->replaceSubtitles($content);
         $this->savePage($pageName, $content, 'Conversion des titres de section');
 
-        $content = '<translate>'.PHP_EOL.$content.PHP_EOL.'</translate>';
-        $this->savePage($pageName, $content, 'Ajout des balises de traduction');
+        $content = $this->replaceSourceLists($content);
+        $this->savePage($pageName, $content, 'Conversion des listes de sources');
+
+        $content = $this->replaceRelatedLinks($content, $events);
+        $this->savePage($pageName, $content, 'Conversion des annexes');
+
+        //$content = '<translate>'.PHP_EOL.$content.PHP_EOL.'</translate>';
+        //$this->savePage($pageName, $content, 'Ajout des balises de traduction');
     }
 
     /**
@@ -710,11 +729,7 @@ class ExportAddressCommand extends ExportCommand
             if (mysql_num_rows($result) <= 5) {
                 $isNews = false;
             } else {
-                if (in_array(
-                    $res['type'],
-                    ['Construction', 'Rénovation', 'Transformation', 'Démolition', 'Extension', 'Ravalement']
-                )
-                ) {
+                if (in_array($res['type'], self::CONSTRUCTION_EVENTS_TYPE)) {
                     $isNews = false;
                 } elseif ($res['ISMH'] > 0 || $res['MH'] > 0) {
                     $isNews = false;
@@ -742,5 +757,22 @@ class ExportAddressCommand extends ExportCommand
 
         $this->exportEvents($events, $pageName, $address);
         $this->exportEvents($newsEvents, 'Actualités_adresse:'.$basePageName, $address);
+    }
+
+    private function getPeople($id)
+    {
+        $rep = $this->e->connexionBdd->requete('
+                SELECT  p.idPersonne, m.nom as metier, p.nom, p.prenom
+                FROM _evenementPersonne _eP
+                LEFT JOIN personne p ON p.idPersonne = _eP.idPersonne
+                LEFT JOIN metier m ON m.idMetier = p.idMetier
+                WHERE _eP.idEvenement='.mysql_real_escape_string($id).'
+                ORDER BY p.nom DESC');
+        $people = [];
+        while ($res = mysql_fetch_object($rep)) {
+            $people[] = $res;
+        }
+
+        return $people;
     }
 }

@@ -101,7 +101,7 @@ class ExportSourceCommand extends ExportCommand
             $html;
         $html .= PHP_EOL.'{{Liste utilisations source}}';
 
-        $html = '<translate>'.PHP_EOL.$html.PHP_EOL.'</translate>';
+        //$html = '<translate>'.PHP_EOL.$html.PHP_EOL.'</translate>';
 
         $this->savePage($pageName, $html, 'Source importée depuis Archi-Wiki');
     }

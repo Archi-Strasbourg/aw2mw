@@ -235,7 +235,6 @@ class ExportPersonCommand extends ExportCommand
                     $this->login('aw2mw bot');
                 }
 
-
                 $content = '';
 
                 if (!empty($eventInfo['titre'])) {
@@ -262,7 +261,6 @@ class ExportPersonCommand extends ExportCommand
                 $html = $this->convertHtml(
                     (string) $this->bbCode->convertToDisplay(['text' => $eventInfo['description']])
                 );
-
 
                 $content .= trim($html).PHP_EOL.PHP_EOL;
                 $this->api->postRequest(
@@ -362,7 +360,11 @@ class ExportPersonCommand extends ExportCommand
                 $linkedEventImg = $this->a->getUrlImageFromAdresse(
                     $linkedEventIdAddress,
                     'mini',
-                    ['idEvenementGroupeAdresse' => $this->a->getIdEvenementGroupeAdresseFromIdAdresse($linkedEventIdAddress)]
+                    [
+                        'idEvenementGroupeAdresse' => $this->a->getIdEvenementGroupeAdresseFromIdAdresse(
+                            $linkedEventIdAddress
+                        ),
+                    ]
                 );
                 $html .= '{{Adresse liée'.PHP_EOL.
                     '|adresse='.$this->getAddressName($linkedEventIdAddress).PHP_EOL;
@@ -421,10 +423,12 @@ class ExportPersonCommand extends ExportCommand
 
         //Replace <u/> with ===
         $content = $this->replaceSubtitles($content);
-
         $this->savePage($pageName, $content, 'Conversion des titres de section');
 
-        $content = '<translate>'.PHP_EOL.$content.PHP_EOL.'</translate>';
-        $this->savePage($pageName, $content, 'Ajout des balises de traduction');
+        $content = $this->replaceSourceLists($content);
+        $this->savePage($pageName, $content, 'Conversion des listes de sources');
+
+        //$content = '<translate>'.PHP_EOL.$content.PHP_EOL.'</translate>';
+        //$this->savePage($pageName, $content, 'Ajout des balises de traduction');
     }
 }

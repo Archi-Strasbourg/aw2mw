@@ -47,6 +47,8 @@ abstract class ExportCommand extends Command
      */
     protected function login($username)
     {
+        //We need to invalidate tokens if we change user
+        $this->api->clearTokens();
         $password = password_hash(
             $username.$this->config->userSecret,
             PASSWORD_BCRYPT,
@@ -149,7 +151,90 @@ abstract class ExportCommand extends Command
      */
     protected function replaceSubtitles($content)
     {
-        return preg_replace('/\n<u>(.+)(\s*:)<\/u>(\s*:)?\s*/i', PHP_EOL.'=== $1 ==='.PHP_EOL, $content);
+        return preg_replace('/\n<u>(.+)(\s*:)?<\/u>(\s*:)?\s*/i', PHP_EOL.'=== $1 ==='.PHP_EOL, $content);
+    }
+
+    protected function replaceSourceLists($content)
+    {
+        $sources = '';
+        preg_match_all('/^\s*\(?sources\s*:([^\)]*)\)?/im', $content, $sourceLists, PREG_SET_ORDER);
+        foreach ($sourceLists as $sourceList) {
+            if (!empty($sourceList)) {
+                $sources .= PHP_EOL.str_replace(
+                    ','.PHP_EOL,
+                    PHP_EOL,
+                    trim(
+                        str_replace(
+                            ' - ',
+                            PHP_EOL.'* ',
+                            $sourceList[1]
+                        )
+                    )
+                );
+                $content = str_replace($sourceList[0], '', $content);
+            }
+        }
+        if (!empty($sources)) {
+            $content .= '== Sources =='.$sources;
+        }
+
+        return $content;
+    }
+
+    protected function replaceRelatedLinks($content, array $events)
+    {
+        $externalLinks = '';
+        preg_match_all(
+            '/^===\s*Lien(?:s)? externe(?:s)?\s*===\n((?:(?:-.*)\n)*)/im',
+            $content,
+            $linkLists,
+            PREG_SET_ORDER
+        );
+        foreach ($linkLists as $linkList) {
+            if (!empty($linkList)) {
+                $externalLinks .= trim(preg_replace('/^\s*-\s/', PHP_EOL.'* ', $linkList[1]));
+                $content = str_replace($linkList[0], '', $content);
+            }
+        }
+
+        $internalLinks = '';
+        preg_match_all(
+            '/^===\s*Lien(?:s)? interne(?:s)?\s*===\n((?:(?:-.*)\n)*)/im',
+            $content,
+            $linkLists,
+            PREG_SET_ORDER
+        );
+        foreach ($linkLists as $linkList) {
+            if (!empty($linkList)) {
+                $internalLinks .= trim(preg_replace('/^\s*-\s/', PHP_EOL.'* ', $linkList[1]));
+                $content = str_replace($linkList[0], '', $content);
+            }
+        }
+
+        foreach ($events as $event) {
+            $req = 'SELECT distinct idEvenementGroupeAdresse
+    			FROM _evenementAdresseLiee
+    			WHERE idEvenement='.mysql_real_escape_string($event);
+            $res = $this->e->connexionBdd->requete($req);
+            while ($fetch = mysql_fetch_assoc($res)) {
+                $addressName = $this->getAddressName(
+                    $this->a->getIdAdresseFromIdEvenementGroupeAdresse($fetch['idEvenementGroupeAdresse'])
+                );
+                $internalLinks .= PHP_EOL.'* [[Adresse:'.$addressName.'|'.$addressName.']]';
+            }
+        }
+
+        if (!empty($externalLinks) || !empty($internalLinks)) {
+            $content .= '== Annexes =='.PHP_EOL;
+            if (!empty($internalLinks)) {
+                $content .= '=== Liens internes ==='.PHP_EOL.$internalLinks;
+            }
+            if (!empty($externalLinks)) {
+                $content .= '=== Liens externes ==='.PHP_EOL.$externalLinks;
+            }
+        }
+
+        return $content;
     }
 
     /**
@@ -229,7 +314,7 @@ abstract class ExportCommand extends Command
         return $html;
     }
 
-    protected function createGallery($images)
+    protected function createGallery($images, $addLinkedAddresses = true)
     {
         $return = '<gallery>'.PHP_EOL;
         foreach ($images as $image) {
@@ -241,15 +326,38 @@ abstract class ExportCommand extends Command
                 );
             }
             $filename = $this->getImageName($image['idImage']);
-            $description = str_replace(
-                PHP_EOL,
-                ' ',
-                strip_tags(
-                    $this->convertHtml(
-                        (string) $this->bbCode->convertToDisplay(['text' => $image['description']])
+
+            $description = trim(
+                str_replace(
+                    PHP_EOL,
+                    ' ',
+                    strip_tags(
+                        $this->convertHtml(
+                            (string) $this->bbCode->convertToDisplay(['text' => $image['description']])
+                        )
                     )
                 )
             );
+
+            if ($addLinkedAddresses) {
+                $reqPriseDepuis = 'SELECT ai.idAdresse,  ai.idEvenementGroupeAdresse
+                    FROM _adresseImage ai
+                    WHERE ai.idImage = '.$image['idImage']."
+                    AND ai.prisDepuis='1'
+                ";
+                $resPriseDepuis = $this->i->connexionBdd->requete($reqPriseDepuis);
+                $linkedAdresses = [];
+                while ($fetchPriseDepuis = mysql_fetch_assoc($resPriseDepuis)) {
+                    $addressName = $this->getAddressName($fetchPriseDepuis['idAdresse']);
+                    $linkedAdresses[] = '[[Adresse:'.$addressName.'|'.$addressName.']]';
+                }
+                if (!empty($linkedAdresses)) {
+                    if (!empty($description)) {
+                        $description .= '<br/><br/>';
+                    }
+                    $description .= 'Pris depuis '.implode(', ', $linkedAdresses);
+                }
+            }
             $return .= 'File:'.$filename.'|'.$description.PHP_EOL;
         }
         $return .= '</gallery>'.PHP_EOL;
