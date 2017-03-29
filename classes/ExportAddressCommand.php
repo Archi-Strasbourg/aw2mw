@@ -425,7 +425,7 @@ class ExportAddressCommand extends ExportCommand
                 );
             }
             $filename = $this->getImageName($mainImageInfo['idImage']);
-            $intro .= '|photo = '.$filename.PHP_EOL;
+            $intro .= '|photo_principale = '.$filename.PHP_EOL;
             $intro .= '}}'.PHP_EOL.PHP_EOL;
             $sections[0] = $intro;
 
