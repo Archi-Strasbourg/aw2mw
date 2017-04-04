@@ -152,7 +152,7 @@ class ExportImageCommand extends ExportCommand
         $refs = [];
         if (is_array($matches)) {
             foreach ($matches as $match) {
-                $refs[] = $match[1];
+                $refs[] = trim($match[1]);
             }
         }
         $description = preg_replace('#<ref>(.*)</ref>#iU', '', $description);
@@ -172,7 +172,7 @@ class ExportImageCommand extends ExportCommand
             '|licence = {{Modèle:'.$licence['name'].'}}'.PHP_EOL.
             '|tags = '.$image['tags'].PHP_EOL.
             '|source='.$sourceName.PHP_EOL.
-            '|références='.implode(PHP_EOL, $refs).PHP_EOL.
+                implode(PHP_EOL, $refs).PHP_EOL.
             '}}',
             "Description de l'image importée depuis Archi-Wiki"
         );
