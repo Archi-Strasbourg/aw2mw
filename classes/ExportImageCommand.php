@@ -141,6 +141,22 @@ class ExportImageCommand extends ExportCommand
         $description = $this->convertHtml(
             (string) $this->bbCode->convertToDisplay(['text' => $image['description']])
         );
+
+        //Move sources to infobox
+        preg_match_all(
+            '#<ref>(.*)</ref>#iU',
+            $description,
+            $matches,
+            PREG_SET_ORDER
+        );
+        $refs = [];
+        if (is_array($matches)) {
+            foreach ($matches as $match) {
+                $refs[] = $match[1];
+            }
+        }
+        $description = preg_replace('#<ref>(.*)</ref>#iU', '', $description);
+
         if ($image['idSource'] > 0) {
             $sourceName = $this->escapeSourceName($this->s->getSourceLibelle($image['idSource']));
             $sourceName = '[[Source::Source:'.$sourceName.'|'.$sourceName.']]';
@@ -156,6 +172,7 @@ class ExportImageCommand extends ExportCommand
             '|licence = {{Modèle:'.$licence['name'].'}}'.PHP_EOL.
             '|tags = '.$image['tags'].PHP_EOL.
             '|source='.$sourceName.PHP_EOL.
+            '|références='.implode(PHP_EOL, $refs).PHP_EOL.
             '}}',
             "Description de l'image importée depuis Archi-Wiki"
         );
