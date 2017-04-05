@@ -89,7 +89,7 @@ class ExportPersonCommand extends ExportCommand
                 $this->output
             );
             $filename = $this->getImageName($fetch->idImage);
-            $intro .= '|photo='.$filename.PHP_EOL;
+            $intro .= '|photo_principale='.$filename.PHP_EOL;
         }
         $job = $this->getJobName($person->idMetier);
         if (isset($job)) {
