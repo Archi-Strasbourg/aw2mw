@@ -317,8 +317,9 @@ class ExportPersonCommand extends ExportCommand
             );
 
             $linkedEvents = $person->getEvenementsLies($id, $eventInfo['dateDebut'], 3000);
+            $html = '';
             if (!empty($linkedEvents)) {
-                $html = '=== Adresses liées ==='.PHP_EOL;
+                $html .= '=== Adresses liées ==='.PHP_EOL;
             }
             foreach ($linkedEvents as $linkedEvent) {
                 $req = "
