@@ -313,6 +313,7 @@ class ExportPersonCommand extends ExportCommand
             $title = 'Biographie';
         }
         $title = stripslashes($title);
+
         return '== '.$title.' =='.PHP_EOL;
     }
 
