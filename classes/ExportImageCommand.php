@@ -159,7 +159,7 @@ class ExportImageCommand extends ExportCommand
 
         if ($image['idSource'] > 0) {
             $sourceName = $this->escapeSourceName($this->s->getSourceLibelle($image['idSource']));
-            $sourceName = '[[Source::Source:'.$sourceName.'|'.$sourceName.']]';
+            $sourceName = '{{source|'.$sourceName.'}}';
         } else {
             $sourceName = '';
         }
