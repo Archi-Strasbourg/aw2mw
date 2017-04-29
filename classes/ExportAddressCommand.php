@@ -725,7 +725,6 @@ class ExportAddressCommand extends ExportCommand
             ORDER BY pe.position ASC
             ';
         $result = $this->e->connexionBdd->requete($requete);
-        $arrayIdEvenement = [];
         while ($res = mysql_fetch_assoc($result)) {
             $isNews = true;
             if (mysql_num_rows($result) <= 5) {
