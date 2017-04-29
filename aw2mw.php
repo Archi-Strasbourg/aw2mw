@@ -24,4 +24,6 @@ $application->add(new ExportImageCommand());
 $application->add(new ExportUserCommand());
 $application->add(new ExportPersonCommand());
 $application->add(new ExportStreetCommand());
-$application->run();
+if (isset($_SERVER['argv'])) {
+    $application->run();
+}
