@@ -11,7 +11,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class ExportPersonCommand extends ExportCommand
 {
-
     protected $pageName;
     protected $person;
     protected $id;
