@@ -53,7 +53,8 @@ class ExportAddressCommand extends ExportCommand
 
         $this->output->writeln('<info>Exporting "'.$pageName.'"…</info>');
 
-        $isNews = $this->services->newPageGetter()->getFromTitle($pageName)->getPageIdentifier()->getTitle()->getNs() == 4100;
+        $isNews = $this->services->newPageGetter()->getFromTitle($pageName)
+            ->getPageIdentifier()->getTitle()->getNs() == 4100;
 
         $this->loginAsAdmin();
 
