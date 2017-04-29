@@ -699,7 +699,6 @@ class ExportAddressCommand extends ExportCommand
 
             return;
         }
-        $city = $this->a->getInfosVille($address['idVille']);
 
         $basePageName = $this->getAddressName($this->input->getArgument('id'));
 
