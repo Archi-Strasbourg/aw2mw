@@ -339,6 +339,7 @@ class ExportAddressCommand extends ExportCommand
             $resAddressGroup = $this->a->getAdressesFromEvenementGroupeAdresses(
                 $this->a->getIdEvenementGroupeAdresseFromIdAdresse($address['idAdresse'])
             );
+            $addresses = [];
             while ($fetchAddressGroup = mysql_fetch_assoc($resAddressGroup)) {
                 $addresses[] = $fetchAddressGroup;
             }
