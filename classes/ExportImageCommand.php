@@ -38,22 +38,8 @@ class ExportImageCommand extends ExportCommand
         return preg_replace('/<u>(.+)<\/u>\s*:\s*/i', '=== $1 ==='.PHP_EOL, $content);
     }
 
-    /**
-     * Execute command.
-     *
-     * @param InputInterface  $input  Input
-     * @param OutputInterface $output Output
-     *
-     * @return void
-     */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    private function getImage($id)
     {
-        $this->setup($input, $output);
-        global $config;
-        $config = new \ArchiConfig();
-
-        $id = $input->getArgument('id');
-
         $reqImages = "
             SELECT hi1.idImage,  hi1.idHistoriqueImage,  hi1.nom, hi1.auteur,
                 hi1.description,  hi1.dateUpload,  hi1.dateCliche, hi1.idUtilisateur,
@@ -72,6 +58,57 @@ class ExportImageCommand extends ExportCommand
         if ($image === false) {
             throw new \Exception("Can't find this image");
         }
+
+        return $image;
+    }
+
+    private function uploadImage(array $image)
+    {
+        $filename = $this->getImageName($image['idImage']);
+        $imagePage = $this->services->newPageGetter()->getFromTitle('File:'.$filename);
+        $this->output->writeln('<info>Exporting "File:'.$filename.'"…</info>');
+        if ($imagePage->getPageIdentifier()->getId() == 0 || $this->input->getOption('force')) {
+            $oldPath = 'http://www.archi-wiki.org/photos--'.$image['dateUpload'].
+                '-'.$image['idHistoriqueImage'].'-originaux.jpg';
+
+            $params = [
+                'filename' => $filename,
+                'token'    => $this->api->getToken('edit'),
+                'url'      => $oldPath,
+            ];
+            if ($this->input->getOption('force')) {
+                $params['ignorewarnings'] = true;
+            }
+
+            $this->api->postRequest(
+                new Api\SimpleRequest(
+                    'upload',
+                    $params,
+                    []
+                )
+            );
+        }
+
+        return $filename;
+    }
+
+    /**
+     * Execute command.
+     *
+     * @param InputInterface  $input  Input
+     * @param OutputInterface $output Output
+     *
+     * @return void
+     */
+    protected function execute(InputInterface $input, OutputInterface $output)
+    {
+        $this->setup($input, $output);
+        global $config;
+        $config = new \ArchiConfig();
+
+        $id = $this->input->getArgument('id');
+
+        $image = $this->getImage($id);
 
         $origImage = mysql_fetch_assoc(
             $this->i->connexionBdd->requete(
@@ -94,30 +131,8 @@ class ExportImageCommand extends ExportCommand
             }
         }
 
-        $filename = $this->getImageName($image['idImage']);
-        $imagePage = $this->services->newPageGetter()->getFromTitle('File:'.$filename);
-        $output->writeln('<info>Exporting "File:'.$filename.'"…</info>');
-        if ($imagePage->getPageIdentifier()->getId() == 0 || $input->getOption('force')) {
-            $oldPath = 'http://www.archi-wiki.org/photos--'.$image['dateUpload'].
-                '-'.$image['idHistoriqueImage'].'-originaux.jpg';
+        $filename = $this->uploadImage($image);
 
-            $params = [
-                'filename' => $filename,
-                'token'    => $this->api->getToken('edit'),
-                'url'      => $oldPath,
-            ];
-            if ($input->getOption('force')) {
-                $params['ignorewarnings'] = true;
-            }
-
-            $this->api->postRequest(
-                new Api\SimpleRequest(
-                    'upload',
-                    $params,
-                    []
-                )
-            );
-        }
         if (empty($image['auteur'])) {
             if (!empty($user)) {
                 $image['auteur'] = '[[Utilisateur:'.$user['prenom'].' '.$user['nom'].'|'.
