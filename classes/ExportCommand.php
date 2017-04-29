@@ -26,6 +26,7 @@ abstract class ExportCommand extends Command
     protected $revisionSaver;
     protected $fileUploader;
     protected $output;
+    protected $input;
 
     /**
      * Configure command.
