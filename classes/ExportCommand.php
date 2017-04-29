@@ -159,20 +159,22 @@ abstract class ExportCommand extends Command
     {
         $sources = '';
         preg_match_all('/^\s*\(?sources\s*:([^\)]*)\)?/im', $content, $sourceLists, PREG_SET_ORDER);
-        foreach ($sourceLists as $sourceList) {
-            if (!empty($sourceList)) {
-                $sources .= PHP_EOL.str_replace(
-                    ','.PHP_EOL,
-                    PHP_EOL,
-                    trim(
-                        str_replace(
-                            ' - ',
-                            PHP_EOL.'* ',
-                            $sourceList[1]
+        if (is_array($sourceLists)) {
+            foreach ($sourceLists as $sourceList) {
+                if (!empty($sourceList)) {
+                    $sources .= PHP_EOL.str_replace(
+                        ','.PHP_EOL,
+                        PHP_EOL,
+                        trim(
+                            str_replace(
+                                ' - ',
+                                PHP_EOL.'* ',
+                                $sourceList[1]
+                            )
                         )
-                    )
-                );
-                $content = str_replace($sourceList[0], '', $content);
+                    );
+                    $content = str_replace($sourceList[0], '', $content);
+                }
             }
         }
         if (!empty($sources)) {
@@ -191,10 +193,12 @@ abstract class ExportCommand extends Command
             $linkLists,
             PREG_SET_ORDER
         );
-        foreach ($linkLists as $linkList) {
-            if (!empty($linkList)) {
-                $externalLinks .= trim(preg_replace('/^\s*-\s/', PHP_EOL.'* ', $linkList[1]));
-                $content = str_replace($linkList[0], '', $content);
+        if (is_array($linkLists)) {
+            foreach ($linkLists as $linkList) {
+                if (!empty($linkList)) {
+                    $externalLinks .= trim(preg_replace('/^\s*-\s/', PHP_EOL.'* ', $linkList[1]));
+                    $content = str_replace($linkList[0], '', $content);
+                }
             }
         }
 
