@@ -5,7 +5,7 @@
 	"require": {
 		"archi-strasbourg/archi-wiki": "dev-dev",
 		"symfony/console": "~3.1.0",
-		"addwiki/mediawiki-api": "~0.5.1",
+		"addwiki/mediawiki-api": "~0.7.1",
 		"symfony/yaml": "~3.1.0",
 		"symfony/process": "~3.1.0",
         "ptachoire/process-builder-chain": "~1.2.0"
