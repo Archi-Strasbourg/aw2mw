@@ -269,6 +269,53 @@ class ExportPersonCommand extends ExportCommand
         $this->sections[$section + 1] .= $html;
     }
 
+    private function getSectionTitle($event)
+    {
+        $sql = 'SELECT  hE.idEvenement,
+                hE.titre, hE.idSource,
+                hE.idTypeStructure,
+                hE.idTypeEvenement,
+                hE.description,
+                hE.dateDebut,
+                hE.dateFin,
+                hE.dateDebut,
+                hE.dateFin,
+                tE.nom AS nomTypeEvenement,
+                tS.nom AS nomTypeStructure,
+                s.nom AS nomSource,
+                u.nom AS nomUtilisateur,
+                u.prenom as prenomUtilisateur,
+                tE.groupe,
+                hE.ISMH,
+                hE.MH,
+                date_format(hE.dateCreationEvenement,"'._('%e/%m/%Y à %kh%i').'") as dateCreationEvenement,
+                hE.isDateDebutEnviron as isDateDebutEnviron,
+                u.idUtilisateur as idUtilisateur,
+                hE.numeroArchive as numeroArchive
+
+                FROM historiqueEvenement hE
+                LEFT JOIN source s      ON s.idSource = hE.idSource
+                LEFT JOIN typeStructure tS  ON tS.idTypeStructure = hE.idTypeStructure
+                LEFT JOIN typeEvenement tE  ON tE.idTypeEvenement = hE.idTypeEvenement
+                LEFT JOIN utilisateur u     ON u.idUtilisateur = hE.idUtilisateur
+                WHERE hE.idEvenement = '.mysql_real_escape_string($event['idEvenementAssocie']).'
+        ORDER BY hE.idHistoriqueEvenement DESC';
+
+        $res = $this->e->connexionBdd->requete($sql);
+
+        $event = mysql_fetch_assoc($res);
+
+        if (!empty($event['titre'])) {
+            $title = $event['titre'];
+        } elseif ($event['dateDebut'] != '0000-00-00') {
+            $title = substr($event['dateDebut'], 0, 4);
+        } else {
+            $title = 'Biographie';
+        }
+        $title = stripslashes($title);
+        return '== '.$title.' =='.PHP_EOL;
+    }
+
     /**
      * Execute command.
      *
@@ -352,49 +399,7 @@ class ExportPersonCommand extends ExportCommand
 
         //Create page structure
         foreach ($events as $event) {
-            $sql = 'SELECT  hE.idEvenement,
-                    hE.titre, hE.idSource,
-                    hE.idTypeStructure,
-                    hE.idTypeEvenement,
-                    hE.description,
-                    hE.dateDebut,
-                    hE.dateFin,
-                    hE.dateDebut,
-                    hE.dateFin,
-                    tE.nom AS nomTypeEvenement,
-                    tS.nom AS nomTypeStructure,
-                    s.nom AS nomSource,
-                    u.nom AS nomUtilisateur,
-                    u.prenom as prenomUtilisateur,
-                    tE.groupe,
-                    hE.ISMH,
-                    hE.MH,
-                    date_format(hE.dateCreationEvenement,"'._('%e/%m/%Y à %kh%i').'") as dateCreationEvenement,
-                    hE.isDateDebutEnviron as isDateDebutEnviron,
-                    u.idUtilisateur as idUtilisateur,
-                    hE.numeroArchive as numeroArchive
-
-                    FROM historiqueEvenement hE
-                    LEFT JOIN source s      ON s.idSource = hE.idSource
-                    LEFT JOIN typeStructure tS  ON tS.idTypeStructure = hE.idTypeStructure
-                    LEFT JOIN typeEvenement tE  ON tE.idTypeEvenement = hE.idTypeEvenement
-                    LEFT JOIN utilisateur u     ON u.idUtilisateur = hE.idUtilisateur
-                    WHERE hE.idEvenement = '.mysql_real_escape_string($event['idEvenementAssocie']).'
-            ORDER BY hE.idHistoriqueEvenement DESC';
-
-            $res = $this->e->connexionBdd->requete($sql);
-
-            $event = mysql_fetch_assoc($res);
-
-            if (!empty($event['titre'])) {
-                $title = $event['titre'];
-            } elseif ($event['dateDebut'] != '0000-00-00') {
-                $title = substr($event['dateDebut'], 0, 4);
-            } else {
-                $title = 'Biographie';
-            }
-            $title = stripslashes($title);
-            $content .= '== '.$title.' =='.PHP_EOL;
+            $content .= $this->getSectionTitle($event);
         }
 
         $relatedPeople = $this->person->getRelatedPeople($this->id);
