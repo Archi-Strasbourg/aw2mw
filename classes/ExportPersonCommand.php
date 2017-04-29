@@ -317,37 +317,31 @@ class ExportPersonCommand extends ExportCommand
         return '== '.$title.' =='.PHP_EOL;
     }
 
-    /**
-     * Execute command.
-     *
-     * @param InputInterface  $input  Input
-     * @param OutputInterface $output Output
-     *
-     * @return void
-     */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    private function getRelatedPeople()
     {
-        $this->setup($input, $output);
-        global $config;
-        $config = new \ArchiConfig();
-        $this->id = $input->getArgument('id');
-        @$this->person = new \ArchiPersonne($this->id);
-        if (!isset($this->person->nom)) {
-            $this->output->writeln('<error>Personne introuvable</error>');
-
-            return;
+        $relatedPeople = $this->person->getRelatedPeople($this->id);
+        if (!empty($relatedPeople)) {
+            $relatedPeopleContent = '== Personnes liées =='.PHP_EOL;
+        } else {
+            $relatedPeopleContent = '';
+        }
+        foreach ($relatedPeople as $relatedId) {
+            $relatedPerson = new \ArchiPersonne($relatedId);
+            $job = $this->getJobName($relatedPerson->idMetier);
+            $relatedPeopleContent .= '* [[Personne:'.$relatedPerson->prenom.' '.$relatedPerson->nom.'|'.
+                $relatedPerson->prenom.' '.$relatedPerson->nom;
+            if (isset($job)) {
+                $relatedPeopleContent .= ' ('.$job.')';
+            }
+            $relatedPeopleContent .= ']]'.PHP_EOL;
         }
 
-        $this->pageName = 'Personne:'.$this->person->prenom.' '.$this->person->nom;
-        $this->output->writeln('<info>Exporting "'.$this->pageName.'"…</info>');
+        return $relatedPeopleContent;
+    }
 
-        $this->loginAsAdmin();
-        $this->deletePage($this->pageName);
-
-        $this->login('aw2mw bot');
-
-        $events = $this->person->getEvents($this->id);
-
+    private function getIntro()
+    {
+        global $config;
         $reqImage = "
             SELECT idImage
             FROM _personneImage
@@ -380,6 +374,42 @@ class ExportPersonCommand extends ExportCommand
         }
         $intro .= '}}'.PHP_EOL;
 
+        return $intro;
+    }
+
+    /**
+     * Execute command.
+     *
+     * @param InputInterface  $input  Input
+     * @param OutputInterface $output Output
+     *
+     * @return void
+     */
+    protected function execute(InputInterface $input, OutputInterface $output)
+    {
+        $this->setup($input, $output);
+        global $config;
+        $config = new \ArchiConfig();
+        $this->id = $input->getArgument('id');
+        @$this->person = new \ArchiPersonne($this->id);
+        if (!isset($this->person->nom)) {
+            $this->output->writeln('<error>Personne introuvable</error>');
+
+            return;
+        }
+
+        $this->pageName = 'Personne:'.$this->person->prenom.' '.$this->person->nom;
+        $this->output->writeln('<info>Exporting "'.$this->pageName.'"…</info>');
+
+        $this->loginAsAdmin();
+        $this->deletePage($this->pageName);
+
+        $this->login('aw2mw bot');
+
+        $events = $this->person->getEvents($this->id);
+
+        $intro = $this->getIntro();
+
         $this->sections = [];
         $this->sections[0] = $content = $intro;
 
@@ -403,22 +433,7 @@ class ExportPersonCommand extends ExportCommand
             $content .= $this->getSectionTitle($event);
         }
 
-        $relatedPeople = $this->person->getRelatedPeople($this->id);
-        if (!empty($relatedPeople)) {
-            $relatedPeopleContent = '== Personnes liées =='.PHP_EOL;
-        } else {
-            $relatedPeopleContent = '';
-        }
-        foreach ($relatedPeople as $relatedId) {
-            $relatedPerson = new \ArchiPersonne($relatedId);
-            $job = $this->getJobName($relatedPerson->idMetier);
-            $relatedPeopleContent .= '* [[Personne:'.$relatedPerson->prenom.' '.$relatedPerson->nom.'|'.
-                $relatedPerson->prenom.' '.$relatedPerson->nom;
-            if (isset($job)) {
-                $relatedPeopleContent .= ' ('.$job.')';
-            }
-            $relatedPeopleContent .= ']]'.PHP_EOL;
-        }
+        $relatedPeopleContent = $this->getRelatedPeople();
 
         $content .= $relatedPeopleContent;
 
