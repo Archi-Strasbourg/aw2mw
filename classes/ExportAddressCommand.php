@@ -15,6 +15,8 @@ class ExportAddressCommand extends ExportCommand
         'Construction', 'Rénovation', 'Transformation', 'Démolition', 'Extension', 'Ravalement',
     ];
 
+    protected $allEvents;
+
     /**
      * Configure command.
      *
