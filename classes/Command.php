@@ -14,6 +14,7 @@ class Command extends SymfonyCommand
     protected $e;
     protected $u;
     protected $i;
+    protected $s;
     protected $source;
     protected $bbCode;
     protected $api;
@@ -32,6 +33,7 @@ class Command extends SymfonyCommand
         $this->e = new \archiEvenement();
         $this->u = new \archiUtilisateur();
         $this->i = new \archiImage();
+        $this->s = new \ArchiSource();
         $this->source = new Source();
         $this->bbCode = new \bbCodeObject();
         $this->api = new Api\MediawikiApi($this->config->apiUrl);
