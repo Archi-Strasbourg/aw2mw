@@ -188,6 +188,8 @@ abstract class ExportCommand extends Command
     }
 
     /**
+     * @param string $content
+     *
      * @return string
      */
     protected function replaceRelatedLinks($content, array $events)
