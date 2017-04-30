@@ -321,6 +321,9 @@ class ExportAddressCommand extends ExportCommand
         }
     }
 
+    /**
+     * @param string $pageName
+     */
     private function exportInfobox(array $address, array $infobox, $pageName)
     {
         $intro = '{{Infobox adresse'.PHP_EOL;
@@ -437,6 +440,9 @@ class ExportAddressCommand extends ExportCommand
         return $intro;
     }
 
+    /**
+     * @param string $pageName
+     */
     private function exportEvent($id, $section, $pageName)
     {
         $req = 'SELECT idHistoriqueEvenement
@@ -550,6 +556,9 @@ class ExportAddressCommand extends ExportCommand
         }
     }
 
+    /**
+     * @param integer $section
+     */
     private function exportEventImages($id, $section, $pageName)
     {
         $reqImages = "
@@ -588,6 +597,9 @@ class ExportAddressCommand extends ExportCommand
         );
     }
 
+    /**
+     * @param string $pageName
+     */
     private function exportComments(array $events, array $address, $pageName)
     {
         $comments = [];
