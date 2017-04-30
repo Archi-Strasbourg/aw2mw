@@ -6,6 +6,8 @@ use Mediawiki\Api;
 
 abstract class AbstractEventCommand extends ExportCommand
 {
+    protected $sections;
+
     /**
      * @param string $pageName
      */

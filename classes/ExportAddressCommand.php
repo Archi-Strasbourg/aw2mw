@@ -16,7 +16,6 @@ class ExportAddressCommand extends AbstractEventCommand
     ];
 
     protected $allEvents;
-    protected $sections;
 
     /**
      * Configure command.
