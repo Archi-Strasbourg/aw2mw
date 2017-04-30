@@ -321,39 +321,10 @@ class ExportAddressCommand extends ExportCommand
         }
     }
 
-    /**
-     * @param string $pageName
-     */
-    private function exportInfobox(array $address, array $infobox, $pageName)
+    private function getNumberedInfo(array $infobox)
     {
-        $intro = '{{Infobox adresse'.PHP_EOL;
-
-        $txtAdresses = $this->getFullAddressName($address);
-
-        $intro .= '|pays = '.$address['nomPays'].PHP_EOL;
-        $intro .= '|ville = '.$address['nomVille'].PHP_EOL;
-        $resAddressGroup = $this->a->getAdressesFromEvenementGroupeAdresses(
-            $this->a->getIdEvenementGroupeAdresseFromIdAdresse($address['idAdresse'])
-        );
-        $addresses = [];
-        while ($fetchAddressGroup = mysql_fetch_assoc($resAddressGroup)) {
-            $addresses[] = $fetchAddressGroup;
-        }
-        foreach ($addresses as $i => $subAddress) {
-            $intro .= '|complément_rue'.($i + 1).' = '.$subAddress['prefixeRue'].PHP_EOL;
-            $intro .= '|rue'.($i + 1).' = '.$subAddress['nomRue'].PHP_EOL;
-            if ($subAddress['numero'] > 0) {
-                $intro .= '|numéro'.($i + 1).' = '.$subAddress['numero'].PHP_EOL;
-            }
-            if ($subAddress['longitude'] > 0 && $subAddress['latitude'] > 0) {
-                $intro .= '|longitude'.($i + 1).' = '.$subAddress['longitude'].PHP_EOL;
-                $intro .= '|latitude'.($i + 1).' = '.$subAddress['latitude'].PHP_EOL;
-            }
-        }
-        if (isset($txtAdresses)) {
-            $intro .= '|nom_complet = '.$txtAdresses.PHP_EOL;
-        }
         $j = $k = $l = 0;
+        $intro = '';
         foreach ($infobox as $i => $info) {
             if (in_array($info['type'], self::CONSTRUCTION_EVENTS_TYPE)) {
                 $j++;
@@ -391,6 +362,45 @@ class ExportAddressCommand extends ExportCommand
                 $intro .= '|mh'.$l.'='.$info['date']['pretty'].PHP_EOL;
             }
         }
+
+        return $intro;
+    }
+
+    /**
+     * @param string $pageName
+     */
+    private function exportInfobox(array $address, array $infobox, $pageName)
+    {
+        $intro = '{{Infobox adresse'.PHP_EOL;
+
+        $txtAdresses = $this->getFullAddressName($address);
+
+        $intro .= '|pays = '.$address['nomPays'].PHP_EOL;
+        $intro .= '|ville = '.$address['nomVille'].PHP_EOL;
+        $resAddressGroup = $this->a->getAdressesFromEvenementGroupeAdresses(
+            $this->a->getIdEvenementGroupeAdresseFromIdAdresse($address['idAdresse'])
+        );
+        $addresses = [];
+        while ($fetchAddressGroup = mysql_fetch_assoc($resAddressGroup)) {
+            $addresses[] = $fetchAddressGroup;
+        }
+        foreach ($addresses as $i => $subAddress) {
+            $intro .= '|complément_rue'.($i + 1).' = '.$subAddress['prefixeRue'].PHP_EOL;
+            $intro .= '|rue'.($i + 1).' = '.$subAddress['nomRue'].PHP_EOL;
+            if ($subAddress['numero'] > 0) {
+                $intro .= '|numéro'.($i + 1).' = '.$subAddress['numero'].PHP_EOL;
+            }
+            if ($subAddress['longitude'] > 0 && $subAddress['latitude'] > 0) {
+                $intro .= '|longitude'.($i + 1).' = '.$subAddress['longitude'].PHP_EOL;
+                $intro .= '|latitude'.($i + 1).' = '.$subAddress['latitude'].PHP_EOL;
+            }
+        }
+        if (isset($txtAdresses)) {
+            $intro .= '|nom_complet = '.$txtAdresses.PHP_EOL;
+        }
+
+        $intro .= $this->getNumberedInfo($infobox);
+
         $mainImageInfo = $this->i->getArrayInfosImagePrincipaleFromIdGroupeAdresse(
             [
                 'idEvenementGroupeAdresse' => $this->a->getIdEvenementGroupeAdresseFromIdAdresse(
