@@ -52,7 +52,7 @@ class ExportSourceCommand extends ExportCommand
 
         $id = $input->getArgument('id');
 
-        $origPageName = $this->getSourceName($id);
+        $origPageName = $this->source->getSourceName($id);
         $pageName = 'Source:'.$origPageName;
 
         $output->writeln('<info>Exporting "'.$pageName.'"…</info>');
@@ -63,7 +63,7 @@ class ExportSourceCommand extends ExportCommand
         $html = $this->replaceSubtitles($html);
 
         //Login as bot
-        $this->login('aw2mw bot');
+        $this->loginManager->login('aw2mw bot');
 
         $oldPath = 'http://www.archi-wiki.org/images/logosSources/'.$id.'_original.jpg';
         $headers = get_headers($oldPath, 1);
@@ -95,13 +95,13 @@ class ExportSourceCommand extends ExportCommand
         }
         $html = '{{Infobox source'.PHP_EOL.
             '|image='.$filename.''.PHP_EOL.
-            '|type='.$this->getSourceType($id).PHP_EOL.
+            '|type='.$this->source->getSourceType($id).PHP_EOL.
             '}}'.PHP_EOL.
             $html;
         $html .= PHP_EOL.'{{Liste utilisations source}}';
 
         //$html = '<translate>'.PHP_EOL.$html.PHP_EOL.'</translate>';
 
-        $this->savePage($pageName, $html, 'Source importée depuis Archi-Wiki');
+        $this->pageSaver->savePage($pageName, $html, 'Source importée depuis Archi-Wiki');
     }
 }

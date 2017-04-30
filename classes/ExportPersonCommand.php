@@ -224,9 +224,9 @@ class ExportPersonCommand extends ExportCommand
 
             //Login as user
             if (!empty($user['nom'])) {
-                $this->login($user['prenom'].' '.$user['nom']);
+                $this->loginManager->login($user['prenom'].' '.$user['nom']);
             } else {
-                $this->login('aw2mw bot');
+                $this->loginManager->login('aw2mw bot');
             }
 
             $content = '';
@@ -240,11 +240,11 @@ class ExportPersonCommand extends ExportCommand
             }
 
             if ($eventInfo['idSource'] > 0) {
-                $sourceName = $this->getSourceName($eventInfo['idSource']);
+                $sourceName = $this->source->getSourceName($eventInfo['idSource']);
                 $title .= '<ref>[[Source:'.$sourceName.'|'.$sourceName.']]</ref>';
             }
             if (!empty($eventInfo['numeroArchive'])) {
-                $sourceName = $this->getSourceName(24);
+                $sourceName = $this->source->getSourceName(24);
                 $title .= '<ref>[[Source:'.$sourceName.'|'.$sourceName.']] - Cote '.
                     $eventInfo['numeroArchive'].'</ref>';
             }
@@ -412,10 +412,10 @@ class ExportPersonCommand extends ExportCommand
         $this->pageName = 'Personne:'.$this->person->prenom.' '.$this->person->nom;
         $this->output->writeln('<info>Exporting "'.$this->pageName.'"…</info>');
 
-        $this->loginAsAdmin();
-        $this->deletePage($this->pageName);
+        $this->loginManager->loginAsAdmin();
+        $this->pageSaver->deletePage($this->pageName);
 
-        $this->login('aw2mw bot');
+        $this->loginManager->login('aw2mw bot');
 
         $events = $this->person->getEvents($this->id);
 
@@ -451,7 +451,7 @@ class ExportPersonCommand extends ExportCommand
         $references = PHP_EOL.'== Références =='.PHP_EOL.'<references />'.PHP_EOL;
         $content .= $references;
 
-        $this->savePage($this->pageName, $content, 'Sections importées depuis Archi-Wiki');
+        $this->pageSaver->savePage($this->pageName, $content, 'Sections importées depuis Archi-Wiki');
 
         foreach ($events as $section => $event) {
             $this->exportEvent($event, $section);
@@ -461,18 +461,18 @@ class ExportPersonCommand extends ExportCommand
         $this->sections[] = $references;
 
         //Login with bot
-        $this->login('aw2mw bot');
+        $this->loginManager->login('aw2mw bot');
 
         $content = implode('', $this->sections);
 
         //Replace <u/> with ===
         $content = $this->replaceSubtitles($content);
-        $this->savePage($this->pageName, $content, 'Conversion des titres de section');
+        $this->pageSaver->savePage($this->pageName, $content, 'Conversion des titres de section');
 
         $content = $this->replaceSourceLists($content);
-        $this->savePage($this->pageName, $content, 'Conversion des listes de sources');
+        $this->pageSaver->savePage($this->pageName, $content, 'Conversion des listes de sources');
 
         //$content = '<translate>'.PHP_EOL.$content.PHP_EOL.'</translate>';
-        //$this->savePage($this->pageName, $content, 'Ajout des balises de traduction');
+        //$this->pageSaver->savePage($this->pageName, $content, 'Ajout des balises de traduction');
     }
 }

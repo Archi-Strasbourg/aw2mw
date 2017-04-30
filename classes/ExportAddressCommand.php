@@ -496,7 +496,7 @@ class ExportAddressCommand extends ExportCommand
             $user = $this->u->getArrayInfosFromUtilisateur($event['idUtilisateur']);
 
             //Login as user
-            $this->login($user['prenom'].' '.$user['nom']);
+            $this->loginManager->login($user['prenom'].' '.$user['nom']);
 
             $content = '';
             $date = $this->convertDate($event['dateDebut'], $event['dateFin'], $event['isDateDebutEnviron']);
@@ -508,11 +508,11 @@ class ExportAddressCommand extends ExportCommand
             }
 
             if ($event['idSource'] > 0) {
-                $sourceName = $this->getSourceName($event['idSource']);
+                $sourceName = $this->source->getSourceName($event['idSource']);
                 $title .= '<ref>{{source|'.$sourceName.'}}</ref>';
             }
             if (!empty($event['numeroArchive'])) {
-                $sourceName = $this->getSourceName(24);
+                $sourceName = $this->source->getSourceName(24);
                 $title .= '<ref>{{source|'.$sourceName.'}} - Cote '.
                     $event['numeroArchive'].'</ref>';
             }
@@ -657,7 +657,7 @@ class ExportAddressCommand extends ExportCommand
         array_multisort($commentDates, SORT_ASC, $comments);
 
         foreach ($comments as $comment) {
-            $this->login($comment['prenom'].' '.$comment['nom']);
+            $this->loginManager->login($comment['prenom'].' '.$comment['nom']);
             $this->api->postRequest(
                 new Api\SimpleRequest(
                     'commentsubmit',
@@ -692,9 +692,9 @@ class ExportAddressCommand extends ExportCommand
         $isNews = $this->services->newPageGetter()->getFromTitle($pageName)
             ->getPageIdentifier()->getTitle()->getNs() == 4100;
 
-        $this->loginAsAdmin();
+        $this->loginManager->loginAsAdmin();
 
-        $this->deletePage($pageName);
+        $this->pageSaver->deletePage($pageName);
 
         //Create page structure
         foreach ($events as $id) {
@@ -718,9 +718,9 @@ class ExportAddressCommand extends ExportCommand
         $content .= $references;
 
         //Login as bot
-        $this->login('aw2mw bot');
+        $this->loginManager->login('aw2mw bot');
 
-        $this->savePage($pageName, $content, 'Sections importées depuis Archi-Wiki');
+        $this->pageSaver->savePage($pageName, $content, 'Sections importées depuis Archi-Wiki');
 
         if (!$isNews) {
             $this->sections[0] = $this->exportInfobox($address, $infobox, $pageName);
@@ -741,22 +741,22 @@ class ExportAddressCommand extends ExportCommand
         }
 
         //Login with bot
-        $this->login('aw2mw bot');
+        $this->loginManager->login('aw2mw bot');
 
         $content = implode('', $this->sections);
 
         //Replace <u/> with ===
         $content = $this->replaceSubtitles($content);
-        $this->savePage($pageName, $content, 'Conversion des titres de section');
+        $this->pageSaver->savePage($pageName, $content, 'Conversion des titres de section');
 
         $content = $this->replaceSourceLists($content);
-        $this->savePage($pageName, $content, 'Conversion des listes de sources');
+        $this->pageSaver->savePage($pageName, $content, 'Conversion des listes de sources');
 
         $content = $this->replaceRelatedLinks($content, $events);
-        $this->savePage($pageName, $content, 'Conversion des annexes');
+        $this->pageSaver->savePage($pageName, $content, 'Conversion des annexes');
 
         //$content = '<translate>'.PHP_EOL.$content.PHP_EOL.'</translate>';
-        //$this->savePage($pageName, $content, 'Ajout des balises de traduction');
+        //$this->pageSaver->savePage($pageName, $content, 'Ajout des balises de traduction');
     }
 
     /**

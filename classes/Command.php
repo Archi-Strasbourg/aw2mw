@@ -14,11 +14,12 @@ class Command extends SymfonyCommand
     protected $e;
     protected $u;
     protected $i;
-    protected $s;
+    protected $source;
     protected $bbCode;
     protected $api;
     protected $services;
-    protected $revisionSaver;
+    protected $pageSaver;
+    protected $loginManager;
     protected $fileUploader;
     protected $output;
     protected $input;
@@ -31,12 +32,13 @@ class Command extends SymfonyCommand
         $this->e = new \archiEvenement();
         $this->u = new \archiUtilisateur();
         $this->i = new \archiImage();
-        $this->s = new \ArchiSource();
+        $this->source = new Source();
         $this->bbCode = new \bbCodeObject();
         $this->api = new Api\MediawikiApi($this->config->apiUrl);
         $this->services = new Api\MediawikiFactory($this->api);
-        $this->revisionSaver = $this->services->newRevisionSaver();
+        $this->pageSaver = new PageSaver($this->services);
         $this->fileUploader = $this->services->newFileUploader();
+        $this->loginManager = new LoginManager($this->api, $this->config);
         $this->input = $input;
         $this->output = $output;
     }

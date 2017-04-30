@@ -3,8 +3,6 @@
 namespace AW2MW;
 
 use Chain\Chain;
-use Mediawiki\Api;
-use Mediawiki\DataModel;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Process\ProcessBuilder;
@@ -23,62 +21,6 @@ abstract class ExportCommand extends Command
             null,
             InputOption::VALUE_NONE,
             'Use production server'
-        );
-    }
-
-    /**
-     * @param string $username
-     */
-    protected function login($username)
-    {
-        //We need to invalidate tokens if we change user
-        $this->api->clearTokens();
-        $password = password_hash(
-            $username.$this->config->userSecret,
-            PASSWORD_BCRYPT,
-            ['salt' => $this->config->salt]
-        );
-        try {
-            $this->api->login(new Api\ApiUser($username, $password));
-        } catch (Api\UsageException $error) {
-            try {
-                //No email for now
-                $this->services->newUserCreator()->create(
-                    $username,
-                    $password
-                );
-                $this->api->login(new Api\ApiUser($username, $password));
-            } catch (Api\UsageException $error) {
-                $this->login('aw2mw bot');
-            }
-        }
-    }
-
-    /**
-     * @param string $pageName
-     */
-    protected function deletePage($pageName)
-    {
-        //Delete article if it already exists
-        $page = $this->services->newPageGetter()->getFromTitle($pageName);
-        if ($page->getPageIdentifier()->getId() > 0) {
-            $this->services->newPageDeleter()->delete($page);
-        }
-    }
-
-    /**
-     * @param string $note
-     * @param string $pageName
-     * @param string $content
-     */
-    protected function savePage($pageName, $content, $note)
-    {
-        $this->revisionSaver->save(
-            new DataModel\Revision(
-                new DataModel\Content($content),
-                new DataModel\PageIdentifier(new DataModel\Title($pageName))
-            ),
-            new DataModel\EditInfo($note, true, true)
         );
     }
 
@@ -105,11 +47,6 @@ abstract class ExportCommand extends Command
         }
 
         return $date;
-    }
-
-    protected function loginAsAdmin()
-    {
-        $this->api->login(new Api\ApiUser($this->config->admin['login'], $this->config->admin['password']));
     }
 
     /**
@@ -354,30 +291,6 @@ abstract class ExportCommand extends Command
         }
     }
 
-    protected function getSourceType($id)
-    {
-        $reqTypeSource = '
-            SELECT tS.nom
-            FROM source s
-            LEFT JOIN typeSource tS USING (idTypeSource)
-            WHERE idSource = '.mysql_real_escape_string($id).' LIMIT 1
-        ';
-        $resTypeSource = $this->s->connexionBdd->requete($reqTypeSource);
-        $typeSource = mysql_fetch_assoc($resTypeSource);
-
-        return $typeSource['nom'];
-    }
-
-    protected function getSourceName($id)
-    {
-        $origPageName = $this->escapeSourceName($this->s->getSourceLibelle($id));
-        if (empty($origPageName)) {
-            throw new Exception('Empty source name (ID '.$id.')');
-        }
-
-        return $origPageName.' ('.$this->getSourceType($id).')';
-    }
-
     protected function getAddressName($id)
     {
         $addressInfo = $this->a->getArrayAdresseFromIdAdresse($id);
@@ -420,18 +333,5 @@ abstract class ExportCommand extends Command
             $addressInfo['numero'].' '.$addressInfo['prefixeRue'].' '.
             $addressInfo['nomRue'].' '.$addressInfo['nomVille'].' '.$id.'.jpg'
         );
-    }
-
-    /**
-     * @param string $name
-     */
-    protected function escapeSourceName($name)
-    {
-        $name = stripslashes($name);
-        $name = str_replace('"', '', $name);
-        $name = urldecode($name);
-        $name = trim($name);
-
-        return $name;
     }
 }

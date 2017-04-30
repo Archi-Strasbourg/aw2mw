@@ -54,7 +54,7 @@ class ExportUserCommand extends ExportCommand
         $output->writeln('<info>Exporting "'.$pageName.'"…</info>');
 
         //Login as user
-        $this->login($user['prenom'].' '.$user['nom']);
+        $this->loginManager->login($user['prenom'].' '.$user['nom']);
 
         $oldPath = 'http://www.archi-wiki.org/images/avatar/'.$id.'/original.jpg';
         $headers = get_headers($oldPath, 1);
@@ -82,7 +82,7 @@ class ExportUserCommand extends ExportCommand
             $filename = '';
         }
 
-        $this->savePage(
+        $this->pageSaver->savePage(
             $pageName,
             '{{Infobox utilisateur'.PHP_EOL.
             '|site='.$user['urlSiteWeb'].PHP_EOL.

@@ -50,7 +50,7 @@ class ExportStreetCommand extends ExportCommand
 
         $html = '{{Infobox sous-quartier}}'.PHP_EOL.
             '[[Catégorie:'.$district['nom'].']]';
-        $this->savePage($pageName, $html, 'Sous-quartier importé depuis Archi-Wiki');
+        $this->pageSaver->savePage($pageName, $html, 'Sous-quartier importé depuis Archi-Wiki');
 
         return $subdistrict;
     }
@@ -76,7 +76,7 @@ class ExportStreetCommand extends ExportCommand
 
         $html = '{{Infobox quartier}}'.PHP_EOL.
             '[[Catégorie:'.$city['nom'].']]';
-        $this->savePage($pageName, $html, 'Quartier importé depuis Archi-Wiki');
+        $this->pageSaver->savePage($pageName, $html, 'Quartier importé depuis Archi-Wiki');
 
         return $district;
     }
@@ -100,7 +100,7 @@ class ExportStreetCommand extends ExportCommand
 
         $html = '{{Infobox ville}}'.PHP_EOL.
             '[[Catégorie:'.$country['nom'].']]';
-        $this->savePage($pageName, $html, 'Ville importée depuis Archi-Wiki');
+        $this->pageSaver->savePage($pageName, $html, 'Ville importée depuis Archi-Wiki');
 
         return $city;
     }
@@ -121,7 +121,7 @@ class ExportStreetCommand extends ExportCommand
 
         $html = '{{Infobox pays}}'.PHP_EOL.
             '[[Catégorie:Pays]]';
-        $this->savePage($pageName, $html, 'Pays importé depuis Archi-Wiki');
+        $this->pageSaver->savePage($pageName, $html, 'Pays importé depuis Archi-Wiki');
 
         return $country;
     }
@@ -152,7 +152,7 @@ class ExportStreetCommand extends ExportCommand
 
         if (!empty($street) && !empty($street['nom'])) {
             //Login as bot
-            $this->login('aw2mw bot');
+            $this->loginManager->login('aw2mw bot');
 
             $subdistrict = $this->exportSubdistrict($street['idSousQuartier']);
             $street['nom'] .= ' ('.$subdistrict['ville'].')';
@@ -165,7 +165,7 @@ class ExportStreetCommand extends ExportCommand
             $html = '{{Infobox rue}}'.PHP_EOL.
                 '[[Catégorie:'.$subdistrict['nom'].'|'.$street['nom'].'|]]';
 
-            $this->savePage($pageName, $html, 'Rue importée depuis Archi-Wiki');
+            $this->pageSaver->savePage($pageName, $html, 'Rue importée depuis Archi-Wiki');
         } else {
             $output->writeln('<error>Can\'t find this street: '.$id.'</error>');
         }

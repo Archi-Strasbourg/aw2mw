@@ -121,13 +121,13 @@ class ExportImageCommand extends ExportCommand
 
         $after2008 = false;
         if (!empty($user)) {
-            $this->login($user['prenom'].' '.$user['nom']);
+            $this->loginManager->login($user['prenom'].' '.$user['nom']);
         } else {
             $after2008 = new \DateTime($origImage['dateUpload']) > new \DateTime('2008-04-01');
             if ($after2008) {
-                $this->login('aw2mw bot');
+                $this->loginManager->login('aw2mw bot');
             } else {
-                $this->login('Fabien Romary');
+                $this->loginManager->login('Fabien Romary');
             }
         }
 
@@ -152,7 +152,7 @@ class ExportImageCommand extends ExportCommand
             $image['dateCliche'] = substr($image['dateCliche'], 0, 4);
         }
         $licence = $this->i->getLicence($image['idImage']);
-        $this->login('aw2mw bot');
+        $this->loginManager->login('aw2mw bot');
         $description = $this->convertHtml(
             (string) $this->bbCode->convertToDisplay(['text' => $image['description']])
         );
@@ -173,12 +173,12 @@ class ExportImageCommand extends ExportCommand
         $description = preg_replace('#<ref>(.*)</ref>#iU', '', $description);
 
         if ($image['idSource'] > 0) {
-            $sourceName = $this->escapeSourceName($this->s->getSourceLibelle($image['idSource']));
+            $sourceName = $this->source->escapeSourceName($this->s->getSourceLibelle($image['idSource']));
             $sourceName = '{{source|'.$sourceName.'}}';
         } else {
             $sourceName = '';
         }
-        $this->savePage(
+        $this->pageSaver->savePage(
             'File:'.$filename,
             '{{Infobox image'.PHP_EOL.
             '|description='.$description.PHP_EOL.
