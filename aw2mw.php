@@ -6,6 +6,7 @@ use AW2MW\ExportAllCommand;
 use AW2MW\ExportAllSourceCommand;
 use AW2MW\ExportAllStreetCommand;
 use AW2MW\ExportAllUserCommand;
+use AW2MW\ExportEventCommand;
 use AW2MW\ExportImageCommand;
 use AW2MW\ExportPersonCommand;
 use AW2MW\ExportSourceCommand;
@@ -24,6 +25,7 @@ $application->add(new ExportImageCommand());
 $application->add(new ExportUserCommand());
 $application->add(new ExportPersonCommand());
 $application->add(new ExportStreetCommand());
+$application->add(new ExportEventCommand());
 if (isset($_SERVER['argv'])) {
     $application->run();
 }
