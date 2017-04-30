@@ -155,6 +155,9 @@ abstract class ExportCommand extends Command
         return preg_replace('/\n<u>(.+)(\s*:)?<\/u>(\s*:)?\s*/i', PHP_EOL.'=== $1 ==='.PHP_EOL, $content);
     }
 
+    /**
+     * @param string $content
+     */
     protected function replaceSourceLists($content)
     {
         $sources = '';
@@ -184,6 +187,9 @@ abstract class ExportCommand extends Command
         return $content;
     }
 
+    /**
+     * @return string
+     */
     protected function replaceRelatedLinks($content, array $events)
     {
         $externalLinks = '';

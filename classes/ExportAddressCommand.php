@@ -568,6 +568,7 @@ class ExportAddressCommand extends ExportCommand
 
     /**
      * @param int $section
+     * @param string $pageName
      */
     private function exportEventImages($id, $section, $pageName)
     {
