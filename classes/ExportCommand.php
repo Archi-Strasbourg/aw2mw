@@ -5,29 +5,12 @@ namespace AW2MW;
 use Chain\Chain;
 use Mediawiki\Api;
 use Mediawiki\DataModel;
-use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\ArrayInput;
-use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\ProcessBuilder;
 
 abstract class ExportCommand extends Command
 {
-    protected $config;
-    protected $a;
-    protected $e;
-    protected $u;
-    protected $i;
-    protected $s;
-    protected $bbCode;
-    protected $api;
-    protected $services;
-    protected $revisionSaver;
-    protected $fileUploader;
-    protected $output;
-    protected $input;
-
     /**
      * Configure command.
      *
@@ -122,24 +105,6 @@ abstract class ExportCommand extends Command
         }
 
         return $date;
-    }
-
-    protected function setup(InputInterface $input, OutputInterface $output)
-    {
-        //Instantiate objects
-        $this->config = Config::getInstance($input->getOption('prod'));
-        $this->a = new \archiAdresse();
-        $this->e = new \archiEvenement();
-        $this->u = new \archiUtilisateur();
-        $this->i = new \archiImage();
-        $this->s = new \ArchiSource();
-        $this->bbCode = new \bbCodeObject();
-        $this->api = new Api\MediawikiApi($this->config->apiUrl);
-        $this->services = new Api\MediawikiFactory($this->api);
-        $this->revisionSaver = $this->services->newRevisionSaver();
-        $this->fileUploader = $this->services->newFileUploader();
-        $this->input = $input;
-        $this->output = $output;
     }
 
     protected function loginAsAdmin()
