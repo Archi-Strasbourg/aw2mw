@@ -55,7 +55,7 @@ class ExportSourceCommand extends ExportCommand
 
         $id = $input->getArgument('id');
 
-        $origPageName = $this->source->getSourceName($id);
+        $origPageName = Source::getSourceName($id);
         $pageName = 'Source:'.$origPageName;
 
         $output->writeln('<info>Exporting "'.$pageName.'"…</info>');
@@ -98,7 +98,7 @@ class ExportSourceCommand extends ExportCommand
         }
         $html = '{{Infobox source'.PHP_EOL.
             '|image='.$filename.''.PHP_EOL.
-            '|type='.$this->source->getSourceType($id).PHP_EOL.
+            '|type='.Source::getSourceType($id).PHP_EOL.
             '}}'.PHP_EOL.
             $html;
         $html .= PHP_EOL.'{{Liste utilisations source}}';

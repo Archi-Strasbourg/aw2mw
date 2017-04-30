@@ -57,7 +57,7 @@ abstract class AbstractEventCommand extends ExportCommand
             $this->loginManager->login($user['prenom'].' '.$user['nom']);
 
             $content = '';
-            $date = $this->convertDate($event['dateDebut'], $event['dateFin'], $event['isDateDebutEnviron']);
+            $date = Infobox::convertDate($event['dateDebut'], $event['dateFin'], $event['isDateDebutEnviron']);
 
             if (!empty($event['titre'])) {
                 $title = $event['titre'];
@@ -66,11 +66,11 @@ abstract class AbstractEventCommand extends ExportCommand
             }
 
             if ($event['idSource'] > 0) {
-                $sourceName = $this->source->getSourceName($event['idSource']);
+                $sourceName = Source::getSourceName($event['idSource']);
                 $title .= '<ref>{{source|'.$sourceName.'}}</ref>';
             }
             if (!empty($event['numeroArchive'])) {
-                $sourceName = $this->source->getSourceName(24);
+                $sourceName = Source::getSourceName(24);
                 $title .= '<ref>{{source|'.$sourceName.'}} - Cote '.
                     $event['numeroArchive'].'</ref>';
             }
@@ -79,7 +79,7 @@ abstract class AbstractEventCommand extends ExportCommand
             $content .= '== '.$title.' =='.PHP_EOL;
 
             $people = [];
-            foreach ($this->getPeople($id) as $person) {
+            foreach (Person::getPeople($id) as $person) {
                 if (isset($people[$person->metier]) && !empty($people[$person->metier])) {
                     $people[$person->metier] .= ';'.$person->prenom.' '.$person->nom;
                 } else {
@@ -122,23 +122,6 @@ abstract class AbstractEventCommand extends ExportCommand
 
             $this->exportEventImages($id, $section, $pageName);
         }
-    }
-
-    protected function getPeople($id)
-    {
-        $rep = $this->e->connexionBdd->requete('
-                SELECT  p.idPersonne, m.nom as metier, p.nom, p.prenom
-                FROM _evenementPersonne _eP
-                LEFT JOIN personne p ON p.idPersonne = _eP.idPersonne
-                LEFT JOIN metier m ON m.idMetier = p.idMetier
-                WHERE _eP.idEvenement='.mysql_real_escape_string($id).'
-                ORDER BY p.nom DESC');
-        $people = [];
-        while ($res = mysql_fetch_object($rep)) {
-            $people[] = $res;
-        }
-
-        return $people;
     }
 
     /**

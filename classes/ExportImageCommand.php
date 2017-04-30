@@ -173,7 +173,7 @@ class ExportImageCommand extends ExportCommand
         $description = preg_replace('#<ref>(.*)</ref>#iU', '', $description);
 
         if ($image['idSource'] > 0) {
-            $sourceName = $this->source->escapeSourceName($this->s->getSourceLibelle($image['idSource']));
+            $sourceName = Source::escapeSourceName($this->s->getSourceLibelle($image['idSource']));
             $sourceName = '{{source|'.$sourceName.'}}';
         } else {
             $sourceName = '';

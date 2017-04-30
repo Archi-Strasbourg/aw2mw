@@ -15,7 +15,6 @@ abstract class Command extends SymfonyCommand
     protected $u;
     protected $i;
     protected $s;
-    protected $source;
     protected $bbCode;
     protected $api;
     protected $services;
@@ -34,7 +33,6 @@ abstract class Command extends SymfonyCommand
         $this->u = new \archiUtilisateur();
         $this->i = new \archiImage();
         $this->s = new \ArchiSource();
-        $this->source = new Source();
         $this->bbCode = new \bbCodeObject();
         $this->api = new Api\MediawikiApi($this->config->apiUrl);
         $this->services = new Api\MediawikiFactory($this->api);
