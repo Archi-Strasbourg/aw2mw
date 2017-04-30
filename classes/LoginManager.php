@@ -12,7 +12,7 @@ class LoginManager
 
     /**
      * @param Api\MediawikiApi $api
-     * @param Config $config
+     * @param Config           $config
      */
     public function __construct($api, $config)
     {
