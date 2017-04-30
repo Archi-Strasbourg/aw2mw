@@ -6,6 +6,10 @@ use Mediawiki\Api;
 
 class LoginManager
 {
+    /**
+     * @param Api\MediawikiApi $api
+     * @param Config $config
+     */
     public function __construct($api, $config)
     {
         $this->api = $api;

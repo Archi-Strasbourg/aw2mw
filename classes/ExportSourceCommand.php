@@ -33,6 +33,9 @@ class ExportSourceCommand extends ExportCommand
             );
     }
 
+    /**
+     * @param string $content
+     */
     protected function replaceSubtitles($content)
     {
         return preg_replace('/<u>(.+)<\/u>\s*:\s*/i', '=== $1 ==='.PHP_EOL, $content);
