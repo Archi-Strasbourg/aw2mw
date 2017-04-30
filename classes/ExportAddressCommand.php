@@ -16,6 +16,7 @@ class ExportAddressCommand extends ExportCommand
     ];
 
     protected $allEvents;
+    protected $sections;
 
     /**
      * Configure command.
@@ -178,9 +179,9 @@ class ExportAddressCommand extends ExportCommand
         if (!empty($otherImagesInfo)) {
             $otherImages = PHP_EOL.'== Autres vues sur cette adresse =='.PHP_EOL.
                 $this->createGallery($otherImagesInfo, false);
-
-            return $otherImages;
         }
+
+        return $otherImages;
     }
 
     private function getImagesFrom(array $address)
@@ -221,15 +222,13 @@ class ExportAddressCommand extends ExportCommand
         if (!empty($imagesFromInfo)) {
             $imagesFrom = PHP_EOL.'== Vues prises depuis cette adresse =='.PHP_EOL.
                 $this->createGallery($imagesFromInfo, false);
-
-            return $imagesFrom;
         }
+
+        return $imagesFrom;
     }
 
-    private function exportInfobox(array $address, array $infobox, $pageName)
+    private function getFullAddressName($address)
     {
-        $intro = '{{Infobox adresse'.PHP_EOL;
-
         $idEvenementGroupeAdresse = $this->a->getIdEvenementGroupeAdresseFromIdAdresse($address['idAdresse']);
 
         $reqAdresseDuGroupeAdresse = "
@@ -317,7 +316,16 @@ class ExportAddressCommand extends ExportCommand
                 $txtAdresses .= $intituleRue.', ';
             }
             $txtAdresses = trim($txtAdresses, ', ');
+
+            return $txtAdresses;
         }
+    }
+
+    private function exportInfobox(array $address, array $infobox, $pageName)
+    {
+        $intro = '{{Infobox adresse'.PHP_EOL;
+
+        $txtAdresses = $this->getFullAddressName($address);
 
         $intro .= '|pays = '.$address['nomPays'].PHP_EOL;
         $intro .= '|ville = '.$address['nomVille'].PHP_EOL;
@@ -537,7 +545,13 @@ class ExportAddressCommand extends ExportCommand
                 )
             );
             $this->sections[$section + 1] = $content;
+
+            $this->exportEventImages($id, $section, $pageName);
         }
+    }
+
+    private function exportEventImages($id, $section, $pageName)
+    {
         $reqImages = "
             SELECT hi1.idImage, hi1.description
             FROM _evenementImage ei
@@ -639,6 +653,9 @@ class ExportAddressCommand extends ExportCommand
         }
     }
 
+    /**
+     * @param string $pageName
+     */
     private function exportEvents(array $events, $pageName, array $address)
     {
         global $config;
