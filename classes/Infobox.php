@@ -53,6 +53,26 @@ class Infobox
         return $intro;
     }
 
+    private function getCourants($id)
+    {
+        $e = new \archiEvenement();
+        $rep = $e->connexionBdd->requete(
+            'SELECT  cA.idCourantArchitectural, cA.nom
+			FROM _evenementCourantArchitectural _eA
+			LEFT JOIN courantArchitectural cA  ON cA.idCourantArchitectural  = _eA.idCourantArchitectural
+			WHERE _eA.idEvenement='.$id.'
+			ORDER BY cA.nom ASC'
+        );
+        $results = [];
+        if (mysql_num_rows($rep) > 0) {
+            while ($res = mysql_fetch_object($rep)) {
+                $results[] = $res->nom;
+            }
+        }
+
+        return implode(';', $results);
+    }
+
     public function getInfoboxInfo(array $event)
     {
         $info = [
@@ -75,7 +95,7 @@ class Infobox
         if ($event['MH'] > 0) {
             $info['mh'] = true;
         }
-        $info['courant'] = $event['courantArchitectural'];
+        $info['courant'] = self::getCourants($event['idEvenement']);
 
         $people = Person::getPeople($event['idEvenement']);
         foreach ($people as $person) {
