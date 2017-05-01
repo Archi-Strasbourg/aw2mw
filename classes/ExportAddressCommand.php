@@ -28,6 +28,10 @@ class ExportAddressCommand extends AbstractEventCommand
                 'id',
                 InputArgument::REQUIRED,
                 'Address ID'
+            )->addArgument(
+                'groupId',
+                InputArgument::OPTIONAL,
+                'Address group ID'
             )->addOption(
                 'noimage',
                 null,
@@ -444,15 +448,19 @@ class ExportAddressCommand extends AbstractEventCommand
             return;
         }
 
-        $basePageName = $this->getAddressName($this->input->getArgument('id'));
+        $groupId = $this->input->getArgument('groupId');
+        if (!isset($groupId)) {
+            $groupInfo = mysql_fetch_assoc($this->a->getIdEvenementsFromAdresse($this->input->getArgument('id')));
+
+            if (!$groupInfo) {
+                throw new \Exception("Can't find this address");
+            }
+            $groupId = $groupInfo['idEvenementGroupeAdresse'];
+        }
+
+        $basePageName = $this->getAddressName($this->input->getArgument('id'), $groupId);
 
         $pageName = 'Adresse:'.$basePageName;
-
-        $groupInfo = mysql_fetch_assoc($this->a->getIdEvenementsFromAdresse($this->input->getArgument('id')));
-
-        if (!$groupInfo) {
-            throw new \Exception("Can't find this address");
-        }
 
         $events = [];
         $newsEvents = [];
@@ -461,7 +469,7 @@ class ExportAddressCommand extends AbstractEventCommand
             SELECT DISTINCT evt.idEvenement, pe.position, te.nom as type, ISMH, MH
             FROM evenements evt
             LEFT JOIN _evenementEvenement ee on ee.idEvenement = '.
-                mysql_real_escape_string($groupInfo['idEvenementGroupeAdresse']).
+                mysql_real_escape_string($groupId).
             '
             LEFT JOIN positionsEvenements pe on pe.idEvenement = ee.idEvenementAssocie
             LEFT JOIN typeEvenement te on te.idTypeEvenement = evt.idTypeEvenement

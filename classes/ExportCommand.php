@@ -266,8 +266,11 @@ abstract class ExportCommand extends Command
         }
     }
 
-    protected function getAddressName($id)
+    protected function getAddressName($id, $groupId = null)
     {
+        if (!isset($groupId)) {
+            $groupId = $this->a->getIdEvenementGroupeAdresseFromIdAdresse($id);
+        }
         $addressInfo = $this->a->getArrayAdresseFromIdAdresse($id);
         $return = strip_tags(
             $this->a->getIntituleAdresseFrom(
@@ -280,7 +283,7 @@ abstract class ExportCommand extends Command
                     'noVille'                  => true,
                     'displayFirstTitreAdresse' => true,
                     'setSeparatorAfterTitle'   => '#',
-                    'idEvenementGroupeAdresse' => $this->a->getIdEvenementGroupeAdresseFromIdAdresse($id),
+                    'idEvenementGroupeAdresse' => $groupId,
                 ]
             )
         ).' ('.$addressInfo['nomVille'].')';
