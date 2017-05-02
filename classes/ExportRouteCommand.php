@@ -46,7 +46,7 @@ class ExportRouteCommand extends ExportCommand
 
         $id = $input->getArgument('id');
 
-        $resParcours = $this->a->getMysqlParcours(array('sqlWhere'=>"AND idParcours='".$id."'"));
+        $resParcours = $this->a->getMysqlParcours(['sqlWhere'=>"AND idParcours='".$id."'"]);
         $route = mysql_fetch_assoc($resParcours);
 
         $pageName = 'Parcours:'.$route['libelleParcours'];
