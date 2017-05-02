@@ -58,12 +58,14 @@ class ExportRouteCommand extends ExportCommand
 
         $html = '{| class="wikitable"';
         while ($stage = mysql_fetch_assoc($resEtapes)) {
+            $addressId = $this->a->getIdAdresseFromIdEvenementGroupeAdresse($stage['idEvenementGroupeAdresse']);
             $addressName = $this->getAddressName(
-                $this->a->getIdAdresseFromIdEvenementGroupeAdresse($stage['idEvenementGroupeAdresse']),
+                $addressId,
                 $stage['idEvenementGroupeAdresse']
             );
             $html .= '|-'.PHP_EOL;
             $html .= '|[[Adresse:'.$addressName.'|'.$addressName.']]'.PHP_EOL;
+            $html .= PHP_EOL.Address::getFullAddressName($this->a->getArrayAdresseFromIdAdresse($addressId)).PHP_EOL;
             $html .= '|'.$this->convertHtml(
                 (string) $this->bbCode->convertToDisplay(['text' => $stage['commentaireEtape']])
             ).PHP_EOL;
