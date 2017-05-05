@@ -64,11 +64,12 @@ class ExportRouteCommand extends ExportCommand
                 $stage['idEvenementGroupeAdresse']
             );
             $html .= '|-'.PHP_EOL;
+            $html .= '|'.$stage['position'].PHP_EOL;
             $html .= '|[[Adresse:'.$addressName.'|'.$addressName.']]'.PHP_EOL;
             $html .= PHP_EOL.Address::getFullAddressName($this->a->getArrayAdresseFromIdAdresse($addressId)).PHP_EOL;
-            $html .= '|'.$this->convertHtml(
+            $html .= '|'.trim($this->convertHtml(
                 (string) $this->bbCode->convertToDisplay(['text' => $stage['commentaireEtape']])
-            ).PHP_EOL;
+            )).PHP_EOL;
         }
         $html .= '|}';
 
