@@ -59,8 +59,8 @@ class ExportNewsCommand extends ExportCommand
         } else {
             throw new \Exception("Can't find this news");
         }
-        if(empty($news['texte'])) {
-            throw new \Exception("Empty news");
+        if (empty($news['texte'])) {
+            throw new \Exception('Empty news');
         }
         $pageName = 'Actualité:'.stripslashes($news['titre']);
 
