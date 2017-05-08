@@ -3,6 +3,7 @@
 require_once 'vendor/autoload.php';
 use AW2MW\ExportAddressCommand;
 use AW2MW\ExportAllCommand;
+use AW2MW\ExportAllNewsCommand;
 use AW2MW\ExportAllRouteCommand;
 use AW2MW\ExportAllSourceCommand;
 use AW2MW\ExportAllStreetCommand;
@@ -23,6 +24,7 @@ $application->add(new ExportAllStreetCommand());
 $application->add(new ExportAllSourceCommand());
 $application->add(new ExportAllUserCommand());
 $application->add(new ExportAllRouteCommand());
+$application->add(new ExportAllNewsCommand());
 $application->add(new ExportAddressCommand());
 $application->add(new ExportSourceCommand());
 $application->add(new ExportImageCommand());

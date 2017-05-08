@@ -134,7 +134,7 @@ abstract class ExportCommand extends Command
     {
         global $config;
         $chain = new Chain(
-            ProcessBuilder::create(['echo', $html])
+            ProcessBuilder::create(['echo', stripslashes($html)])
         );
         $chain->add(
             '|',
@@ -158,6 +158,19 @@ abstract class ExportCommand extends Command
 
         //Replace old domain
         $html = str_replace('archi-strasbourg.org', 'archi-wiki.org', $html);
+
+        //Convert relative URLs
+        preg_match_all(
+            '#\[(?!http)(.+)\s(.+)\]#iU',
+            $html,
+            $matches,
+            PREG_SET_ORDER
+        );
+        if (is_array($matches)) {
+            foreach ($matches as $match) {
+                $html = str_replace($match[0], '[http://archi-wiki.org/'.$match[1].' '.$match[2].']', $html);
+            }
+        }
 
         //Convert URLs
         preg_match_all(

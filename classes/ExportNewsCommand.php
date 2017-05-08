@@ -45,6 +45,9 @@ class ExportNewsCommand extends ExportCommand
     {
         $this->setup($input, $output);
 
+        global $config;
+        $config = new \ArchiConfig();
+
         $id = $input->getArgument('id');
         $home = new \ArchiAccueil();
 
@@ -56,41 +59,54 @@ class ExportNewsCommand extends ExportCommand
         } else {
             throw new \Exception("Can't find this news");
         }
-        $pageName = 'Actualité:'.$news['titre'];
+        if(empty($news['texte'])) {
+            throw new \Exception("Empty news");
+        }
+        $pageName = 'Actualité:'.stripslashes($news['titre']);
 
         $output->writeln('<info>Exporting "'.$pageName.'"…</info>');
 
         //Login as bot
         $this->loginManager->login('aw2mw bot');
 
-        $filename = 'Actualité '.$news['titre'];
-        $filename = str_replace('/', '-', $filename);
-        $filename = str_replace('.', '-', $filename);
-        $filename .= '.jpg';
+        $html = '';
 
-        $params = [
-            'filename' => $filename,
-            'token'    => $this->api->getToken('edit'),
-            'url'      => 'http://www.archi-wiki.org/images/actualites/'.
-                            $news['idActualite'].'/'.$news['photoIllustration'],
-        ];
-        if ($input->getOption('force')) {
-            $params['ignorewarnings'] = true;
+        if (!empty($news['photoIllustration'])) {
+            $filename = 'Actualité '.stripslashes($news['titre']);
+            $filename = str_replace('/', '-', $filename);
+            $filename = str_replace('.', '-', $filename);
+            $filename .= '.jpg';
+
+            $params = [
+                'filename' => $filename,
+                'token'    => $this->api->getToken('edit'),
+                'url'      => 'http://www.archi-wiki.org/images/actualites/'.
+                                $news['idActualite'].'/'.$news['photoIllustration'],
+            ];
+            if ($input->getOption('force')) {
+                $params['ignorewarnings'] = true;
+            }
+
+            $output->writeln('<info>Exporting "File:'.$filename.'"…</info>');
+            $this->api->postRequest(
+                new Api\SimpleRequest(
+                    'upload',
+                    $params,
+                    []
+                )
+            );
+
+            $html .= '[[Fichier:'.$filename.'|thumb]]';
         }
 
-        $output->writeln('<info>Exporting "File:'.$filename.'"…</info>');
-        $this->api->postRequest(
-            new Api\SimpleRequest(
-                'upload',
-                $params,
-                []
-            )
-        );
-
-        $html = '[[Fichier:'.$filename.'|thumb]]';
         $html .= $this->convertHtml($news['texte']);
         $html = str_replace(
             '[http://www.archi-wiki.org/profil-31-11005.html Fabien Romary]',
+            '[[Utilisateur:Digito/me_contacter|Fabien Romary]]',
+            $html
+        );
+        $html = str_replace(
+            '[http://www.archi-wiki.org/profil-31.html Fabien Romary]',
             '[[Utilisateur:Digito/me_contacter|Fabien Romary]]',
             $html
         );
