@@ -4,6 +4,7 @@ namespace AW2MW;
 
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class ExportAllNewsCommand extends ExportCommand
@@ -18,7 +19,13 @@ class ExportAllNewsCommand extends ExportCommand
         parent::configure();
         $this
             ->setName('export:news:all')
-            ->setDescription('Export every news');
+            ->setDescription('Export every news')
+            ->addOption(
+                'noimage',
+                null,
+                InputOption::VALUE_NONE,
+                "Don't upload images"
+            );
     }
 
     /**
@@ -42,7 +49,7 @@ class ExportAllNewsCommand extends ExportCommand
             try {
                 $command = $this->getApplication()->find('export:news');
                 $command->run(
-                    new ArrayInput(['id' => $news['idActualite']]),
+                    new ArrayInput(['id' => $news['idActualite'], '--noimage'=>$this->input->getOption('noimage')]),
                     $output
                 );
             } catch (\Exception $e) {

@@ -30,28 +30,35 @@ class ExportNewsCommand extends ExportCommand
                 null,
                 InputOption::VALUE_NONE,
                 'Force reupload'
+            )->addOption(
+                'noimage',
+                null,
+                InputOption::VALUE_NONE,
+                "Don't upload images"
             );
     }
 
-    private function importImage(InputInterface $input, OutputInterface $output, $filename, $url)
+    private function exportImage(InputInterface $input, OutputInterface $output, $filename, $url)
     {
-        $params = [
-            'filename' => $filename,
-            'token'    => $this->api->getToken('edit'),
-            'url'      => $url,
-        ];
-        if ($input->getOption('force')) {
-            $params['ignorewarnings'] = true;
-        }
+        if (!$this->input->getOption('noimage')) {
+            $params = [
+                'filename' => $filename,
+                'token'    => $this->api->getToken('edit'),
+                'url'      => $url,
+            ];
+            if ($input->getOption('force')) {
+                $params['ignorewarnings'] = true;
+            }
 
-        $output->writeln('<info>Exporting "File:'.$filename.'"…</info>');
-        $this->api->postRequest(
-            new Api\SimpleRequest(
-                'upload',
-                $params,
-                []
-            )
-        );
+            $output->writeln('<info>Exporting "File:'.$filename.'"…</info>');
+            $this->api->postRequest(
+                new Api\SimpleRequest(
+                    'upload',
+                    $params,
+                    []
+                )
+            );
+        }
     }
 
     /**
@@ -99,7 +106,7 @@ class ExportNewsCommand extends ExportCommand
             $filename = str_replace(':', '-', $filename);
             $filename .= '.jpg';
 
-            $this->importImage(
+            $this->exportImage(
                 $input,
                 $output,
                 $filename,
@@ -160,7 +167,7 @@ class ExportNewsCommand extends ExportCommand
                 }
                 $imageUrl = str_replace('https', 'http', $imageUrl);
                 try {
-                    $this->importImage(
+                    $this->exportImage(
                         $input,
                         $output,
                         $filename,
