@@ -124,21 +124,19 @@ class ExportNewsCommand extends ExportCommand
         );
 
         $html .= $this->convertHtml($news['texte']);
-        $html = str_replace(
-            '[http://www.archi-wiki.org/profil-31-11005.html Fabien Romary]',
-            '[[Utilisateur:Digito/me_contacter|Fabien Romary]]',
-            $html
+
+        //Replace signature
+        preg_match_all(
+            '#\[http:\/\/(www\.)?archi-wiki.org\/profil-31(-([0-9]+))?\.html (Fabien Romary|Romary Fabien)\]#iU',
+            $html,
+            $matches,
+            PREG_SET_ORDER
         );
-        $html = str_replace(
-            '[http://www.archi-wiki.org/profil-31.html Fabien Romary]',
-            '[[Utilisateur:Digito/me_contacter|Fabien Romary]]',
-            $html
-        );
-        $html = str_replace(
-            '[http://www.archi-wiki.org/profil-31.html Romary Fabien]',
-            '[[Utilisateur:Digito/me_contacter|Fabien Romary]]',
-            $html
-        );
+        if (is_array($matches)) {
+            foreach ($matches as $match) {
+                $html = str_replace($match[0], '[[Utilisateur:Digito/me_contacter|Fabien Romary]]', $html);
+            }
+        }
 
         //Import images in text
         preg_match_all(
