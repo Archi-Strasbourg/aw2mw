@@ -96,6 +96,7 @@ class ExportNewsCommand extends ExportCommand
             $filename = 'Actualité '.stripslashes($news['titre']);
             $filename = str_replace('/', '-', $filename);
             $filename = str_replace('.', '-', $filename);
+            $filename = str_replace(':', '-', $filename);
             $filename .= '.jpg';
 
             $this->importImage(
@@ -106,7 +107,7 @@ class ExportNewsCommand extends ExportCommand
                     $news['idActualite'].'/'.$news['photoIllustration']
             );
 
-            $html .= '[[Fichier:'.$filename.'|thumb]]';
+            $html .= '[[Fichier:'.$filename.'|thumb]]'.PHP_EOL;
         }
 
         $news['texte'] = str_replace(
@@ -126,6 +127,11 @@ class ExportNewsCommand extends ExportCommand
             '[[Utilisateur:Digito/me_contacter|Fabien Romary]]',
             $html
         );
+        $html = str_replace(
+            '[http://www.archi-wiki.org/profil-31.html Romary Fabien]',
+            '[[Utilisateur:Digito/me_contacter|Fabien Romary]]',
+            $html
+        );
 
         //Import images in text
         preg_match_all(
@@ -139,9 +145,11 @@ class ExportNewsCommand extends ExportCommand
                 $filename = 'Actualité '.stripslashes($news['titre']);
                 $filename = str_replace('/', '-', $filename);
                 $filename = str_replace('.', '-', $filename);
+                $filename = str_replace(':', '-', $filename);
                 $filename .= ' - '.str_replace('%20', ' ', $match[2]);
                 preg_match(
-                    '#[\"\']([^\"\']+)('.preg_quote(str_replace('%20', ' ', $match[2])).'|'.preg_quote($match[2]).')[\"\']#iU',
+                    '#[\"\']([^\"\']+)('.preg_quote(str_replace('%20', ' ', $match[2])).'|'.
+                        preg_quote($match[2]).')[\"\']#iU',
                     stripslashes($news['texte']),
                     $imageMatches
                 );
