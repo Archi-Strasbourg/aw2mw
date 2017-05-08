@@ -32,14 +32,14 @@ class ExportAllRouteCommand extends ExportCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $this->setup($input, $output);
-        $reqSource = '
+        $req = '
             SELECT idParcours
             FROM parcoursArt
             WHERE isActif = 0
             ';
 
-        $resSource = $this->a->connexionBdd->requete($reqSource);
-        while ($route = mysql_fetch_assoc($resSource)) {
+        $res = $this->a->connexionBdd->requete($req);
+        while ($route = mysql_fetch_assoc($res)) {
             try {
                 $command = $this->getApplication()->find('export:route');
                 $command->run(
