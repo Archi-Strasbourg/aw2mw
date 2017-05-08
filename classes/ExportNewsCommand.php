@@ -110,8 +110,8 @@ class ExportNewsCommand extends ExportCommand
         }
 
         $news['texte'] = str_replace(
-            "###cheminImages###",
-            $this->a->getUrlImage()."actualites/".$news['idActualite']."/",
+            '###cheminImages###',
+            $this->a->getUrlImage().'actualites/'.$news['idActualite'].'/',
             $news['texte']
         );
 
