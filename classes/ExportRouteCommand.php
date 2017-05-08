@@ -44,6 +44,9 @@ class ExportRouteCommand extends ExportCommand
     {
         $this->setup($input, $output);
 
+        global $config;
+        $config = new \ArchiConfig();
+
         $id = $input->getArgument('id');
 
         $resParcours = $this->a->getMysqlParcours(['sqlWhere'=>"AND idParcours='".$id."'"]);
