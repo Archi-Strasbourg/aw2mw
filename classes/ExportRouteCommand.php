@@ -48,6 +48,9 @@ class ExportRouteCommand extends ExportCommand
 
         $resParcours = $this->a->getMysqlParcours(['sqlWhere'=>"AND idParcours='".$id."'"]);
         $route = mysql_fetch_assoc($resParcours);
+        $routeInfo = new \ArchiParcours($route['idParcours']);
+
+        $html = $this->convertHtml($routeInfo->desc).PHP_EOL;
 
         $pageName = 'Parcours:'.$route['libelleParcours'];
         $output->writeln('<info>Exporting "'.$pageName.'"…</info>');
@@ -56,7 +59,7 @@ class ExportRouteCommand extends ExportCommand
             FROM etapesParcoursArt WHERE idParcours='".$id."' ORDER BY position ASC";
         $resEtapes = $this->a->connexionBdd->requete($reqEtapes);
 
-        $html = '{| class="wikitable"';
+        $html .= '{| class="wikitable"';
         while ($stage = mysql_fetch_assoc($resEtapes)) {
             $addressId = $this->a->getIdAdresseFromIdEvenementGroupeAdresse($stage['idEvenementGroupeAdresse']);
             $addressName = $this->getAddressName(
