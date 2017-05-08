@@ -71,7 +71,8 @@ class ExportNewsCommand extends ExportCommand
         $params = [
             'filename' => $filename,
             'token'    => $this->api->getToken('edit'),
-            'url'      => 'http://www.archi-wiki.org/images/actualites/'.$news['idActualite'].'/'.$news['photoIllustration'],
+            'url'      => 'http://www.archi-wiki.org/images/actualites/'.
+                            $news['idActualite'].'/'.$news['photoIllustration'],
         ];
         if ($input->getOption('force')) {
             $params['ignorewarnings'] = true;
@@ -88,7 +89,11 @@ class ExportNewsCommand extends ExportCommand
 
         $html = '[[Fichier:'.$filename.'|thumb]]';
         $html .= $this->convertHtml($news['texte']);
-        $html = str_replace('[http://www.archi-wiki.org/profil-31-11005.html Fabien Romary]', '[[Utilisateur:Digito/me_contacter|Fabien Romary]]', $html);
+        $html = str_replace(
+            '[http://www.archi-wiki.org/profil-31-11005.html Fabien Romary]',
+            '[[Utilisateur:Digito/me_contacter|Fabien Romary]]',
+            $html
+        );
 
         $this->pageSaver->savePage(
             $pageName,
