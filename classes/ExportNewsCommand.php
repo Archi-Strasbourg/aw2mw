@@ -97,7 +97,9 @@ class ExportNewsCommand extends ExportCommand
         //Login as bot
         $this->loginManager->login('aw2mw bot');
 
-        $html = '';
+        $html = '{{En-tête actualité'.PHP_EOL.
+            '|date='.$news['date'].PHP_EOL.
+            '}}'.PHP_EOL;
 
         if (!empty($news['photoIllustration'])) {
             $filename = 'Actualité '.stripslashes($news['titre']);
