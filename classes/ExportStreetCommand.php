@@ -162,8 +162,11 @@ class ExportStreetCommand extends ExportCommand
 
             $output->writeln('<info>Exporting "'.$pageName.'"…</info>');
 
-            $html = '{{Infobox rue}}'.PHP_EOL.
-                '[[Catégorie:'.$subdistrict['nom'].'|'.$street['nom'].'|]]';
+            $html = '{{Infobox rue'.PHP_EOL.
+                '|sous-quartier='.$subdistrict['nom'].PHP_EOL.
+                '|nom_court='.$street['nom'].PHP_EOL.
+                '|complement='.$street['prefixe'].PHP_EOL.
+                '}}'.PHP_EOL;
 
             $this->pageSaver->savePage($pageName, $html, 'Rue importée depuis Archi-Wiki');
         } else {
