@@ -154,6 +154,8 @@ class ExportStreetCommand extends ExportCommand
             //Login as bot
             $this->loginManager->login('aw2mw bot');
 
+            $origName = $street['nom'];
+
             $subdistrict = $this->exportSubdistrict($street['idSousQuartier']);
             $street['nom'] .= ' ('.$subdistrict['ville'].')';
             $pageName = 'Catégorie:'.$street['prefixe'].' '.$street['nom'];
@@ -164,8 +166,9 @@ class ExportStreetCommand extends ExportCommand
 
             $html = '{{Infobox rue'.PHP_EOL.
                 '|sous-quartier='.$subdistrict['nom'].PHP_EOL.
-                '|nom_court='.$street['nom'].PHP_EOL.
+                '|nom_court='.$origName.PHP_EOL.
                 '|complement='.$street['prefixe'].PHP_EOL.
+                '|ville='.$subdistrict['ville'].PHP_EOL.
                 '}}'.PHP_EOL;
 
             $this->pageSaver->savePage($pageName, $html, 'Rue importée depuis Archi-Wiki');
