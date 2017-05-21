@@ -52,8 +52,8 @@ class ExportAllStreetCommand extends ExportCommand
                     $command->run(
                         new ArrayInput(
                             [
-                                'id' => $street['idRue'],
-                                '--noparent' => $this->input->getOption('noparent')
+                                'id'         => $street['idRue'],
+                                '--noparent' => $this->input->getOption('noparent'),
                             ]
                         ),
                         $output
