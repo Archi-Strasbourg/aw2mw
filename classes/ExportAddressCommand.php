@@ -93,7 +93,7 @@ class ExportAddressCommand extends AbstractEventCommand
         return $title;
     }
 
-    private function getOtherImages(array $address)
+    private function getOtherImages(array $address, $groupId)
     {
         $reqPhotos = '
             SELECT hi1.idHistoriqueImage, hi1.idImage as idImage,
@@ -103,7 +103,8 @@ class ExportAddressCommand extends AbstractEventCommand
             LEFT JOIN _adresseImage ai ON ai.idImage = hi1.idImage
             LEFT JOIN _adresseEvenement ae ON ae.idAdresse = ai.idAdresse
             WHERE hi2.idImage = hi1.idImage
-            AND ai.idAdresse = '.mysql_real_escape_string($address['idAdresse'])."
+            AND ai.idAdresse = '.mysql_real_escape_string($address['idAdresse']).'
+            AND ai.idEvenementGroupeAdresse = '.mysql_real_escape_string($groupId)."
             AND ai.vueSur='1'
             GROUP BY hi1.idImage,  hi1.idHistoriqueImage
             HAVING hi1.idHistoriqueImage = max(hi2.idHistoriqueImage)
@@ -141,13 +142,13 @@ class ExportAddressCommand extends AbstractEventCommand
         }
         if (!empty($otherImagesInfo)) {
             $otherImages = PHP_EOL.'== Autres vues sur cette adresse =='.PHP_EOL.
-                $this->createGallery($otherImagesInfo, false);
+                $this->createGallery($otherImagesInfo, false, false);
         }
 
         return $otherImages;
     }
 
-    private function getImagesFrom(array $address)
+    private function getImagesFrom(array $address, $groupId)
     {
         $reqPhotos = '
             SELECT hi1.idHistoriqueImage, hi1.idImage as idImage,
@@ -157,7 +158,8 @@ class ExportAddressCommand extends AbstractEventCommand
             LEFT JOIN _adresseImage ai ON ai.idImage = hi1.idImage
             LEFT JOIN _adresseEvenement ae ON ae.idAdresse = ai.idAdresse
             WHERE hi2.idImage = hi1.idImage
-            AND ai.idAdresse = '.mysql_real_escape_string($address['idAdresse'])."
+            AND ai.idAdresse = '.mysql_real_escape_string($address['idAdresse']).'
+            AND ai.idEvenementGroupeAdresse = '.mysql_real_escape_string($groupId)."
             AND ai.prisDepuis='1'
             GROUP BY hi1.idImage,  hi1.idHistoriqueImage
             HAVING hi1.idHistoriqueImage = max(hi2.idHistoriqueImage)
@@ -345,7 +347,7 @@ class ExportAddressCommand extends AbstractEventCommand
     /**
      * @param string $pageName
      */
-    private function exportEvents(array $events, $pageName, array $address)
+    private function exportEvents(array $events, $pageName, array $address, $groupId)
     {
         global $config;
 
@@ -371,11 +373,11 @@ class ExportAddressCommand extends AbstractEventCommand
 
         if (!$isNews) {
             //Vues sur
-            $otherImages = $this->getOtherImages($address);
+            $otherImages = $this->getOtherImages($address, $groupId);
             $content .= $otherImages;
 
             //Vues prises depuis
-            $imagesFrom = $this->getImagesFrom($address);
+            $imagesFrom = $this->getImagesFrom($address, $groupId);
             $content .= $imagesFrom;
         }
 
@@ -508,7 +510,7 @@ class ExportAddressCommand extends AbstractEventCommand
             $this->allEvents[] = $res['idEvenement'];
         }
 
-        $this->exportEvents($events, $pageName, $address);
-        $this->exportEvents($newsEvents, 'Actualités_adresse:'.$basePageName, $address);
+        $this->exportEvents($events, $pageName, $address, $groupId);
+        $this->exportEvents($newsEvents, 'Actualités_adresse:'.$basePageName, $address, $groupId);
     }
 }

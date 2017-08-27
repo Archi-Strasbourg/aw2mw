@@ -217,7 +217,7 @@ abstract class ExportCommand extends Command
         return $html;
     }
 
-    protected function createGallery($images, $addLinkedAddresses = true)
+    protected function createGallery($images, $addLinkedAddresses = true, $convertDesc = true)
     {
         $return = '<gallery>'.PHP_EOL;
         foreach ($images as $image) {
@@ -230,17 +230,21 @@ abstract class ExportCommand extends Command
             }
             $filename = $this->getImageName($image['idImage']);
 
-            $description = trim(
-                str_replace(
-                    PHP_EOL,
-                    ' ',
-                    strip_tags(
-                        $this->convertHtml(
-                            (string) $this->bbCode->convertToDisplay(['text' => $image['description']])
+            if ($convertDesc) {
+                $description = trim(
+                    str_replace(
+                        PHP_EOL,
+                        ' ',
+                        strip_tags(
+                            $this->convertHtml(
+                                (string) $this->bbCode->convertToDisplay(['text' => $image['description']])
+                            )
                         )
                     )
-                )
-            );
+                );
+            } else {
+                $description = $image['description'];
+            }
 
             if ($addLinkedAddresses) {
                 $reqPriseDepuis = 'SELECT ai.idAdresse,  ai.idEvenementGroupeAdresse
