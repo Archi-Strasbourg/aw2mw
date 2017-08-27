@@ -166,6 +166,7 @@ class ExportNewsCommand extends ExportCommand
                     $imageUrl = $imageMatches[1].$match[2];
                 }
                 $imageUrl = str_replace('https', 'http', $imageUrl);
+
                 try {
                     $this->exportImage(
                         $input,

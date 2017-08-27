@@ -38,6 +38,7 @@ class LoginManager
             PASSWORD_BCRYPT,
             ['salt' => $this->config->salt]
         );
+
         try {
             $this->api->login(new Api\ApiUser($username, $password));
         } catch (Api\UsageException $error) {
