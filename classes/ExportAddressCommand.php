@@ -156,21 +156,11 @@ class ExportAddressCommand extends AbstractEventCommand
 
         $otherImagesInfo = [];
         $otherImages = '';
-        $linkedImages = $this->e->getArrayCorrespondancesIdImageVuesSurAndEvenementByDateFromGA(
-            $this->a->getIdEvenementGroupeAdresseFromIdAdresse($address['idAdresse'])
-        );
         $resPhotos = $this->getAutresPhotosVuesSurAdresse(
             $listeAdressesFromEvenement, 'moyen',
             ['idEvenementGroupeAdresse'=> $groupId, 'idGroupeAdresseEvenementAffiche'=>$groupId]
         );
         while ($fetchPhotos = mysql_fetch_assoc($resPhotos)) {
-            foreach ($linkedImages as $linkedImageGroup) {
-                foreach ($linkedImageGroup as $linkedImage) {
-                    if ($linkedImage['idImage'] == $fetchPhotos['idImage']) {
-                        continue 3;
-                    }
-                }
-            }
             $reqPriseDepuis = 'SELECT ai.idAdresse,  ai.idEvenementGroupeAdresse
                                 FROM _adresseImage ai
                                 WHERE ai.idImage = '.$fetchPhotos['idImage']."
@@ -352,7 +342,7 @@ class ExportAddressCommand extends AbstractEventCommand
     /**
      * @param string $pageName
      */
-    private function exportComments(array $events, array $address, $pageName)
+    private function exportComments(array $events, array $address, $pageName, $groupId)
     {
         $comments = [];
 
@@ -379,8 +369,7 @@ class ExportAddressCommand extends AbstractEventCommand
                  ,date_format( c.date, '%Y%m%d%H%i%s' ) AS dateTri
                 FROM commentaires c
                 LEFT JOIN utilisateur u ON u.idUtilisateur = c.idUtilisateur
-                WHERE c.idEvenementGroupeAdresse = '".
-                    $this->a->getIdEvenementGroupeAdresseFromIdAdresse($address['idAdresse'])."'
+                WHERE c.idEvenementGroupeAdresse = '".$groupId."'
                         AND CommentaireValide=1
                         ORDER BY DateTri ASC
                         ";
@@ -478,7 +467,7 @@ class ExportAddressCommand extends AbstractEventCommand
         $this->sections[] = $references;
 
         if (!$isNews) {
-            $this->exportComments($events, $address, $pageName);
+            $this->exportComments($events, $address, $pageName, $groupId);
         }
 
         //Login with bot
