@@ -85,6 +85,7 @@ class ExportPersonCommand extends ExportCommand
         if (!empty($linkedEvents)) {
             $html .= '=== Adresses liées ==='.PHP_EOL;
         }
+        $linkedAddresses = [];
         foreach ($linkedEvents as $linkedEvent) {
             $req = "
                 SELECT titre, dateDebut, dateFin, idTypeEvenement
@@ -110,56 +111,60 @@ class ExportPersonCommand extends ExportCommand
             );
 
             if (!empty($linkedEventAddress)) {
+                $groupId = $this->e->getIdEvenementGroupeAdresseFromIdEvenement($linkedEvent);
                 $req = '
                         SELECT  idAdresse
                         FROM _adresseEvenement
                         WHERE idEvenement = '.
-                        $this->e->getIdEvenementGroupeAdresseFromIdEvenement($linkedEvent);
+                        mysql_real_escape_string($groupId);
                 $resAddress = $config->connexionBdd->requete($req);
                 $fetchAddress = mysql_fetch_object($resAddress);
                 if (isset($fetchAddress->idAdresse)) {
                     $linkedEventIdAddress = $fetchAddress->idAdresse;
                 }
-            }
+                if (in_array($linkedEventIdAddress, $linkedAddresses)) {
+                    //Avoid duplicates
+                    continue;
+                }
+                $linkedAddresses[] = $linkedEventIdAddress;
 
-            $linkedEventImg = $this->a->getUrlImageFromAdresse(
-                $linkedEventIdAddress,
-                'mini',
-                [
-                    'idEvenementGroupeAdresse' => $this->a->getIdEvenementGroupeAdresseFromIdAdresse(
-                        $linkedEventIdAddress
-                    ),
-                ]
-            );
-            $html .= '{{Adresse liée'.PHP_EOL.
-                '|adresse='.$this->getAddressName($linkedEventIdAddress).PHP_EOL;
-            if (!empty($linkedEventImg['idHistoriqueImage'])) {
-                $reqImage = 'SELECT idImage FROM historiqueImage
-                    WHERE idHistoriqueImage = '.mysql_real_escape_string($linkedEventImg['idHistoriqueImage']).'
-                    ORDER BY idHistoriqueImage DESC LIMIT 1';
-                $resImage = $config->connexionBdd->requete($reqImage);
-                $imageInfo = mysql_fetch_object($resImage);
-                if (isset($imageInfo->idImage)) {
-                    if (!$this->input->getOption('noimage')) {
-                        $command = $this->getApplication()->find('export:image');
-                        $command->run(
-                            new ArrayInput(['id' => $imageInfo->idImage]),
-                            $this->output
-                        );
+                $linkedEventImg = $this->a->getUrlImageFromAdresse(
+                    $linkedEventIdAddress,
+                    'mini',
+                    [
+                        'idEvenementGroupeAdresse' => $groupId,
+                    ]
+                );
+                $html .= '{{Adresse liée'.PHP_EOL.
+                    '|adresse='.$this->getAddressName($linkedEventIdAddress, $groupId).PHP_EOL;
+                if (!empty($linkedEventImg['idHistoriqueImage'])) {
+                    $reqImage = 'SELECT idImage FROM historiqueImage
+                        WHERE idHistoriqueImage = '.mysql_real_escape_string($linkedEventImg['idHistoriqueImage']).'
+                        ORDER BY idHistoriqueImage DESC LIMIT 1';
+                    $resImage = $config->connexionBdd->requete($reqImage);
+                    $imageInfo = mysql_fetch_object($resImage);
+                    if (isset($imageInfo->idImage)) {
+                        if (!$this->input->getOption('noimage')) {
+                            $command = $this->getApplication()->find('export:image');
+                            $command->run(
+                                new ArrayInput(['id' => $imageInfo->idImage]),
+                                $this->output
+                            );
+                        }
+                        $filename = $this->getImageName($imageInfo->idImage);
+                        $html .= '|photo='.$filename.PHP_EOL;
                     }
-                    $filename = $this->getImageName($imageInfo->idImage);
-                    $html .= '|photo='.$filename.PHP_EOL;
                 }
-            }
-            if ($linkedEventInfo->dateDebut != '0000-00-00') {
-                if ($linkedEventInfo->dateFin != '0000-00-00') {
-                    $linkedDate = $linkedEventInfo->dateFin;
-                } else {
-                    $linkedDate = $linkedEventInfo->dateDebut;
+                if ($linkedEventInfo->dateDebut != '0000-00-00') {
+                    if ($linkedEventInfo->dateFin != '0000-00-00') {
+                        $linkedDate = $linkedEventInfo->dateFin;
+                    } else {
+                        $linkedDate = $linkedEventInfo->dateDebut;
+                    }
+                    $html .= '|date='.$config->date->toFrench($linkedDate).PHP_EOL;
                 }
-                $html .= '|date='.$config->date->toFrench($linkedDate).PHP_EOL;
+                $html .= '}}'.PHP_EOL;
             }
-            $html .= '}}'.PHP_EOL;
         }
         $this->api->postRequest(
             new Api\SimpleRequest(
