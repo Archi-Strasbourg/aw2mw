@@ -401,7 +401,7 @@ class ExportPersonCommand extends ExportCommand
                     $filename = $this->getImageName($fetch->idImage);
                     $intro .= '|photo_principale='.$filename.PHP_EOL;
                 } catch (\Exception $e) {
-                    $this->output->writeln('<error>Couldn\'t export image'.$fetch->idImage.'</error>');
+                    $this->output->writeln('<error>Couldn\'t export image '.$fetch->idImage.'</error>');
                 }
             }
         }
