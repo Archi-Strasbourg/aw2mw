@@ -75,6 +75,7 @@ class ExportImageCommand extends ExportCommand
                 'filename' => $filename,
                 'token'    => $this->api->getToken('edit'),
                 'url'      => $oldPath,
+                'async'    => true
             ];
             if ($this->input->getOption('force')) {
                 $params['ignorewarnings'] = true;

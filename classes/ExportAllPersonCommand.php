@@ -45,9 +45,9 @@ class ExportAllPersonCommand extends ExportCommand
         ';
 
         $resPerson = $this->a->connexionBdd->requete($reqPerson);
-        while ($person = mysql_fetch_assoc($resPerson)) {
-            if ($person['idPersonne'] > 0) {
-                @$person = new \ArchiPersonne($person['idPersonne']);
+        while ($fetch = mysql_fetch_assoc($resPerson)) {
+            if ($fetch['idPersonne'] > 0) {
+                @$person = new \ArchiPersonne($fetch['idPersonne']);
                 if (!isset($person->nom)) {
                     $this->output->writeln('<error>Personne introuvable</error>');
                     continue;
@@ -62,7 +62,7 @@ class ExportAllPersonCommand extends ExportCommand
                             $output
                         );
                     } catch (\Exception $e) {
-                        $output->writeln('<info>Couldn\'t export ID '.$person['idPersonne'].' </info>');
+                        $output->writeln('<error>Couldn\'t export ID '.$fetch['idPersonne'].' </error>');
                     }
                 }
             }

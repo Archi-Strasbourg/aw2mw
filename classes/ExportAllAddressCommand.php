@@ -49,7 +49,7 @@ class ExportAllAddressCommand extends ExportCommand
                         $output
                     );
                 } catch (\Exception $e) {
-                    $output->writeln('<info>Couldn\'t export ID '.$user['idUtilisateur'].' </info>');
+                    $output->writeln('<error>Couldn\'t export ID '.$user['idUtilisateur'].' </error>');
                 }
             }
         }
