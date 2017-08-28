@@ -77,10 +77,26 @@ class ExportPersonCommand extends ExportCommand
         );
     }
 
-    private function exportEventLinkedAddresses(array $eventInfo, $section)
+    private function exportEventLinkedAddresses(array $eventInfo, $section, array $nextEvent = null)
     {
         global $config;
-        $linkedEvents = $this->person->getEvenementsLies($this->id, $eventInfo['dateDebut'], 3000);
+
+        if (isset($nextEvent)) {
+            $req = "
+    			SELECT dateDebut
+    			FROM evenements
+    			WHERE idEvenement = '".mysql_real_escape_string($nextEvent['idEvenementAssocie'])."'
+    			ORDER BY idEvenement DESC LIMIT 1
+    			";
+
+            $res = $this->e->connexionBdd->requete($req);
+            $date2 = mysql_fetch_object($res)->dateDebut;
+        } else {
+            $date2 = 3000;
+        }
+        dump($eventInfo['dateDebut'].' - '.$date2);
+
+        $linkedEvents = $this->person->getEvenementsLies($this->id, $eventInfo['dateDebut'], $date2);
         $html = '';
         if (!empty($linkedEvents)) {
             $html .= '=== Adresses liées ==='.PHP_EOL;
@@ -166,13 +182,14 @@ class ExportPersonCommand extends ExportCommand
                 $html .= '}}'.PHP_EOL;
             }
         }
+        $this->sections[$section + 1] .= $html;
         $this->api->postRequest(
             new Api\SimpleRequest(
                 'edit',
                 [
                     'title'   => $this->pageName,
-                    'md5'     => md5($html),
-                    'text'    => $html,
+                    'md5'     => md5($this->sections[$section + 1]),
+                    'text'    => $this->sections[$section + 1],
                     'section' => $section + 1,
                     'bot'     => true,
                     'summary' => 'Importation des adresses liées depuis Archi-Wiki',
@@ -180,10 +197,9 @@ class ExportPersonCommand extends ExportCommand
                 ]
             )
         );
-        $this->sections[$section + 1] .= $html;
     }
 
-    private function exportEvent(array $event, $section)
+    private function exportEvent(array $event, $section, array $nextEvent = null)
     {
         global $config;
         $req = 'SELECT idHistoriqueEvenement
@@ -282,7 +298,7 @@ class ExportPersonCommand extends ExportCommand
 
         $this->exportEventImages($event, $section);
 
-        $this->exportEventLinkedAddresses($eventInfo, $section);
+        $this->exportEventLinkedAddresses($eventInfo, $section, $nextEvent);
     }
 
     private function getSectionTitle($event)
@@ -459,7 +475,11 @@ class ExportPersonCommand extends ExportCommand
         $this->pageSaver->savePage($this->pageName, $content, 'Sections importées depuis Archi-Wiki');
 
         foreach ($events as $section => $event) {
-            $this->exportEvent($event, $section);
+            if (isset($events[$section + 1])) {
+                $this->exportEvent($event, $section, $events[$section + 1]);
+            } else {
+                $this->exportEvent($event, $section);
+            }
         }
 
         $this->sections[] = $relatedPeopleContent;
