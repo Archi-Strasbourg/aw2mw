@@ -4,6 +4,7 @@ namespace AW2MW;
 
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class ExportAllSourceCommand extends ExportCommand
@@ -18,7 +19,13 @@ class ExportAllSourceCommand extends ExportCommand
         parent::configure();
         $this
             ->setName('export:source:all')
-            ->setDescription('Export every source');
+            ->setDescription('Export every source')
+            ->addOption(
+                'force',
+                null,
+                InputOption::VALUE_NONE,
+                'Force reupload'
+            );
     }
 
     /**
@@ -43,7 +50,7 @@ class ExportAllSourceCommand extends ExportCommand
                 try {
                     $command = $this->getApplication()->find('export:source');
                     $command->run(
-                        new ArrayInput(['id' => $source['idSource']]),
+                        new ArrayInput(['id' => $source['idSource'], '--force'=>$this->input->getOption('force')]),
                         $output
                     );
                 } catch (\Exception $e) {
