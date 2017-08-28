@@ -391,13 +391,19 @@ class ExportPersonCommand extends ExportCommand
             $intro .= '|date_décès='.$this->person->dateDeces.PHP_EOL;
         }
         if ($fetch = mysql_fetch_object($resImage)) {
-            $command = $this->getApplication()->find('export:image');
-            $command->run(
-                new ArrayInput(['id' => $fetch->idImage]),
-                $this->output
-            );
-            $filename = $this->getImageName($fetch->idImage);
-            $intro .= '|photo_principale='.$filename.PHP_EOL;
+            if ($fetch->idImage > 0) {
+                try {
+                    $command = $this->getApplication()->find('export:image');
+                    $command->run(
+                        new ArrayInput(['id' => $fetch->idImage]),
+                        $this->output
+                    );
+                    $filename = $this->getImageName($fetch->idImage);
+                    $intro .= '|photo_principale='.$filename.PHP_EOL;
+                } catch (\Exception $e) {
+                    $this->output->writeln('<error>Couldn\'t export image'.$fetch->idImage.'</error>');
+                }
+            }
         }
         $job = $this->getJobName($this->person->idMetier);
         if (isset($job)) {
@@ -423,7 +429,7 @@ class ExportPersonCommand extends ExportCommand
         $config = new \ArchiConfig();
         $this->id = $input->getArgument('id');
         @$this->person = new \ArchiPersonne($this->id);
-        if (!isset($this->person->nom)) {
+        if (!isset($this->person->nom) || empty(trim($this->person->nom))) {
             $this->output->writeln('<error>Personne introuvable</error>');
 
             return;

@@ -48,7 +48,7 @@ class ExportAllPersonCommand extends ExportCommand
         while ($fetch = mysql_fetch_assoc($resPerson)) {
             if ($fetch['idPersonne'] > 0) {
                 @$person = new \ArchiPersonne($fetch['idPersonne']);
-                if (!isset($person->nom)) {
+                if (!isset($person->nom) || empty(trim($person->nom))) {
                     $this->output->writeln('<error>Personne introuvable</error>');
                     continue;
                 }
