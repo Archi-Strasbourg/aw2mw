@@ -25,6 +25,11 @@ class ExportAllSourceCommand extends ExportCommand
                 null,
                 InputOption::VALUE_NONE,
                 'Force reupload'
+            )->addOption(
+                'start',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Start exporting at this ID'
             );
     }
 
@@ -39,10 +44,14 @@ class ExportAllSourceCommand extends ExportCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $this->setup($input, $output);
+        $start = $this->input->getOption('start');
         $reqSource = '
             SELECT idSource
             FROM source
             ';
+        if (isset($start)) {
+            $reqSource .= 'WHERE idSource >= '.mysql_real_escape_string($start);
+        }
 
         $resSource = $this->a->connexionBdd->requete($reqSource);
         while ($source = mysql_fetch_assoc($resSource)) {

@@ -53,6 +53,9 @@ class ExportSourceCommand extends ExportCommand
     {
         $this->setup($input, $output);
 
+        global $config;
+        $config = new \ArchiConfig();
+
         $id = $input->getArgument('id');
 
         $origPageName = Source::getSourceName($id);
