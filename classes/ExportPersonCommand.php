@@ -94,7 +94,6 @@ class ExportPersonCommand extends ExportCommand
         } else {
             $date2 = 3000;
         }
-        dump($eventInfo['dateDebut'].' - '.$date2);
 
         $linkedEvents = $this->person->getEvenementsLies($this->id, $eventInfo['dateDebut'], $date2);
         $html = '';

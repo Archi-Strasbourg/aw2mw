@@ -38,7 +38,7 @@ abstract class ExportCommand extends Command
     protected function replaceSourceLists($content)
     {
         $sources = '';
-        preg_match_all('/^\s*\(?sources\s*:([^\)\<]*)\)?/im', $content, $sourceLists, PREG_SET_ORDER);
+        preg_match_all('/^\s*\(?sources\s*:([^\<\=]*)\)?/im', $content, $sourceLists, PREG_SET_ORDER);
         if (is_array($sourceLists)) {
             foreach ($sourceLists as $sourceList) {
                 if (!empty($sourceList)) {
