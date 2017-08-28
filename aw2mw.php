@@ -2,7 +2,6 @@
 
 require_once 'vendor/autoload.php';
 use AW2MW\ExportAddressCommand;
-use AW2MW\ExportAllCommand;
 use AW2MW\ExportAllNewsCommand;
 use AW2MW\ExportAllRouteCommand;
 use AW2MW\ExportAllSourceCommand;
@@ -19,7 +18,6 @@ use AW2MW\ExportUserCommand;
 use Symfony\Component\Console\Application;
 
 $application = new Application();
-$application->add(new ExportAllCommand());
 $application->add(new ExportAllStreetCommand());
 $application->add(new ExportAllSourceCommand());
 $application->add(new ExportAllUserCommand());
