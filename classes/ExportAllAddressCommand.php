@@ -32,6 +32,7 @@ class ExportAllAddressCommand extends ExportCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $this->setup($input, $output);
+
         return;
         $reqUser = '
             SELECT idUtilisateur
