@@ -298,7 +298,7 @@ class ExportAddressCommand extends AbstractEventCommand
             $mainImageInfo = $this->a->getUrlImageFromAdresse(
                 $address['idAdresse'],
                 'grand',
-                ['idEvenementGroupeAdresse'=>$groupId]
+                ['idEvenementGroupeAdresse'=> $groupId]
             );
             $reqImages = "
                 SELECT idImage
