@@ -33,10 +33,10 @@ class ExportAllAddressCommand extends ExportCommand
     {
         $this->setup($input, $output);
 
-        $reqAddress = "
+        $reqAddress = '
 			SELECT idEvenementGA, idAdresse
 			FROM recherche
-            GROUP BY idAdresse, idEvenementGA";
+            GROUP BY idAdresse, idEvenementGA';
 
         $resAddress = $this->a->connexionBdd->requete($reqAddress);
         while ($address = mysql_fetch_assoc($resAddress)) {
