@@ -258,7 +258,7 @@ class ExportAddressCommand extends AbstractEventCommand
     /**
      * @param string $pageName
      */
-    private function exportInfobox(array $address, array $infobox, $pageName)
+    private function exportInfobox(array $address, array $infobox, $pageName, $groupId)
     {
         $intro = '{{Infobox adresse'.PHP_EOL;
 
@@ -266,9 +266,7 @@ class ExportAddressCommand extends AbstractEventCommand
 
         $intro .= '|pays = '.$address['nomPays'].PHP_EOL;
         $intro .= '|ville = '.$address['nomVille'].PHP_EOL;
-        $resAddressGroup = $this->a->getAdressesFromEvenementGroupeAdresses(
-            $this->a->getIdEvenementGroupeAdresseFromIdAdresse($address['idAdresse'])
-        );
+        $resAddressGroup = $this->a->getAdressesFromEvenementGroupeAdresses($groupId);
         $addresses = [];
         while ($fetchAddressGroup = mysql_fetch_assoc($resAddressGroup)) {
             $addresses[] = $fetchAddressGroup;
@@ -292,14 +290,16 @@ class ExportAddressCommand extends AbstractEventCommand
 
         $mainImageInfo = $this->i->getArrayInfosImagePrincipaleFromIdGroupeAdresse(
             [
-                'idEvenementGroupeAdresse' => $this->a->getIdEvenementGroupeAdresseFromIdAdresse(
-                    $address['idAdresse']
-                ),
+                'idEvenementGroupeAdresse' => $groupId,
                 'format'                   => 'grand',
             ]
         );
         if (!$mainImageInfo['trouve']) {
-            $mainImageInfo = $this->a->getUrlImageFromAdresse($address['idAdresse']);
+            $mainImageInfo = $this->a->getUrlImageFromAdresse(
+                $address['idAdresse'],
+                'grand',
+                ['idEvenementGroupeAdresse'=>$groupId]
+            );
             $reqImages = "
                 SELECT idImage
                 FROM historiqueImage
@@ -453,7 +453,7 @@ class ExportAddressCommand extends AbstractEventCommand
         $this->pageSaver->savePage($pageName, $content, 'Sections importées depuis Archi-Wiki');
 
         if (!$isNews) {
-            $this->sections[0] = $this->exportInfobox($address, $infobox, $pageName);
+            $this->sections[0] = $this->exportInfobox($address, $infobox, $pageName, $groupId);
         }
 
         foreach ($events as $section => $id) {
