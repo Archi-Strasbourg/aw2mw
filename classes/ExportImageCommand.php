@@ -70,6 +70,12 @@ class ExportImageCommand extends ExportCommand
         if ($imagePage->getPageIdentifier()->getId() == 0 || $this->input->getOption('force')) {
             $oldPath = 'http://www.archi-wiki.org/photos--'.$image['dateUpload'].
                 '-'.$image['idHistoriqueImage'].'-originaux.jpg';
+            $oldPathHeaders = get_headers($oldPath);
+            if ($oldPathHeaders[0] == 'HTTP/1.1 404 Not Found') {
+                $this->output->writeln('<error>'.$oldPath.' returned a 404</error>');
+
+                return false;
+            }
 
             $params = [
                 'filename' => $filename,
@@ -133,6 +139,12 @@ class ExportImageCommand extends ExportCommand
         }
 
         $filename = $this->uploadImage($image);
+
+        if (empty($filename)) {
+            $this->output->writeln('<error>Couldn\'t upload image '.$id.'</error>');
+
+            return;
+        }
 
         if (empty($image['auteur'])) {
             if (!empty($user)) {
