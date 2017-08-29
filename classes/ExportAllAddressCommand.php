@@ -33,23 +33,28 @@ class ExportAllAddressCommand extends ExportCommand
     {
         $this->setup($input, $output);
 
-        return;
-        $reqUser = '
-            SELECT idUtilisateur
-            FROM utilisateur
-            ';
+        $reqAddress = "
+			SELECT idEvenementGA, idAdresse
+			FROM recherche
+            GROUP BY idAdresse, idEvenementGA";
 
-        $resUser = $this->a->connexionBdd->requete($reqUser);
-        while ($user = mysql_fetch_assoc($resUser)) {
-            if ($user['idUtilisateur'] > 0) {
-                try {
-                    $command = $this->getApplication()->find('export:user');
-                    $command->run(
-                        new ArrayInput(['id' => $user['idUtilisateur']]),
-                        $output
-                    );
-                } catch (\Exception $e) {
-                    $output->writeln('<error>Couldn\'t export ID '.$user['idUtilisateur'].' </error>');
+        $resAddress = $this->a->connexionBdd->requete($reqAddress);
+        while ($address = mysql_fetch_assoc($resAddress)) {
+            if ($address['idAdresse'] > 0) {
+                $basePageName = $this->getAddressName($address['idAdresse'], $address['idEvenementGA']);
+
+                $pageName = 'Adresse:'.$basePageName;
+
+                if ($this->services->newPageGetter()->getFromTitle($pageName)->getId() == 0) {
+                    try {
+                        $command = $this->getApplication()->find('export:address');
+                        $command->run(
+                            new ArrayInput(['id' => $address['idAdresse'], 'groupId' => $address['idEvenementGA']]),
+                            $output
+                        );
+                    } catch (\Exception $e) {
+                        $output->writeln('<error>Couldn\'t export ID '.$address['idAdresse'].'/'.$address['idEvenementGA'].' </error>');
+                    }
                 }
             }
         }

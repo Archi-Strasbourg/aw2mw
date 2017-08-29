@@ -119,9 +119,9 @@ abstract class AbstractEventCommand extends ExportCommand
                 )
             );
             $this->sections[$section + 1] = $content;
-
-            $this->exportEventImages($id, $section, $pageName);
         }
+        // We only export images from the latest revision (in order to speed up export)
+        $this->exportEventImages($id, $section, $pageName);
     }
 
     /**
