@@ -153,6 +153,9 @@ class ExportAddressCommand extends AbstractEventCommand
         while ($fetchAdressesCourantes = mysql_fetch_assoc($resAdressesCourantes)) {
             $listeAdressesFromEvenement[] = $fetchAdressesCourantes['idAdresse'];
         }
+        if (empty($listeAdressesFromEvenement)) {
+            return;
+        }
 
         $otherImagesInfo = [];
         $otherImages = '';
@@ -222,6 +225,10 @@ class ExportAddressCommand extends AbstractEventCommand
         $listeAdressesFromEvenement = [];
         while ($fetchAdressesCourantes = mysql_fetch_assoc($resAdressesCourantes)) {
             $listeAdressesFromEvenement[] = $fetchAdressesCourantes['idAdresse'];
+        }
+
+        if (empty($listeAdressesFromEvenement)) {
+            return;
         }
 
         $resPhotos = $this->getAutresPhotosPrisesDepuisAdresse(
