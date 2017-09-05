@@ -4,6 +4,7 @@ namespace AW2MW;
 
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class ExportAllAddressCommand extends ExportCommand
@@ -18,7 +19,13 @@ class ExportAllAddressCommand extends ExportCommand
         parent::configure();
         $this
             ->setName('export:address:all')
-            ->setDescription('Export every address');
+            ->setDescription('Export every address')
+            ->addOption(
+                'list',
+                null,
+                InputOption::VALUE_NONE,
+                'Only list addresses'
+            );
     }
 
     /**
@@ -45,7 +52,9 @@ class ExportAllAddressCommand extends ExportCommand
 
                 $pageName = 'Adresse:'.$basePageName;
 
-                if ($this->services->newPageGetter()->getFromTitle($pageName)->getId() == 0) {
+                if ($this->input->getOption('list')) {
+                    fputcsv($output->getStream(), [$address['idAdresse'], $address['idEvenementGA'], $pageName]);
+                } else if ($this->services->newPageGetter()->getFromTitle($pageName)->getId() == 0) {
                     try {
                         $command = $this->getApplication()->find('export:address');
                         $command->run(
