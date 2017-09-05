@@ -54,7 +54,7 @@ class ExportAllAddressCommand extends ExportCommand
 
                 if ($this->input->getOption('list')) {
                     fputcsv($output->getStream(), [$address['idAdresse'], $address['idEvenementGA'], $pageName]);
-                } else if ($this->services->newPageGetter()->getFromTitle($pageName)->getId() == 0) {
+                } elseif ($this->services->newPageGetter()->getFromTitle($pageName)->getId() == 0) {
                     try {
                         $command = $this->getApplication()->find('export:address');
                         $command->run(
