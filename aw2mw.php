@@ -18,6 +18,7 @@ use AW2MW\ExportRouteCommand;
 use AW2MW\ExportSourceCommand;
 use AW2MW\ExportStreetCommand;
 use AW2MW\ExportUserCommand;
+use AW2MW\FixAddressDuplicatesCommand;
 use Symfony\Component\Console\Application;
 
 $application = new Application();
@@ -38,6 +39,7 @@ $application->add(new ExportStreetCommand());
 $application->add(new ExportEventCommand());
 $application->add(new ExportNewsCommand());
 $application->add(new ExportRouteCommand());
+$application->add(new FixAddressDuplicatesCommand());
 if (isset($_SERVER['argv'])) {
     $application->run();
 }

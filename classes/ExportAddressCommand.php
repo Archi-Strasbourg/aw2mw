@@ -37,6 +37,10 @@ class ExportAddressCommand extends AbstractEventCommand
                 null,
                 InputOption::VALUE_NONE,
                 "Don't upload images"
+            )->addArgument(
+                'title',
+                InputArgument::OPTIONAL,
+                'Force title'
             );
     }
 
@@ -529,7 +533,10 @@ class ExportAddressCommand extends AbstractEventCommand
             $groupId = $groupInfo['idEvenementGroupeAdresse'];
         }
 
-        $basePageName = $this->getAddressName($this->input->getArgument('id'), $groupId);
+        $basePageName = $this->input->getArgument('title');
+        if (!isset($basePageName)) {
+            $basePageName = $this->getAddressName($this->input->getArgument('id'), $groupId);
+        }
 
         $pageName = 'Adresse:'.$basePageName;
 
