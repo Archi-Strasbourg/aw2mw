@@ -260,7 +260,7 @@ class ExportAddressCommand extends AbstractEventCommand
         }
         if (!empty($imagesFromInfo)) {
             $imagesFrom = PHP_EOL.'== Vues prises depuis cette adresse =='.PHP_EOL.
-                $this->createGallery($imagesFromInfo, false);
+                $this->createGallery($imagesFromInfo, false, false);
         }
 
         return $imagesFrom;
