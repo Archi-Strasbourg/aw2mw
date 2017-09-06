@@ -4,6 +4,7 @@ namespace AW2MW;
 
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class FixAddressDuplicatesCommand extends ExportCommand
@@ -18,7 +19,13 @@ class FixAddressDuplicatesCommand extends ExportCommand
         parent::configure();
         $this
             ->setName('fix:address:duplicates')
-            ->setDescription('Find and rename duplicate addresses');
+            ->setDescription('Find and rename duplicate addresses')
+            ->addOption(
+                'delete-only',
+                null,
+                InputOption::VALUE_NONE,
+                'Only delete duplicates and don\'t reimport them'
+            );
     }
 
     /**
@@ -56,17 +63,19 @@ class FixAddressDuplicatesCommand extends ExportCommand
                 $i = 1;
                 $this->output->writeln('<info>Deleting "'.$title.'"…</info>');
                 $this->pageSaver->deletePage($title);
-                foreach ($address as $groupId => $id) {
-                    try {
-                        $command = $this->getApplication()->find('export:address');
-                        $command->run(
-                            new ArrayInput(['id' => $id, 'groupId' => $groupId, 'title' => $title.' '.$i]),
-                            $output
-                        );
-                    } catch (\Exception $e) {
-                        $output->writeln('<error>Couldn\'t export ID '.$id.'/'.$groupId.' </error>');
+                if (!$this->input->getOption('delete-only')) {
+                    foreach ($address as $groupId => $id) {
+                        try {
+                            $command = $this->getApplication()->find('export:address');
+                            $command->run(
+                                new ArrayInput(['id' => $id, 'groupId' => $groupId, 'title' => $title.' '.$i]),
+                                $output
+                            );
+                        } catch (\Exception $e) {
+                            $output->writeln('<error>Couldn\'t export ID '.$id.'/'.$groupId.' </error>');
+                        }
+                        $i++;
                     }
-                    $i++;
                 }
             }
         }
