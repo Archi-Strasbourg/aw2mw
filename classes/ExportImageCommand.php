@@ -73,8 +73,8 @@ class ExportImageCommand extends ExportCommand
             $oldPath = 'http://www.archi-wiki.org/photos--'.$image['dateUpload'].
                 '-'.$image['idHistoriqueImage'].'-originaux.jpg';
             $oldPathHeaders = get_headers($oldPath, true);
-            if ($oldPathHeaders[0] == 'HTTP/1.1 404 Not Found') {
-                $this->output->writeln('<error>'.$oldPath.' returned a 404</error>');
+            if (in_array($oldPathHeaders[0], ['HTTP/1.1 404 Not Found', 'HTTP/1.1 403 Forbidden'])) {
+                $this->output->writeln('<error>'.$oldPath.' returned an error</error>');
 
                 return false;
             } elseif ($oldPathHeaders['Content-Length'] == 0) {
