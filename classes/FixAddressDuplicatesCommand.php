@@ -25,6 +25,11 @@ class FixAddressDuplicatesCommand extends ExportCommand
                 null,
                 InputOption::VALUE_NONE,
                 'Only delete duplicates and don\'t reimport them'
+            )->addOption(
+                'list',
+                null,
+                InputOption::VALUE_NONE,
+                'Only list addresses'
             );
     }
 
@@ -61,20 +66,27 @@ class FixAddressDuplicatesCommand extends ExportCommand
         foreach ($addresses as $title => $address) {
             if (count($address) > 1) {
                 $i = 1;
-                $this->output->writeln('<info>Deleting "'.$title.'"…</info>');
-                $this->pageSaver->deletePage($title);
-                if (!$this->input->getOption('delete-only')) {
+                if ($this->input->getOption('list')) {
                     foreach ($address as $groupId => $id) {
-                        try {
-                            $command = $this->getApplication()->find('export:address');
-                            $command->run(
-                                new ArrayInput(['id' => $id, 'groupId' => $groupId, 'title' => $title.' '.$i]),
-                                $output
-                            );
-                        } catch (\Exception $e) {
-                            $output->writeln('<error>Couldn\'t export ID '.$id.'/'.$groupId.' </error>');
-                        }
+                        $this->output->writeln('* [[Adresse:'.$title.' '.$i.']]');
                         $i++;
+                    }
+                } else {
+                    $this->output->writeln('<info>Deleting "'.$title.'"…</info>');
+                    $this->pageSaver->deletePage($title);
+                    if (!$this->input->getOption('delete-only')) {
+                        foreach ($address as $groupId => $id) {
+                            try {
+                                $command = $this->getApplication()->find('export:address');
+                                $command->run(
+                                    new ArrayInput(['id' => $id, 'groupId' => $groupId, 'title' => $title.' '.$i]),
+                                    $output
+                                );
+                            } catch (\Exception $e) {
+                                $output->writeln('<error>Couldn\'t export ID '.$id.'/'.$groupId.' </error>');
+                            }
+                            $i++;
+                        }
                     }
                 }
             }
