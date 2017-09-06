@@ -214,6 +214,8 @@ abstract class ExportCommand extends Command
             }
         }
 
+        $html = \Normalizer::normalize($html, \Normalizer::NFC);
+
         return $html;
     }
 
