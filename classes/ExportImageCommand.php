@@ -56,7 +56,9 @@ class ExportImageCommand extends ExportCommand
         $resImages = $this->i->connexionBdd->requete($reqImages);
         $image = mysql_fetch_assoc($resImages);
         if ($image === false) {
-            throw new \Exception("Can't find this image");
+            $this->output->writeln("Can't find this image");
+
+            return false;
         }
 
         return $image;
@@ -70,11 +72,22 @@ class ExportImageCommand extends ExportCommand
         if ($imagePage->getPageIdentifier()->getId() == 0 || $this->input->getOption('force')) {
             $oldPath = 'http://www.archi-wiki.org/photos--'.$image['dateUpload'].
                 '-'.$image['idHistoriqueImage'].'-originaux.jpg';
+            $oldPathHeaders = get_headers($oldPath, true);
+            if (in_array($oldPathHeaders[0], ['HTTP/1.1 404 Not Found', 'HTTP/1.1 403 Forbidden'])) {
+                $this->output->writeln('<error>'.$oldPath.' returned an error</error>');
+
+                return false;
+            } elseif ($oldPathHeaders['Content-Length'] == 0) {
+                $this->output->writeln('<error>'.$oldPath.' is empty</error>');
+
+                return false;
+            }
 
             $params = [
                 'filename' => $filename,
                 'token'    => $this->api->getToken('edit'),
                 'url'      => $oldPath,
+                'async'    => true,
             ];
             if ($this->input->getOption('force')) {
                 $params['ignorewarnings'] = true;
@@ -109,6 +122,11 @@ class ExportImageCommand extends ExportCommand
         $id = $this->input->getArgument('id');
 
         $image = $this->getImage($id);
+        if (!$image) {
+            $this->output->writeln('<error>Couldn\'t find image '.$id.'</error>');
+
+            return;
+        }
 
         $origImage = mysql_fetch_assoc(
             $this->i->connexionBdd->requete(
@@ -132,6 +150,12 @@ class ExportImageCommand extends ExportCommand
         }
 
         $filename = $this->uploadImage($image);
+
+        if (empty($filename)) {
+            $this->output->writeln('<error>Couldn\'t upload image '.$id.'</error>');
+
+            return;
+        }
 
         if (empty($image['auteur'])) {
             if (!empty($user)) {

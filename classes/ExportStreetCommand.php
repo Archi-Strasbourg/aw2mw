@@ -4,6 +4,7 @@ namespace AW2MW;
 
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class ExportStreetCommand extends ExportCommand
@@ -23,6 +24,11 @@ class ExportStreetCommand extends ExportCommand
                 'id',
                 InputArgument::REQUIRED,
                 'Street ID'
+            )->addOption(
+                'noparent',
+                null,
+                InputOption::VALUE_NONE,
+                "Don't import parent categories"
             );
     }
 
@@ -45,12 +51,15 @@ class ExportStreetCommand extends ExportCommand
         } else {
             $subdistrict['nom'] .= ' ('.$subdistrict['ville'].')';
         }
-        $pageName = 'Catégorie:'.$subdistrict['nom'];
-        $this->output->writeln('<info>Exporting "'.$pageName.'"…</info>');
 
-        $html = '{{Infobox sous-quartier}}'.PHP_EOL.
-            '[[Catégorie:'.$district['nom'].']]';
-        $this->pageSaver->savePage($pageName, $html, 'Sous-quartier importé depuis Archi-Wiki');
+        if (!$this->input->getOption('noparent')) {
+            $pageName = 'Catégorie:'.$subdistrict['nom'];
+            $this->output->writeln('<info>Exporting "'.$pageName.'"…</info>');
+
+            $html = '{{Infobox sous-quartier}}'.PHP_EOL.
+                '[[Catégorie:'.$district['nom'].']]';
+            $this->pageSaver->savePage($pageName, $html, 'Sous-quartier importé depuis Archi-Wiki');
+        }
 
         return $subdistrict;
     }
@@ -71,12 +80,15 @@ class ExportStreetCommand extends ExportCommand
         $district['ville'] = $city['nom'];
         $district['origNom'] = $district['nom'];
         $district['nom'] .= ' ('.$district['ville'].')';
-        $pageName = 'Catégorie:'.$district['nom'];
-        $this->output->writeln('<info>Exporting "'.$pageName.'"…</info>');
 
-        $html = '{{Infobox quartier}}'.PHP_EOL.
-            '[[Catégorie:'.$city['nom'].']]';
-        $this->pageSaver->savePage($pageName, $html, 'Quartier importé depuis Archi-Wiki');
+        if (!$this->input->getOption('noparent')) {
+            $pageName = 'Catégorie:'.$district['nom'];
+            $this->output->writeln('<info>Exporting "'.$pageName.'"…</info>');
+
+            $html = '{{Infobox quartier}}'.PHP_EOL.
+                '[[Catégorie:'.$city['nom'].']]';
+            $this->pageSaver->savePage($pageName, $html, 'Quartier importé depuis Archi-Wiki');
+        }
 
         return $district;
     }
@@ -95,12 +107,14 @@ class ExportStreetCommand extends ExportCommand
 
         $country = $this->exportCountry($city['idPays']);
 
-        $pageName = 'Catégorie:'.$city['nom'];
-        $this->output->writeln('<info>Exporting "'.$pageName.'"…</info>');
+        if (!$this->input->getOption('noparent')) {
+            $pageName = 'Catégorie:'.$city['nom'];
+            $this->output->writeln('<info>Exporting "'.$pageName.'"…</info>');
 
-        $html = '{{Infobox ville}}'.PHP_EOL.
-            '[[Catégorie:'.$country['nom'].']]';
-        $this->pageSaver->savePage($pageName, $html, 'Ville importée depuis Archi-Wiki');
+            $html = '{{Infobox ville}}'.PHP_EOL.
+                '[[Catégorie:'.$country['nom'].']]';
+            $this->pageSaver->savePage($pageName, $html, 'Ville importée depuis Archi-Wiki');
+        }
 
         return $city;
     }
@@ -116,12 +130,14 @@ class ExportStreetCommand extends ExportCommand
         $res = $this->a->connexionBdd->requete($req);
         $country = mysql_fetch_assoc($res);
 
-        $pageName = 'Catégorie:'.$country['nom'];
-        $this->output->writeln('<info>Exporting "'.$pageName.'"…</info>');
+        if (!$this->input->getOption('noparent')) {
+            $pageName = 'Catégorie:'.$country['nom'];
+            $this->output->writeln('<info>Exporting "'.$pageName.'"…</info>');
 
-        $html = '{{Infobox pays}}'.PHP_EOL.
-            '[[Catégorie:Pays]]';
-        $this->pageSaver->savePage($pageName, $html, 'Pays importé depuis Archi-Wiki');
+            $html = '{{Infobox pays}}'.PHP_EOL.
+                '[[Catégorie:Pays]]';
+            $this->pageSaver->savePage($pageName, $html, 'Pays importé depuis Archi-Wiki');
+        }
 
         return $country;
     }
@@ -154,6 +170,8 @@ class ExportStreetCommand extends ExportCommand
             //Login as bot
             $this->loginManager->login('aw2mw bot');
 
+            $origName = $street['nom'];
+
             $subdistrict = $this->exportSubdistrict($street['idSousQuartier']);
             $street['nom'] .= ' ('.$subdistrict['ville'].')';
             $pageName = 'Catégorie:'.$street['prefixe'].' '.$street['nom'];
@@ -162,8 +180,12 @@ class ExportStreetCommand extends ExportCommand
 
             $output->writeln('<info>Exporting "'.$pageName.'"…</info>');
 
-            $html = '{{Infobox rue}}'.PHP_EOL.
-                '[[Catégorie:'.$subdistrict['nom'].'|'.$street['nom'].'|]]';
+            $html = '{{Infobox rue'.PHP_EOL.
+                '|sous-quartier='.$subdistrict['nom'].PHP_EOL.
+                '|nom_court='.$origName.PHP_EOL.
+                '|complement='.$street['prefixe'].PHP_EOL.
+                '|ville='.$subdistrict['ville'].PHP_EOL.
+                '}}'.PHP_EOL;
 
             $this->pageSaver->savePage($pageName, $html, 'Rue importée depuis Archi-Wiki');
         } else {

@@ -38,7 +38,7 @@ abstract class ExportCommand extends Command
     protected function replaceSourceLists($content)
     {
         $sources = '';
-        preg_match_all('/^\s*\(?sources\s*:([^\)]*)\)?/im', $content, $sourceLists, PREG_SET_ORDER);
+        preg_match_all('/^\s*\(?sources\s*:([^\<\=]*)\)?/im', $content, $sourceLists, PREG_SET_ORDER);
         if (is_array($sourceLists)) {
             foreach ($sourceLists as $sourceList) {
                 if (!empty($sourceList)) {
@@ -134,7 +134,7 @@ abstract class ExportCommand extends Command
     {
         global $config;
         $chain = new Chain(
-            ProcessBuilder::create(['echo', $html])
+            ProcessBuilder::create(['echo', stripslashes($html)])
         );
         $chain->add(
             '|',
@@ -158,6 +158,19 @@ abstract class ExportCommand extends Command
 
         //Replace old domain
         $html = str_replace('archi-strasbourg.org', 'archi-wiki.org', $html);
+
+        //Convert relative URLs
+        preg_match_all(
+            '#\[(?!http)(.+)\s(.+)\]#iU',
+            $html,
+            $matches,
+            PREG_SET_ORDER
+        );
+        if (is_array($matches)) {
+            foreach ($matches as $match) {
+                $html = str_replace($match[0], '[http://archi-wiki.org/'.$match[1].' '.$match[2].']', $html);
+            }
+        }
 
         //Convert URLs
         preg_match_all(
@@ -201,10 +214,12 @@ abstract class ExportCommand extends Command
             }
         }
 
+        $html = \Normalizer::normalize($html, \Normalizer::NFC);
+
         return $html;
     }
 
-    protected function createGallery($images, $addLinkedAddresses = true)
+    protected function createGallery($images, $addLinkedAddresses = true, $convertDesc = true)
     {
         $return = '<gallery>'.PHP_EOL;
         foreach ($images as $image) {
@@ -217,17 +232,21 @@ abstract class ExportCommand extends Command
             }
             $filename = $this->getImageName($image['idImage']);
 
-            $description = trim(
-                str_replace(
-                    PHP_EOL,
-                    ' ',
-                    strip_tags(
-                        $this->convertHtml(
-                            (string) $this->bbCode->convertToDisplay(['text' => $image['description']])
+            if ($convertDesc) {
+                $description = trim(
+                    str_replace(
+                        PHP_EOL,
+                        ' ',
+                        strip_tags(
+                            $this->convertHtml(
+                                (string) $this->bbCode->convertToDisplay(['text' => $image['description']])
+                            )
                         )
                     )
-                )
-            );
+                );
+            } else {
+                $description = $image['description'];
+            }
 
             if ($addLinkedAddresses) {
                 $reqPriseDepuis = 'SELECT ai.idAdresse,  ai.idEvenementGroupeAdresse
@@ -266,8 +285,11 @@ abstract class ExportCommand extends Command
         }
     }
 
-    protected function getAddressName($id)
+    protected function getAddressName($id, $groupId = null)
     {
+        if (!isset($groupId)) {
+            $groupId = $this->a->getIdEvenementGroupeAdresseFromIdAdresse($id);
+        }
         $addressInfo = $this->a->getArrayAdresseFromIdAdresse($id);
         $return = strip_tags(
             $this->a->getIntituleAdresseFrom(
@@ -280,7 +302,7 @@ abstract class ExportCommand extends Command
                     'noVille'                  => true,
                     'displayFirstTitreAdresse' => true,
                     'setSeparatorAfterTitle'   => '#',
-                    'idEvenementGroupeAdresse' => $this->a->getIdEvenementGroupeAdresseFromIdAdresse($id),
+                    'idEvenementGroupeAdresse' => $groupId,
                 ]
             )
         ).' ('.$addressInfo['nomVille'].')';

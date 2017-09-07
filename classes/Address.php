@@ -26,7 +26,7 @@ class Address
 
         $resAdresseDuGroupeAdresse = $a->connexionBdd->requete($reqAdresseDuGroupeAdresse);
 
-        if (mysql_num_rows($resAdresseDuGroupeAdresse) > 1) {
+        if (mysql_num_rows($resAdresseDuGroupeAdresse) >= 1) {
             $txtAdresses = '';
             $arrayNumero = [];
             while ($fetchAdressesGroupeAdresse = mysql_fetch_assoc($resAdresseDuGroupeAdresse)) {

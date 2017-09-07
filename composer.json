@@ -10,7 +10,7 @@
     "symfony/yaml": "~3.1.0",
     "symfony/process": "~3.1.0",
     "ptachoire/process-builder-chain": "~1.2.0",
-    "dshafik/php7-mysql-shim": "~0.2.0",
+    "dshafik/php7-mysql-shim": "~1.0.0@beta",
     "pear-pear.php.net/HTML_BBCodeParser2": "*"
   },
   "require-dev": {

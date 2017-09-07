@@ -28,11 +28,19 @@ class ExportAddressCommand extends AbstractEventCommand
                 'id',
                 InputArgument::REQUIRED,
                 'Address ID'
+            )->addArgument(
+                'groupId',
+                InputArgument::OPTIONAL,
+                'Address group ID'
             )->addOption(
                 'noimage',
                 null,
                 InputOption::VALUE_NONE,
                 "Don't upload images"
+            )->addArgument(
+                'title',
+                InputArgument::OPTIONAL,
+                'Force title'
             );
     }
 
@@ -89,36 +97,77 @@ class ExportAddressCommand extends AbstractEventCommand
         return $title;
     }
 
-    private function getOtherImages(array $address)
+    private function getAutresPhotosVuesSurAdresse($listeAdresses = [], $format = 'mini', $params = [])
     {
-        $reqPhotos = '
-            SELECT hi1.idHistoriqueImage, hi1.idImage as idImage,
-            hi1.dateUpload, ai.idAdresse, hi1.description,
-            ae.idEvenement as idEvenementGroupeAdresseCourant
-            FROM historiqueImage hi2,  historiqueImage hi1
-            LEFT JOIN _adresseImage ai ON ai.idImage = hi1.idImage
-            LEFT JOIN _adresseEvenement ae ON ae.idAdresse = ai.idAdresse
-            WHERE hi2.idImage = hi1.idImage
-            AND ai.idAdresse = '.mysql_real_escape_string($address['idAdresse'])."
-            AND ai.vueSur='1'
-            GROUP BY hi1.idImage,  hi1.idHistoriqueImage
-            HAVING hi1.idHistoriqueImage = max(hi2.idHistoriqueImage)
+        $idAdresseCourante = 0;
+
+        $sqlOneImage = '';
+        if (isset($params['getOneIdImageFromEvenement']) && $params['getOneIdImageFromEvenement'] == true) {
+            $sqlOneImage = "AND ai.idImage='".$params['idImage']."' AND ee.idEvenementAssocie=".$params['idEvenement'].' ';
+        }
+
+        $sqlListeAdresses = '';
+        if (isset($listeAdresses) && !isset($params['getOneIdImageFromEvenement'])) {
+            $sqlListeAdresses = 'AND ai.idAdresse IN ('.implode(',  ', $listeAdresses).') ';
+        }
+
+        $sqlNoDisplayIdImages = '';
+        if (isset($params['noDiplayIdImage']) && count($params['noDiplayIdImage']) > 0) {
+            $sqlNoDisplayIdImages = 'AND ai.idImage NOT IN ('.implode(',  ', $params['noDiplayIdImage']).')';
+        }
+
+        $sqlGroupeAdresse = '';
+        if (isset($params['idEvenementGroupeAdresse']) && $params['idEvenementGroupeAdresse'] != '0') {
+            $sqlGroupeAdresse = "AND ai.idEvenementGroupeAdresse = '".$params['idEvenementGroupeAdresse']."'";
+        }
+
+        $idEvenementGroupeAdresseEvenementAffiche = '';
+        $divIdEvenementGroupeAdresseEvenementAffiche = '';
+        if (isset($params['idGroupeAdresseEvenementAffiche'])) {
+            $idEvenementGroupeAdresseEvenementAffiche = $params['idGroupeAdresseEvenementAffiche'];
+            $divIdEvenementGroupeAdresseEvenementAffiche = '_'.$params['idGroupeAdresseEvenementAffiche'];
+        }
+
+        // recherche des photos :
+        $reqPhotos = "
+                        SELECT hi1.idHistoriqueImage, hi1.idImage as idImage,  hi1.dateUpload, ai.idAdresse, hi1.description, ae.idEvenement as idEvenementGroupeAdresseCourant
+                        FROM historiqueImage hi2,  historiqueImage hi1
+                        LEFT JOIN _adresseImage ai ON ai.idImage = hi1.idImage
+                        LEFT JOIN _adresseEvenement ae ON ae.idAdresse = ai.idAdresse
+                        LEFT JOIN _evenementEvenement ee ON ee.idEvenement = ae.idEvenement
+                        WHERE hi2.idImage = hi1.idImage
+                        $sqlListeAdresses
+                        $sqlOneImage
+                        $sqlNoDisplayIdImages
+                        $sqlGroupeAdresse
+                        AND ai.vueSur='1'
+                        GROUP BY hi1.idImage,  hi1.idHistoriqueImage
+                        HAVING hi1.idHistoriqueImage = max(hi2.idHistoriqueImage)
         ";
+
         $resPhotos = $this->i->connexionBdd->requete($reqPhotos);
+
+        return $resPhotos;
+    }
+
+    private function getOtherImages(array $address, $groupId)
+    {
+        $resAdressesCourantes = $this->a->getAdressesFromEvenementGroupeAdresses($groupId);
+        $listeAdressesFromEvenement = [];
+        while ($fetchAdressesCourantes = mysql_fetch_assoc($resAdressesCourantes)) {
+            $listeAdressesFromEvenement[] = $fetchAdressesCourantes['idAdresse'];
+        }
+        if (empty($listeAdressesFromEvenement)) {
+            return;
+        }
 
         $otherImagesInfo = [];
         $otherImages = '';
-        $linkedImages = $this->e->getArrayCorrespondancesIdImageVuesSurAndEvenementByDateFromGA(
-            $this->a->getIdEvenementGroupeAdresseFromIdAdresse($address['idAdresse'])
+        $resPhotos = $this->getAutresPhotosVuesSurAdresse(
+            $listeAdressesFromEvenement, 'moyen',
+            ['idEvenementGroupeAdresse'=> $groupId, 'idGroupeAdresseEvenementAffiche'=>$groupId]
         );
         while ($fetchPhotos = mysql_fetch_assoc($resPhotos)) {
-            foreach ($linkedImages as $linkedImageGroup) {
-                foreach ($linkedImageGroup as $linkedImage) {
-                    if ($linkedImage['idImage'] == $fetchPhotos['idImage']) {
-                        continue 3;
-                    }
-                }
-            }
             $reqPriseDepuis = 'SELECT ai.idAdresse,  ai.idEvenementGroupeAdresse
                                 FROM _adresseImage ai
                                 WHERE ai.idImage = '.$fetchPhotos['idImage']."
@@ -137,28 +186,59 @@ class ExportAddressCommand extends AbstractEventCommand
         }
         if (!empty($otherImagesInfo)) {
             $otherImages = PHP_EOL.'== Autres vues sur cette adresse =='.PHP_EOL.
-                $this->createGallery($otherImagesInfo, false);
+                $this->createGallery($otherImagesInfo, false, false);
         }
 
         return $otherImages;
     }
 
-    private function getImagesFrom(array $address)
+    private function getAutresPhotosPrisesDepuisAdresse($listeAdresses = [], $format = 'mini', $params = [])
     {
+        $sqlGroupeAdresse = '';
+        if (isset($params['idEvenementGroupeAdresse']) && $params['idEvenementGroupeAdresse'] != '0') {
+            $sqlGroupeAdresse = "AND ai.idEvenementGroupeAdresse = '".$params['idEvenementGroupeAdresse']."'";
+        }
+
+        $idAdresseCourante = 0;
+        if (isset($this->variablesGet['archiIdAdresse']) && $this->variablesGet['archiIdAdresse'] != '') {
+            $idAdresseCourante = $this->variablesGet['archiIdAdresse'];
+        }
+
+        // recherche des photos :
         $reqPhotos = '
-            SELECT hi1.idHistoriqueImage, hi1.idImage as idImage,
-            hi1.dateUpload, ai.idAdresse, hi1.description,
-            ae.idEvenement as idEvenementGroupeAdresseCourant
-            FROM historiqueImage hi2,  historiqueImage hi1
-            LEFT JOIN _adresseImage ai ON ai.idImage = hi1.idImage
-            LEFT JOIN _adresseEvenement ae ON ae.idAdresse = ai.idAdresse
-            WHERE hi2.idImage = hi1.idImage
-            AND ai.idAdresse = '.mysql_real_escape_string($address['idAdresse'])."
-            AND ai.prisDepuis='1'
-            GROUP BY hi1.idImage,  hi1.idHistoriqueImage
-            HAVING hi1.idHistoriqueImage = max(hi2.idHistoriqueImage)
+                        SELECT hi1.idHistoriqueImage, hi1.idImage as idImage,  hi1.dateUpload, ai.idAdresse, hi1.description, ae.idEvenement as idEvenementGroupeAdresseCourant
+                        FROM historiqueImage hi2,  historiqueImage hi1
+                        LEFT JOIN _adresseImage ai ON ai.idImage = hi1.idImage
+                        LEFT JOIN _adresseEvenement ae ON ae.idAdresse = ai.idAdresse
+                        WHERE hi2.idImage = hi1.idImage
+                        AND ai.idAdresse IN ('.implode(',  ', $listeAdresses).")
+                        AND ai.prisDepuis='1'
+                        $sqlGroupeAdresse
+                        GROUP BY hi1.idImage,  hi1.idHistoriqueImage
+                        HAVING hi1.idHistoriqueImage = max(hi2.idHistoriqueImage)
         ";
+
         $resPhotos = $this->i->connexionBdd->requete($reqPhotos);
+
+        return $resPhotos;
+    }
+
+    private function getImagesFrom(array $address, $groupId)
+    {
+        $resAdressesCourantes = $this->a->getAdressesFromEvenementGroupeAdresses($groupId);
+        $listeAdressesFromEvenement = [];
+        while ($fetchAdressesCourantes = mysql_fetch_assoc($resAdressesCourantes)) {
+            $listeAdressesFromEvenement[] = $fetchAdressesCourantes['idAdresse'];
+        }
+
+        if (empty($listeAdressesFromEvenement)) {
+            return;
+        }
+
+        $resPhotos = $this->getAutresPhotosPrisesDepuisAdresse(
+            $listeAdressesFromEvenement, 'moyen',
+            ['idEvenementGroupeAdresse'=> $groupId, 'idGroupeAdresseEvenementAffiche'=>$groupId]
+        );
         $imagesFromInfo = [];
         $imagesFrom = '';
         while ($fetchPhotos = mysql_fetch_assoc($resPhotos)) {
@@ -180,7 +260,7 @@ class ExportAddressCommand extends AbstractEventCommand
         }
         if (!empty($imagesFromInfo)) {
             $imagesFrom = PHP_EOL.'== Vues prises depuis cette adresse =='.PHP_EOL.
-                $this->createGallery($imagesFromInfo, false);
+                $this->createGallery($imagesFromInfo, false, false);
         }
 
         return $imagesFrom;
@@ -189,7 +269,7 @@ class ExportAddressCommand extends AbstractEventCommand
     /**
      * @param string $pageName
      */
-    private function exportInfobox(array $address, array $infobox, $pageName)
+    private function exportInfobox(array $address, array $infobox, $pageName, $groupId)
     {
         $intro = '{{Infobox adresse'.PHP_EOL;
 
@@ -197,9 +277,7 @@ class ExportAddressCommand extends AbstractEventCommand
 
         $intro .= '|pays = '.$address['nomPays'].PHP_EOL;
         $intro .= '|ville = '.$address['nomVille'].PHP_EOL;
-        $resAddressGroup = $this->a->getAdressesFromEvenementGroupeAdresses(
-            $this->a->getIdEvenementGroupeAdresseFromIdAdresse($address['idAdresse'])
-        );
+        $resAddressGroup = $this->a->getAdressesFromEvenementGroupeAdresses($groupId);
         $addresses = [];
         while ($fetchAddressGroup = mysql_fetch_assoc($resAddressGroup)) {
             $addresses[] = $fetchAddressGroup;
@@ -223,14 +301,16 @@ class ExportAddressCommand extends AbstractEventCommand
 
         $mainImageInfo = $this->i->getArrayInfosImagePrincipaleFromIdGroupeAdresse(
             [
-                'idEvenementGroupeAdresse' => $this->a->getIdEvenementGroupeAdresseFromIdAdresse(
-                    $address['idAdresse']
-                ),
+                'idEvenementGroupeAdresse' => $groupId,
                 'format'                   => 'grand',
             ]
         );
         if (!$mainImageInfo['trouve']) {
-            $mainImageInfo = $this->a->getUrlImageFromAdresse($address['idAdresse']);
+            $mainImageInfo = $this->a->getUrlImageFromAdresse(
+                $address['idAdresse'],
+                'grand',
+                ['idEvenementGroupeAdresse'=> $groupId]
+            );
             $reqImages = "
                 SELECT idImage
                 FROM historiqueImage
@@ -273,7 +353,7 @@ class ExportAddressCommand extends AbstractEventCommand
     /**
      * @param string $pageName
      */
-    private function exportComments(array $events, array $address, $pageName)
+    private function exportComments(array $events, array $address, $pageName, $groupId)
     {
         $comments = [];
 
@@ -300,8 +380,7 @@ class ExportAddressCommand extends AbstractEventCommand
                  ,date_format( c.date, '%Y%m%d%H%i%s' ) AS dateTri
                 FROM commentaires c
                 LEFT JOIN utilisateur u ON u.idUtilisateur = c.idUtilisateur
-                WHERE c.idEvenementGroupeAdresse = '".
-                    $this->a->getIdEvenementGroupeAdresseFromIdAdresse($address['idAdresse'])."'
+                WHERE c.idEvenementGroupeAdresse = '".$groupId."'
                         AND CommentaireValide=1
                         ORDER BY DateTri ASC
                         ";
@@ -341,7 +420,7 @@ class ExportAddressCommand extends AbstractEventCommand
     /**
      * @param string $pageName
      */
-    private function exportEvents(array $events, $pageName, array $address)
+    private function exportEvents(array $events, $pageName, array $address, $groupId)
     {
         global $config;
 
@@ -367,11 +446,11 @@ class ExportAddressCommand extends AbstractEventCommand
 
         if (!$isNews) {
             //Vues sur
-            $otherImages = $this->getOtherImages($address);
+            $otherImages = $this->getOtherImages($address, $groupId);
             $content .= $otherImages;
 
             //Vues prises depuis
-            $imagesFrom = $this->getImagesFrom($address);
+            $imagesFrom = $this->getImagesFrom($address, $groupId);
             $content .= $imagesFrom;
         }
 
@@ -385,7 +464,7 @@ class ExportAddressCommand extends AbstractEventCommand
         $this->pageSaver->savePage($pageName, $content, 'Sections importées depuis Archi-Wiki');
 
         if (!$isNews) {
-            $this->sections[0] = $this->exportInfobox($address, $infobox, $pageName);
+            $this->sections[0] = $this->exportInfobox($address, $infobox, $pageName, $groupId);
         }
 
         foreach ($events as $section => $id) {
@@ -399,7 +478,7 @@ class ExportAddressCommand extends AbstractEventCommand
         $this->sections[] = $references;
 
         if (!$isNews) {
-            $this->exportComments($events, $address, $pageName);
+            $this->exportComments($events, $address, $pageName, $groupId);
         }
 
         //Login with bot
@@ -444,15 +523,22 @@ class ExportAddressCommand extends AbstractEventCommand
             return;
         }
 
-        $basePageName = $this->getAddressName($this->input->getArgument('id'));
+        $groupId = $this->input->getArgument('groupId');
+        if (!isset($groupId)) {
+            $groupInfo = mysql_fetch_assoc($this->a->getIdEvenementsFromAdresse($this->input->getArgument('id')));
+
+            if (!$groupInfo) {
+                throw new \Exception("Can't find this address");
+            }
+            $groupId = $groupInfo['idEvenementGroupeAdresse'];
+        }
+
+        $basePageName = $this->input->getArgument('title');
+        if (!isset($basePageName)) {
+            $basePageName = $this->getAddressName($this->input->getArgument('id'), $groupId);
+        }
 
         $pageName = 'Adresse:'.$basePageName;
-
-        $groupInfo = mysql_fetch_assoc($this->a->getIdEvenementsFromAdresse($this->input->getArgument('id')));
-
-        if (!$groupInfo) {
-            throw new \Exception("Can't find this address");
-        }
 
         $events = [];
         $newsEvents = [];
@@ -461,7 +547,7 @@ class ExportAddressCommand extends AbstractEventCommand
             SELECT DISTINCT evt.idEvenement, pe.position, te.nom as type, ISMH, MH
             FROM evenements evt
             LEFT JOIN _evenementEvenement ee on ee.idEvenement = '.
-                mysql_real_escape_string($groupInfo['idEvenementGroupeAdresse']).
+                mysql_real_escape_string($groupId).
             '
             LEFT JOIN positionsEvenements pe on pe.idEvenement = ee.idEvenementAssocie
             LEFT JOIN typeEvenement te on te.idTypeEvenement = evt.idTypeEvenement
@@ -500,7 +586,7 @@ class ExportAddressCommand extends AbstractEventCommand
             $this->allEvents[] = $res['idEvenement'];
         }
 
-        $this->exportEvents($events, $pageName, $address);
-        $this->exportEvents($newsEvents, 'Actualités_adresse:'.$basePageName, $address);
+        $this->exportEvents($events, $pageName, $address, $groupId);
+        $this->exportEvents($newsEvents, 'Actualités_adresse:'.$basePageName, $address, $groupId);
     }
 }
