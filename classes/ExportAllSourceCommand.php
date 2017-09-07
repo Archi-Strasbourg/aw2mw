@@ -63,7 +63,7 @@ class ExportAllSourceCommand extends ExportCommand
                         $output
                     );
                 } catch (\Exception $e) {
-                    $output->writeln('<info>Couldn\'t export ID '.$source['idSource'].' </info>');
+                    $output->writeln('<error>Couldn\'t export ID '.$source['idSource'].' </error>');
                 }
             }
         }
