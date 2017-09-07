@@ -73,7 +73,7 @@ class FixAddressDuplicatesCommand extends ExportCommand
                     }
                 } else {
                     $this->output->writeln('<info>Deleting "'.$title.'"…</info>');
-                    $this->pageSaver->deletePage($title);
+                    $this->pageSaver->deletePage('Adresse:'.$title);
                     if (!$this->input->getOption('delete-only')) {
                         foreach ($address as $groupId => $id) {
                             try {
