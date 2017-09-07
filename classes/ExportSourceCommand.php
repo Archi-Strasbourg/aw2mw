@@ -71,7 +71,7 @@ class ExportSourceCommand extends ExportCommand
         //Login as bot
         $this->loginManager->login('aw2mw bot');
 
-        $oldPath = 'http://www.archi-wiki.org/images/logosSources/'.$id.'_original.jpg';
+        $oldPath = 'http://www.archi-wiki.org/old/images/logosSources/'.$id.'_original.jpg';
         $headers = get_headers($oldPath, 1);
         if ($headers[0] == 'HTTP/1.1 200 OK') {
             $filename = 'Source '.$origPageName;
