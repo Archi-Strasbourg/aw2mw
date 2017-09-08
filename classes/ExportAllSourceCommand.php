@@ -48,6 +48,7 @@ class ExportAllSourceCommand extends ExportCommand
         $reqSource = '
             SELECT idSource
             FROM source
+            ORDER BY idSource
             ';
         if (isset($start)) {
             $reqSource .= 'WHERE idSource >= '.mysql_real_escape_string($start);
