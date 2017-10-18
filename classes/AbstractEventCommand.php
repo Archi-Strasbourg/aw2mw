@@ -54,7 +54,7 @@ abstract class AbstractEventCommand extends ExportCommand
             $user = $this->u->getArrayInfosFromUtilisateur($event['idUtilisateur']);
 
             //Login as user
-            $this->loginManager->login($user['prenom'].' '.$user['nom']);
+            $this->loginManager->login('aw2mw bot');
 
             $content = '';
             $date = Infobox::convertDate($event['dateDebut'], $event['dateFin'], $event['isDateDebutEnviron']);
