@@ -137,17 +137,7 @@ class ExportImageCommand extends ExportCommand
         );
         $user = $this->u->getArrayInfosFromUtilisateur($origImage['idUtilisateur']);
 
-        $after2008 = false;
-        if (!empty($user)) {
-            $this->loginManager->login($user['prenom'].' '.$user['nom']);
-        } else {
-            $after2008 = new \DateTime($origImage['dateUpload']) > new \DateTime('2008-04-01');
-            if ($after2008) {
-                $this->loginManager->login('aw2mw bot');
-            } else {
-                $this->loginManager->login('Fabien Romary');
-            }
-        }
+        $this->loginManager->login('aw2mw bot');
 
         $filename = $this->uploadImage($image);
 
