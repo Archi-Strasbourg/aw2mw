@@ -152,11 +152,7 @@ class ExportImageCommand extends ExportCommand
                 $image['auteur'] = '[[Utilisateur:'.$user['prenom'].' '.$user['nom'].'|'.
                     $user['prenom'].' '.$user['nom'].']]';
             } else {
-                if ($after2008) {
-                    $image['auteur'] = '';
-                } else {
-                    $image['auteur'] = '[[Utilisateur:Fabien Romary|Fabien Romary]]';
-                }
+                $image['auteur'] = '[[Utilisateur:Fabien Romary|Fabien Romary]]';
             }
         }
         if ($image['dateCliche'] == '0000-00-00') {

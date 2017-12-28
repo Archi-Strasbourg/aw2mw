@@ -51,8 +51,6 @@ abstract class AbstractEventCommand extends ExportCommand
 
             $event = mysql_fetch_assoc($this->e->connexionBdd->requete($sql));
 
-            $user = $this->u->getArrayInfosFromUtilisateur($event['idUtilisateur']);
-
             //Login as user
             $this->loginManager->login('aw2mw bot');
 
