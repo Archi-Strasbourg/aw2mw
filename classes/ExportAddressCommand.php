@@ -398,7 +398,7 @@ class ExportAddressCommand extends AbstractEventCommand
         array_multisort($commentDates, SORT_ASC, $comments);
 
         foreach ($comments as $comment) {
-            $this->loginManager->login($comment['prenom'].' '.$comment['nom']);
+            $this->loginManager->login('aw2mw bot');
             $this->api->postRequest(
                 new Api\SimpleRequest(
                     'commentsubmit',
@@ -407,7 +407,7 @@ class ExportAddressCommand extends AbstractEventCommand
                         'parentID'    => 0,
                         'commentText' => $this->convertHtml(
                             (string) $this->bbCode->convertToDisplay(['text' => $comment['commentaire']])
-                        ),
+                        ).PHP_EOL.'('.$comment['prenom'].' '.$comment['nom'].')',
                         'token'       => $this->api->getToken(),
                     ]
                 )
@@ -433,7 +433,7 @@ class ExportAddressCommand extends AbstractEventCommand
         $isNews = $this->services->newPageGetter()->getFromTitle($pageName)
             ->getPageIdentifier()->getTitle()->getNs() == 4100;
 
-        $this->loginManager->loginAsAdmin();
+        $this->loginManager->login('aw2mw bot');
 
         $this->pageSaver->deletePage($pageName);
 

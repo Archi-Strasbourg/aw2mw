@@ -70,7 +70,7 @@ class ExportImageCommand extends ExportCommand
         $imagePage = $this->services->newPageGetter()->getFromTitle('File:'.$filename);
         $this->output->writeln('<info>Exporting "File:'.$filename.'"…</info>');
         if ($imagePage->getPageIdentifier()->getId() == 0 || $this->input->getOption('force')) {
-            $oldPath = 'http://www.archi-wiki.org/photos--'.$image['dateUpload'].
+            $oldPath = 'http://www.archi-wiki.org/old/photos--'.$image['dateUpload'].
                 '-'.$image['idHistoriqueImage'].'-originaux.jpg';
             $oldPathHeaders = get_headers($oldPath, true);
             if (in_array($oldPathHeaders[0], ['HTTP/1.1 404 Not Found', 'HTTP/1.1 403 Forbidden'])) {
@@ -137,17 +137,7 @@ class ExportImageCommand extends ExportCommand
         );
         $user = $this->u->getArrayInfosFromUtilisateur($origImage['idUtilisateur']);
 
-        $after2008 = false;
-        if (!empty($user)) {
-            $this->loginManager->login($user['prenom'].' '.$user['nom']);
-        } else {
-            $after2008 = new \DateTime($origImage['dateUpload']) > new \DateTime('2008-04-01');
-            if ($after2008) {
-                $this->loginManager->login('aw2mw bot');
-            } else {
-                $this->loginManager->login('Fabien Romary');
-            }
-        }
+        $this->loginManager->login('aw2mw bot');
 
         $filename = $this->uploadImage($image);
 
