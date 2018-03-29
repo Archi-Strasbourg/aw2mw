@@ -17,7 +17,7 @@
     "Mediawiki"
   ],
   "license": "GPL-3.0",
-  "main": "aw2mw.php",
+  "main": "Gruntfile.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/Archi-Strasbourg/aw2mw.git"
